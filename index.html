@@ -92,16 +92,17 @@
     Built by Northwestern students: Luke Xiang & Justin Jiang
   </footer>
 
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const supabase = window.supabase.createClient(
-    "https://ylpgfkmjqzuwmqqhubyq.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA"
-  );
+  const sb =
+    window.__wildcat_sb ||
+    (window.__wildcat_sb = window.supabase.createClient(
+      "https://ylpgfkmjqzuwmqqhubyq.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA"
+    ));
 
   async function submitRide() {
     const email = document.getElementById("email").value.trim();
-
     if (!email.endsWith("@u.northwestern.edu")) {
       alert("Please use your Northwestern email.");
       return;
@@ -117,26 +118,30 @@
       contact: document.getElementById("contact").value
     };
 
-    const { error } = await supabase.from("rides").insert([ride]);
-
+    const { error } = await sb.from("rides").insert([ride]);
     if (error) {
       alert(error.message);
-    } else {
-      alert("Ride posted!");
-      loadRides();
+      return;
     }
+    alert("Ride posted!");
+    loadRides();
   }
 
   async function loadRides() {
-    const { data } = await supabase
+    const { data, error } = await sb
       .from("rides")
       .select("*")
       .order("created_at", { ascending: false });
 
+    if (error) {
+      document.getElementById("rides").innerHTML = "Failed to load rides.";
+      return;
+    }
+
     const container = document.getElementById("rides");
     container.innerHTML = "";
 
-    data.forEach(r => {
+    (data || []).forEach(r => {
       const div = document.createElement("div");
       div.className = "ride";
       div.innerHTML = `
@@ -149,12 +154,9 @@
     });
   }
 
-  // 等页面加载完，再绑定按钮
   document.addEventListener("DOMContentLoaded", () => {
-    document
-      .getElementById("submitBtn")
-      .addEventListener("click", submitRide);
-
+    const btn = document.getElementById("submitBtn");
+    if (btn) btn.addEventListener("click", submitRide);
     loadRides();
   });
 </script>
