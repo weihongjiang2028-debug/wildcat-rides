@@ -1,69 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Wildcat Rides</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        background: #f9fafb;
-        margin: 0;
-        padding: 0;
-      }
-      header {
-        background: #4e2a84;
-        color: white;
-        padding: 20px;
-        text-align: center;
-      }
-      main {
-        max-width: 700px;
-        margin: 40px auto;
-        padding: 0 20px;
-        text-align: center;
-      }
-      h1 {
-        font-size: 32px;
-      }
-      p {
-        color: #555;
-        font-size: 18px;
-      }
-      a.button {
-        display: inline-block;
-        margin: 15px;
-        padding: 14px 24px;
-        background: #4e2a84;
-        color: white;
-        text-decoration: none;
-        border-radius: 10px;
-        font-weight: 600;
-      }
-      footer {
-        margin-top: 60px;
-        font-size: 14px;
-        color: #888;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>🐾 Wildcat Rides</h1>
-      <p>Airport carpools for Northwestern students</p>
-    </header>
+<head>
+  <meta charset="UTF-8" />
+  <title>Wildcat Rides</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <main>
-      <p>
-        Find fellow Wildcats to share Uber or Lyft rides to and from ORD or MDW.
-      </p>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-      <a class="button" href="#">Post a Ride</a>
-      <a class="button" href="#">Find a Ride</a>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f9fafb;
+      margin: 0;
+    }
+    header {
+      background: #4e2a84;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    main {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    h2 {
+      margin-top: 40px;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #4e2a84;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .ride {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    footer {
+      text-align: center;
+      margin: 60px 0;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
 
-      <footer>
-        Built by Northwestern students
-      </footer>
-    </main>
-  </body>
-</html>
+<body>
+  <header>
+    <h1>🐾 Wildcat Rides</h1>
+    <p>Airport carpools for Northwestern students</p>
+  </header>
+
+  <main>
+    <h2>Post a Ride</h2>
+
+    <input id="email" placeholder="yourname@u.northwestern.edu" />
+    <select id="direction">
+      <option value="">Direction</option>
+      <option value="Evanston → Airport">Evanston → Airport</option>
+      <option value="Airport → Evanston">Airport → Evanston</option>
+    </select>
+    <select id="airport">
+      <option value="">Airport</option>
+      <option value="ORD">ORD</option>
+      <option value="MDW">MDW</option>
+    </select>
+    <input type="date" id="date" />
+    <input id="time" placeholder="Time window (e.g. 7:30–8:30am)" />
+    <input id="flight" placeholder="Flight number (optional)" />
+    <input id="contact" placeholder="Contact info (WeChat / iMessage)" />
+    <button onclick="submitRide()">Submit Ride</button>
+
+    <h2>Find a Ride</h2>
+    <div id="rides"></div>
+  </main>
+
+  <footer>
+    Built by Northwestern students
+  </footer>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://ylpgfkmjqzuwmqqhubyq.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA"
+    );
+
+    async function submitRide() {
+      const email = document.getElementById("email").value.trim();
+      if (!email.endsWith("@u.northwestern.edu")) {
+        alert("Please use your Northwestern email.");
+        return;
+      }
+
+      const ride = {
+        email,
+        direction: document.getElementById("direction").value,
+        airport: document.getElementById("airport").value,
+        date: document.getElementById("date").value,
+        time_window: document.getElementById("time").value,
+        flight_number: document.getElementById("flight").value,
+        contact: document.getElementById("contact").value
+      };
+
+      const { error } = await supabase.from("rides").insert([ride]);
+      if (error) {
+        alert("Error submitting ride.");
+      } else {
+        alert("Ride posted!");
+        loadRides();
+      }
+    }
+
+    async function loadRides() {
+      const { data } = await supabase
+        .from("rides")
+        .select("*")
+        .order("date", { ascending: true });
+
+      const
