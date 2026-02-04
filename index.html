@@ -98,7 +98,7 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA"
     );
 
-    async function submitRide() {
+    window.submitRide = async function () {
       const email = document.getElementById("email").value.trim();
       if (!email.endsWith("@u.northwestern.edu")) {
         alert("Please use your Northwestern email.");
@@ -124,7 +124,7 @@
       }
     }
 
-    async function loadRides() {
+    window.loadRides = async function () {
       const { data } = await supabase
         .from("rides")
         .select("*")
