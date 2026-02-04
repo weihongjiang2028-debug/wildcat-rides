@@ -82,52 +82,79 @@
     <input id="time" placeholder="Time window (e.g. 7:30–8:30am)" />
     <input id="flight" placeholder="Flight number (optional)" />
     <input id="contact" placeholder="Contact info (WeChat / iMessage)" />
-    <button onclick="submitRide()">Submit Ride</button>
+    <button id="submitBtn">Submit Ride</button>
 
     <h2>Find a Ride</h2>
     <div id="rides"></div>
   </main>
 
   <footer>
-    Built by Northwestern students
+    Built by Northwestern students: Luke Xiang & Justin Jiang
   </footer>
 
-  <script>
-    const supabase = window.supabase.createClient(
-      "https://ylpgfkmjqzuwmqqhubyq.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA"
-    );
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabase = window.supabase.createClient(
+    "https://ylpgfkmjqzuwmqqhubyq.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA"
+  );
 
-    window.submitRide = async function () {
-      const email = document.getElementById("email").value.trim();
-      if (!email.endsWith("@u.northwestern.edu")) {
-        alert("Please use your Northwestern email.");
-        return;
-      }
+  async function submitRide() {
+    const email = document.getElementById("email").value.trim();
 
-      const ride = {
-        email,
-        direction: document.getElementById("direction").value,
-        airport: document.getElementById("airport").value,
-        date: document.getElementById("date").value,
-        time_window: document.getElementById("time").value,
-        flight_number: document.getElementById("flight").value,
-        contact: document.getElementById("contact").value
-      };
-
-      const { error } = await supabase.from("rides").insert([ride]);
-      if (error) {
-        alert("Error submitting ride.");
-      } else {
-        alert("Ride posted!");
-        loadRides();
-      }
+    if (!email.endsWith("@u.northwestern.edu")) {
+      alert("Please use your Northwestern email.");
+      return;
     }
 
-    window.loadRides = async function () {
-      const { data } = await supabase
-        .from("rides")
-        .select("*")
-        .order("date", { ascending: true });
+    const ride = {
+      email,
+      direction: document.getElementById("direction").value,
+      airport: document.getElementById("airport").value,
+      date: document.getElementById("date").value,
+      time_window: document.getElementById("time").value,
+      flight_number: document.getElementById("flight").value,
+      contact: document.getElementById("contact").value
+    };
 
-      const
+    const { error } = await supabase.from("rides").insert([ride]);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Ride posted!");
+      loadRides();
+    }
+  }
+
+  async function loadRides() {
+    const { data } = await supabase
+      .from("rides")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    const container = document.getElementById("rides");
+    container.innerHTML = "";
+
+    data.forEach(r => {
+      const div = document.createElement("div");
+      div.className = "ride";
+      div.innerHTML = `
+        <strong>${r.date} · ${r.direction}</strong><br/>
+        ${r.airport} · ${r.time_window}<br/>
+        ${r.flight_number ? "Flight: " + r.flight_number + "<br/>" : ""}
+        Contact: ${r.contact}
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // 等页面加载完，再绑定按钮
+  document.addEventListener("DOMContentLoaded", () => {
+    document
+      .getElementById("submitBtn")
+      .addEventListener("click", submitRide);
+
+    loadRides();
+  });
+</script>
