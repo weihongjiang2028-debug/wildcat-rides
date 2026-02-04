@@ -5,7 +5,7 @@
   <title>Wildcat Rides</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Supabase -->
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -25,14 +25,13 @@
       margin: 40px auto;
       padding: 0 20px;
     }
-    h2 {
-      margin-top: 40px;
-    }
-    input, select, textarea, button {
+    h2 { margin-top: 40px; }
+    input, select, button {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
       font-size: 16px;
+      box-sizing: border-box;
     }
     button {
       background: #4e2a84;
@@ -42,12 +41,27 @@
       cursor: pointer;
       font-weight: 600;
     }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     .ride {
       background: white;
       border-radius: 10px;
       padding: 16px;
       margin-top: 16px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .muted {
+      color: #777;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .error {
+      color: #b91c1c;
+      font-size: 14px;
+      margin-top: 10px;
+      white-space: pre-wrap;
     }
     footer {
       text-align: center;
@@ -79,12 +93,17 @@
       <option value="MDW">MDW</option>
     </select>
     <input type="date" id="date" />
-    <input id="time" placeholder="Time window (e.g. 7:30–8:30am)" />
-    <input id="flight" placeholder="Flight number (optional)" />
+    <input id="time_window" placeholder="Time window (e.g. 7:30–8:30am)" />
+    <input id="flight_number" placeholder="Flight number (optional)" />
     <input id="contact" placeholder="Contact info (WeChat / iMessage)" />
+
     <button id="submitBtn">Submit Ride</button>
+    <div id="postStatus" class="muted"></div>
+    <div id="postError" class="error"></div>
 
     <h2>Find a Ride</h2>
+    <div id="loadStatus" class="muted"></div>
+    <div id="loadError" class="error"></div>
     <div id="rides"></div>
   </main>
 
@@ -92,71 +111,141 @@
     Built by Northwestern students: Luke Xiang & Justin Jiang
   </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const sb =
-    window.__wildcat_sb ||
-    (window.__wildcat_sb = window.supabase.createClient(
-      "https://ylpgfkmjqzuwmqqhubyq.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA"
-    ));
+  <script>
+    // ---- CONFIG (yours) ----
+    const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA";
+    const TABLE = "rides";
 
-  async function submitRide() {
-    const email = document.getElementById("email").value.trim();
-    if (!email.endsWith("@u.northwestern.edu")) {
-      alert("Please use your Northwestern email.");
-      return;
+    // ---- Safe, single client init (prevents redeclare issues) ----
+    const sb = window.__wildcat_sb || (window.__wildcat_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+
+    function $(id) { return document.getElementById(id); }
+
+    function setText(id, text) {
+      const el = $(id);
+      if (el) el.textContent = text || "";
     }
 
-    const ride = {
-      email,
-      direction: document.getElementById("direction").value,
-      airport: document.getElementById("airport").value,
-      date: document.getElementById("date").value,
-      time_window: document.getElementById("time").value,
-      flight_number: document.getElementById("flight").value,
-      contact: document.getElementById("contact").value
-    };
-
-    const { error } = await sb.from("rides").insert([ride]);
-    if (error) {
-      alert(error.message);
-      return;
-    }
-    alert("Ride posted!");
-    loadRides();
-  }
-
-  async function loadRides() {
-    const { data, error } = await sb
-      .from("rides")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      document.getElementById("rides").innerHTML = "Failed to load rides.";
-      return;
+    function clearMessages() {
+      setText("postError", "");
+      setText("loadError", "");
+      setText("postStatus", "");
+      setText("loadStatus", "");
     }
 
-    const container = document.getElementById("rides");
-    container.innerHTML = "";
+    function normalizeEmail(email) {
+      return (email || "").trim().toLowerCase();
+    }
 
-    (data || []).forEach(r => {
-      const div = document.createElement("div");
-      div.className = "ride";
-      div.innerHTML = `
-        <strong>${r.date} · ${r.direction}</strong><br/>
-        ${r.airport} · ${r.time_window}<br/>
-        ${r.flight_number ? "Flight: " + r.flight_number + "<br/>" : ""}
-        Contact: ${r.contact}
-      `;
-      container.appendChild(div);
+    function validateForm(ride) {
+      if (!ride.email.endsWith("@u.northwestern.edu")) return "Please use your Northwestern email.";
+      if (!ride.direction) return "Please select a direction.";
+      if (!ride.airport) return "Please select an airport.";
+      if (!ride.date) return "Please select a date.";
+      if (!ride.time_window) return "Please enter a time window.";
+      if (!ride.contact) return "Please enter contact info.";
+      return "";
+    }
+
+    async function submitRide() {
+      clearMessages();
+
+      const btn = $("submitBtn");
+      btn.disabled = true;
+      setText("postStatus", "Posting...");
+
+      const ride = {
+        email: normalizeEmail($("email").value),
+        direction: $("direction").value,
+        airport: $("airport").value,
+        date: $("date").value,
+        time_window: $("time_window").value.trim(),
+        flight_number: $("flight_number").value.trim(),
+        contact: $("contact").value.trim()
+      };
+
+      const msg = validateForm(ride);
+      if (msg) {
+        setText("postStatus", "");
+        setText("postError", msg);
+        btn.disabled = false;
+        return;
+      }
+
+      const { error } = await sb.from(TABLE).insert([ride]);
+
+      if (error) {
+        setText("postStatus", "");
+        setText("postError", "Submit failed:\n" + (error.message || JSON.stringify(error)));
+        btn.disabled = false;
+        return;
+      }
+
+      setText("postStatus", "Posted successfully.");
+      btn.disabled = false;
+
+      // Optional: clear some fields after success
+      $("time_window").value = "";
+      $("flight_number").value = "";
+      $("contact").value = "";
+
+      await loadRides();
+    }
+
+    async function loadRides() {
+      setText("loadError", "");
+      setText("loadStatus", "Loading rides...");
+
+      const { data, error } = await sb
+        .from(TABLE)
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setText("loadStatus", "");
+        setText("loadError", "Load failed:\n" + (error.message || JSON.stringify(error)));
+        return;
+      }
+
+      const container = $("rides");
+      container.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        setText("loadStatus", "No rides yet. Be the first to post one.");
+        return;
+      }
+
+      setText("loadStatus", "");
+
+      data.forEach(r => {
+        const div = document.createElement("div");
+        div.className = "ride";
+        div.innerHTML = `
+          <strong>${escapeHtml(r.date)} · ${escapeHtml(r.direction)}</strong><br/>
+          ${escapeHtml(r.airport)} · ${escapeHtml(r.time_window)}<br/>
+          ${r.flight_number ? "Flight: " + escapeHtml(r.flight_number) + "<br/>" : ""}
+          Contact: ${escapeHtml(r.contact)}
+          <div class="muted">Posted by: ${escapeHtml(r.email)}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Basic escaping for safety
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      $("submitBtn").addEventListener("click", submitRide);
+      loadRides();
     });
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("submitBtn");
-    if (btn) btn.addEventListener("click", submitRide);
-    loadRides();
-  });
-</script>
+  </script>
+</body>
+</html>
