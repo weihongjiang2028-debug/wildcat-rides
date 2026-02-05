@@ -17,8 +17,33 @@
     main{ max-width:900px; margin:22px auto; padding:0 14px; }
     .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
     @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
-    .card{ background:#fff; border-radius:14px; padding:14px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
-    h2{ margin:6px 0 12px; }
+
+    .card{
+      background:#fff;
+      border-radius:14px;
+      padding:16px 14px 14px;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+    }
+
+    /* Big section titles centered */
+    .card-title{
+      text-align:center;
+      font-weight:900;
+      font-size:20px;
+      margin:6px 0 12px;
+      color:#111;
+    }
+
+    /* Small labels above inputs, left aligned, smaller font */
+    label{
+      display:block;
+      font-size:12px;
+      font-weight:700;
+      color:#333;
+      margin-top:12px;
+      text-align:left;
+    }
+
     input, select, textarea, button{
       width:100%;
       padding:11px;
@@ -27,124 +52,98 @@
       border:1px solid #ddd;
       box-sizing:border-box;
       font-size:15px;
+      background:#fff;
     }
-    textarea{ min-height:78px; resize:vertical; }
-    button{ background:#4e2a84; color:#fff; border:none; cursor:pointer; font-weight:650; }
+
+    button{ background:#4e2a84; color:#fff; border:none; cursor:pointer; font-weight:750; margin-top:14px; }
     button.secondary{ background:#ece7f6; color:#4e2a84; border:1px solid #d9ccef; }
     button:disabled{ opacity:.6; cursor:not-allowed; }
 
-    .muted{ color:#666; font-size:13px; margin-top:10px; white-space:pre-wrap; text-align:center; }
-    .error{ color:#b91c1c; font-size:13px; margin-top:10px; white-space:pre-wrap; text-align:center; }
+    .muted{ color:#666; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+    .error{ color:#b91c1c; font-size:13px; margin-top:10px; white-space:pre-wrap; }
 
     .split{ display:flex; gap:10px; }
     .split > *{ flex:1; }
-    .hr{ height:1px; background:#eee; margin:12px 0; }
+
+    .hr{ height:1px; background:#eee; margin:14px 0; }
 
     .ride{ border:1px solid #eee; border-radius:14px; padding:12px; margin-top:12px; }
     .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .pill{
       display:inline-block; padding:4px 10px; border-radius:999px;
-      background:#f2effa; color:#4e2a84; font-size:12px; font-weight:600;
+      background:#f2effa; color:#4e2a84; font-size:12px; font-weight:650;
     }
     .small{ font-size:13px; color:#444; }
 
-    /* Labels: centered + bold */
-    .lbl{
-      display:block;
-      text-align:center;
-      font-weight:800;
-      color:#222;
-      margin-top:12px;
-    }
-    .section-title{
-      text-align:center;
-      font-weight:900;
+    /* Leave window highlight in results */
+    .leave-big{
       font-size:16px;
-      margin-top:14px;
-      margin-bottom:6px;
+      font-weight:850;
+      margin-top:10px;
       color:#111;
     }
+    .leave-big span{ font-weight:900; }
+
     .hint{
-      text-align:center;
       color:#666;
       font-size:12px;
       margin-top:6px;
     }
-
-    /* Leave window stand out in results */
-    .leave-big{
-      font-size:16px;
-      font-weight:800;
-      margin-top:10px;
-    }
-    .leave-big span{ font-weight:900; }
   </style>
 </head>
 
 <body>
 <header>
-  <h1>🐾 Wildcat Rides</h1>
+  <h1 style="margin:0;">🐾 Wildcat Rides</h1>
   <div class="small">Airport carpools for Northwestern students</div>
 </header>
 
 <main class="grid">
+
   <!-- LEFT: Post -->
   <div class="card">
-    <h2>Post a Ride</h2>
+    <div class="card-title">Post a Ride</div>
 
-    <label class="lbl">Your NU Email</label>
+    <label for="post_email">Your NU Email</label>
     <input id="post_email" placeholder="name@u.northwestern.edu" />
 
-    <div class="split">
-      <div>
-        <label class="lbl">Direction</label>
-        <select id="post_direction">
-          <option value="Evanston → Airport" selected>Evanston → Airport</option>
-          <option value="Airport → Evanston">Airport → Evanston</option>
-        </select>
-      </div>
-      <div>
-        <label class="lbl">Airport</label>
-        <select id="post_airport">
-          <option value="ORD" selected>ORD</option>
-          <option value="MDW">MDW</option>
-        </select>
-      </div>
-    </div>
+    <label for="post_direction">Direction</label>
+    <select id="post_direction">
+      <option value="Evanston → Airport" selected>Evanston → Airport</option>
+      <option value="Airport → Evanston">Airport → Evanston</option>
+    </select>
 
-    <label class="lbl">Date</label>
+    <label for="post_airport">Airport</label>
+    <select id="post_airport">
+      <option value="ORD" selected>ORD</option>
+      <option value="MDW">MDW</option>
+    </select>
+
+    <label for="post_date">Date</label>
     <input id="post_date" type="date" />
     <div class="hint" id="post_date_display"></div>
 
-    <div class="section-title">Leave window</div>
+    <label>Leave window</label>
     <div class="split">
       <div>
-        <label class="lbl" style="margin-top:0">From (earliest)</label>
+        <label for="post_from" style="margin-top:0;">From (earliest)</label>
         <select id="post_from"></select>
       </div>
       <div>
-        <label class="lbl" style="margin-top:0">To (latest)</label>
+        <label for="post_to" style="margin-top:0;">To (latest)</label>
         <select id="post_to"></select>
       </div>
     </div>
     <div class="hint">We’ll match riders whose plans fall within this time window.</div>
 
-    <div class="split">
-      <div>
-        <label class="lbl">Max seats (including you)</label>
-        <select id="post_max_seats">
-          <option value="2">2</option>
-          <option value="3" selected>3</option>
-        </select>
-      </div>
-      <div>
-        <label class="lbl">Contact (Phone / iMessage)</label>
-        <input id="post_contact" placeholder="+1 (xxx) xxx-xxxx" />
-      </div>
-    </div>
+    <label for="post_max_seats">Max seats (including you)</label>
+    <select id="post_max_seats">
+      <option value="2">2</option>
+      <option value="3" selected>3</option>
+    </select>
 
-    <label class="lbl">Note (optional)</label>
-    <textarea id="post_note" placeholder="Example: I have one checked bag. International flight."></textarea>
+    <label for="post_contact">Contact</label>
+    <input id="post_contact" placeholder="Phone number / iMessage / etc." />
 
     <button id="post_btn">Submit Ride</button>
     <div id="post_msg" class="muted"></div>
@@ -153,36 +152,26 @@
 
   <!-- RIGHT: Find + My Rides -->
   <div class="card">
-    <h2>Find a Ride</h2>
+    <div class="card-title">Find a Ride</div>
 
-    <div class="split">
-      <div>
-        <label class="lbl">Direction</label>
-        <select id="find_direction">
-          <option value="Evanston → Airport" selected>Evanston → Airport</option>
-          <option value="Airport → Evanston">Airport → Evanston</option>
-        </select>
-      </div>
-      <div>
-        <label class="lbl">Airport</label>
-        <select id="find_airport">
-          <option value="ORD" selected>ORD</option>
-          <option value="MDW">MDW</option>
-        </select>
-      </div>
-    </div>
+    <label for="find_direction">Direction</label>
+    <select id="find_direction">
+      <option value="Evanston → Airport" selected>Evanston → Airport</option>
+      <option value="Airport → Evanston">Airport → Evanston</option>
+    </select>
 
-    <div class="split">
-      <div>
-        <label class="lbl">Date</label>
-        <input id="find_date" type="date" />
-        <div class="hint" id="find_date_display"></div>
-      </div>
-      <div>
-        <label class="lbl">Leave around</label>
-        <select id="find_time"></select>
-      </div>
-    </div>
+    <label for="find_airport">Airport</label>
+    <select id="find_airport">
+      <option value="ORD" selected>ORD</option>
+      <option value="MDW">MDW</option>
+    </select>
+
+    <label for="find_date">Date</label>
+    <input id="find_date" type="date" />
+    <div class="hint" id="find_date_display"></div>
+
+    <label for="find_time">Leave around</label>
+    <select id="find_time"></select>
 
     <button id="find_btn" class="secondary">Search</button>
     <div id="find_msg" class="muted"></div>
@@ -191,14 +180,18 @@
 
     <div class="hr"></div>
 
-    <h2>My Rides</h2>
-    <div class="muted">Enter your email to see rides you posted or joined (for now).</div>
+    <div class="card-title" style="margin-top:0;">My Rides</div>
+    <div class="muted" style="margin-top:6px;">Enter your email to see rides you posted or joined (for now).</div>
+
+    <label for="my_email">Your NU Email</label>
     <input id="my_email" placeholder="name@u.northwestern.edu" />
+
     <button id="my_btn" class="secondary">Load My Rides</button>
     <div id="my_msg" class="muted"></div>
     <div id="my_err" class="error"></div>
     <div id="my_rides"></div>
   </div>
+
 </main>
 
 <script>
@@ -246,8 +239,8 @@
       const mm = String(mins%60).padStart(2,"0");
       const hhmm = `${hh}:${mm}`;
       const opt = document.createElement("option");
-      opt.value = hhmm;                  // store as 24h
-      opt.textContent = formatTimeAMPM(hhmm); // display as AM/PM
+      opt.value = hhmm;                  // stored as 24h
+      opt.textContent = formatTimeAMPM(hhmm); // displayed as AM/PM
       selectEl.appendChild(opt);
     }
     if(defaultHHMM) selectEl.value = defaultHHMM;
@@ -268,7 +261,6 @@
     const to_time = $("post_to").value;
     const max_seats = parseInt($("post_max_seats").value,10);
     const contact = $("post_contact").value.trim();
-    const note = $("post_note").value.trim();
 
     if(!owner_email || !isNU(owner_email)) { fail("Please use your Northwestern email."); return; }
     if(!ride_date_iso) { fail("Please select a date."); return; }
@@ -282,7 +274,7 @@
       from_time, to_time,
       max_seats,
       status: "open",
-      note: note || null,
+      note: null,
       contact
     };
 
@@ -377,7 +369,6 @@
           <div class="small"><strong>Seats:</strong> ${filled}/${max} filled</div>
         </div>
 
-        ${r.note ? `<div class="small" style="margin-top:8px;"><strong>Note:</strong> ${escapeHtml(r.note)}</div>` : ""}
         <div class="small" style="margin-top:8px;"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
 
         <div class="row" style="margin-top:10px;">
@@ -486,16 +477,16 @@
         </div>
 
         <div class="small" style="margin-top:8px;"><strong>Seats:</strong> ${filled}/${r.max_seats} filled</div>
-        ${r.note ? `<div class="small" style="margin-top:8px;"><strong>Note:</strong> ${escapeHtml(r.note)}</div>` : ""}
         <div class="small" style="margin-top:8px;"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
       `;
       return div;
     };
 
-    const h1 = document.createElement("div");
-    h1.className = "muted";
-    h1.textContent = "My Posted Rides";
-    container.appendChild(h1);
+    const title1 = document.createElement("div");
+    title1.className = "muted";
+    title1.textContent = "My Posted Rides";
+    container.appendChild(title1);
+
     if(!posted.length){
       const d = document.createElement("div"); d.className="muted"; d.textContent="(none)"; container.appendChild(d);
     } else {
@@ -504,10 +495,11 @@
 
     const hr = document.createElement("div"); hr.className="hr"; container.appendChild(hr);
 
-    const h2 = document.createElement("div");
-    h2.className = "muted";
-    h2.textContent = "My Joined Rides";
-    container.appendChild(h2);
+    const title2 = document.createElement("div");
+    title2.className = "muted";
+    title2.textContent = "My Joined Rides";
+    container.appendChild(title2);
+
     const joinedOnly = joined.filter(r=> !posted.some(p=>p.id===r.id));
     if(!joinedOnly.length){
       const d = document.createElement("div"); d.className="muted"; d.textContent="(none)"; container.appendChild(d);
@@ -526,14 +518,11 @@
     const todayIso = new Date().toISOString().slice(0,10);
     $("find_date").value = todayIso;
     $("post_date").value = todayIso;
+    $("find_date_display").textContent = isoToMDY(todayIso);
+    $("post_date_display").textContent = isoToMDY(todayIso);
 
-    const renderDateDisplay = () => {
-      $("find_date_display").textContent = $("find_date").value ? isoToMDY($("find_date").value) : "";
-      $("post_date_display").textContent = $("post_date").value ? isoToMDY($("post_date").value) : "";
-    };
-    $("find_date").addEventListener("change", renderDateDisplay);
-    $("post_date").addEventListener("change", renderDateDisplay);
-    renderDateDisplay();
+    $("find_date").addEventListener("change", ()=> $("find_date_display").textContent = isoToMDY($("find_date").value));
+    $("post_date").addEventListener("change", ()=> $("post_date_display").textContent = isoToMDY($("post_date").value));
 
     // time dropdowns: AM/PM everywhere (15-min increments)
     buildTimeOptions($("find_time"), "14:30");
