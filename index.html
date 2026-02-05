@@ -5,34 +5,79 @@
   <title>Wildcat Rides</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      font-variant-numeric: tabular-nums; background:#f6f7fb; margin:0; }
-    header { background:#4e2a84; color:#fff; padding:18px 16px; text-align:center; }
-    main { max-width:900px; margin:22px auto; padding:0 14px; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
-    @media (max-width: 860px){ .grid { grid-template-columns:1fr; } }
-    .card { background:#fff; border-radius:14px; padding:14px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
-    h2 { margin:6px 0 12px; }
-    label { display:block; font-size:13px; color:#444; margin-top:10px; }
-    input, select, textarea, button { width:100%; padding:11px; margin-top:6px; border-radius:10px; border:1px solid #ddd; box-sizing:border-box; font-size:15px; }
-    textarea { min-height:78px; resize:vertical; }
-    button { background:#4e2a84; color:#fff; border:none; cursor:pointer; font-weight:650; }
-    button.secondary { background:#ece7f6; color:#4e2a84; border:1px solid #d9ccef; }
-    button:disabled { opacity:.6; cursor:not-allowed; }
-    .muted { color:#666; font-size:13px; margin-top:10px; white-space:pre-wrap; }
-    .error { color:#b91c1c; font-size:13px; margin-top:10px; white-space:pre-wrap; }
-    .ride { border:1px solid #eee; border-radius:14px; padding:12px; margin-top:12px; }
-    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .pill { display:inline-block; padding:4px 10px; border-radius:999px; background:#f2effa; color:#4e2a84; font-size:12px; font-weight:600; }
-    .small { font-size:13px; color:#444; }
-    .split { display:flex; gap:10px; }
-    .split > * { flex:1; }
-    .hr { height:1px; background:#eee; margin:12px 0; }
 
-    /* Make Leave Window stand out more in results */
-    .leave-big { font-size:16px; font-weight:750; margin-top:8px; }
-    .leave-big span { font-weight:800; }
+  <style>
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      background:#f6f7fb;
+      margin:0;
+    }
+    header{ background:#4e2a84; color:#fff; padding:18px 16px; text-align:center; }
+    main{ max-width:900px; margin:22px auto; padding:0 14px; }
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
+    .card{ background:#fff; border-radius:14px; padding:14px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+    h2{ margin:6px 0 12px; }
+    input, select, textarea, button{
+      width:100%;
+      padding:11px;
+      margin-top:6px;
+      border-radius:10px;
+      border:1px solid #ddd;
+      box-sizing:border-box;
+      font-size:15px;
+    }
+    textarea{ min-height:78px; resize:vertical; }
+    button{ background:#4e2a84; color:#fff; border:none; cursor:pointer; font-weight:650; }
+    button.secondary{ background:#ece7f6; color:#4e2a84; border:1px solid #d9ccef; }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .muted{ color:#666; font-size:13px; margin-top:10px; white-space:pre-wrap; text-align:center; }
+    .error{ color:#b91c1c; font-size:13px; margin-top:10px; white-space:pre-wrap; text-align:center; }
+
+    .split{ display:flex; gap:10px; }
+    .split > *{ flex:1; }
+    .hr{ height:1px; background:#eee; margin:12px 0; }
+
+    .ride{ border:1px solid #eee; border-radius:14px; padding:12px; margin-top:12px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill{
+      display:inline-block; padding:4px 10px; border-radius:999px;
+      background:#f2effa; color:#4e2a84; font-size:12px; font-weight:600;
+    }
+    .small{ font-size:13px; color:#444; }
+
+    /* Labels: centered + bold */
+    .lbl{
+      display:block;
+      text-align:center;
+      font-weight:800;
+      color:#222;
+      margin-top:12px;
+    }
+    .section-title{
+      text-align:center;
+      font-weight:900;
+      font-size:16px;
+      margin-top:14px;
+      margin-bottom:6px;
+      color:#111;
+    }
+    .hint{
+      text-align:center;
+      color:#666;
+      font-size:12px;
+      margin-top:6px;
+    }
+
+    /* Leave window stand out in results */
+    .leave-big{
+      font-size:16px;
+      font-weight:800;
+      margin-top:10px;
+    }
+    .leave-big span{ font-weight:900; }
   </style>
 </head>
 
@@ -47,19 +92,19 @@
   <div class="card">
     <h2>Post a Ride</h2>
 
-    <label>Your NU Email</label>
+    <label class="lbl">Your NU Email</label>
     <input id="post_email" placeholder="name@u.northwestern.edu" />
 
     <div class="split">
       <div>
-        <label>Direction</label>
+        <label class="lbl">Direction</label>
         <select id="post_direction">
           <option value="Evanston → Airport" selected>Evanston → Airport</option>
           <option value="Airport → Evanston">Airport → Evanston</option>
         </select>
       </div>
       <div>
-        <label>Airport</label>
+        <label class="lbl">Airport</label>
         <select id="post_airport">
           <option value="ORD" selected>ORD</option>
           <option value="MDW">MDW</option>
@@ -67,39 +112,38 @@
       </div>
     </div>
 
-    <label>Date (MM/DD/YYYY)</label>
-    <input id="post_date_text" type="text" placeholder="02/10/2026" inputmode="numeric" />
-    <input id="post_date" type="date" style="display:none;" />
+    <label class="lbl">Date</label>
+    <input id="post_date" type="date" />
+    <div class="hint" id="post_date_display"></div>
 
-    <label>Leave window</label>
+    <div class="section-title">Leave window</div>
     <div class="split">
       <div>
-        <label style="margin-top:0">From (earliest)</label>
-        <input id="post_from" type="time" />
+        <label class="lbl" style="margin-top:0">From (earliest)</label>
+        <select id="post_from"></select>
       </div>
       <div>
-        <label style="margin-top:0">To (latest)</label>
-        <input id="post_to" type="time" />
+        <label class="lbl" style="margin-top:0">To (latest)</label>
+        <select id="post_to"></select>
       </div>
     </div>
-
-    <div class="muted">We’ll match riders whose plans fall within this time window.</div>
+    <div class="hint">We’ll match riders whose plans fall within this time window.</div>
 
     <div class="split">
       <div>
-        <label>Max seats (including you)</label>
+        <label class="lbl">Max seats (including you)</label>
         <select id="post_max_seats">
           <option value="2">2</option>
           <option value="3" selected>3</option>
         </select>
       </div>
       <div>
-        <label>Contact (Phone / iMessage)</label>
+        <label class="lbl">Contact (Phone / iMessage)</label>
         <input id="post_contact" placeholder="+1 (xxx) xxx-xxxx" />
       </div>
     </div>
 
-    <label>Note (optional)</label>
+    <label class="lbl">Note (optional)</label>
     <textarea id="post_note" placeholder="Example: I have one checked bag. International flight."></textarea>
 
     <button id="post_btn">Submit Ride</button>
@@ -113,14 +157,14 @@
 
     <div class="split">
       <div>
-        <label>Direction</label>
+        <label class="lbl">Direction</label>
         <select id="find_direction">
           <option value="Evanston → Airport" selected>Evanston → Airport</option>
           <option value="Airport → Evanston">Airport → Evanston</option>
         </select>
       </div>
       <div>
-        <label>Airport</label>
+        <label class="lbl">Airport</label>
         <select id="find_airport">
           <option value="ORD" selected>ORD</option>
           <option value="MDW">MDW</option>
@@ -130,18 +174,17 @@
 
     <div class="split">
       <div>
-        <label>Date (MM/DD/YYYY)</label>
-        <input id="find_date_text" type="text" placeholder="02/10/2026" inputmode="numeric" />
-        <input id="find_date" type="date" style="display:none;" />
+        <label class="lbl">Date</label>
+        <input id="find_date" type="date" />
+        <div class="hint" id="find_date_display"></div>
       </div>
       <div>
-        <label>Leave around</label>
-        <input id="find_time" type="time" />
+        <label class="lbl">Leave around</label>
+        <select id="find_time"></select>
       </div>
     </div>
 
     <button id="find_btn" class="secondary">Search</button>
-
     <div id="find_msg" class="muted"></div>
     <div id="find_err" class="error"></div>
     <div id="results"></div>
@@ -181,31 +224,33 @@
       .replaceAll("'", "&#039;");
   }
 
-  // ---- Date helpers: show as MM/DD/YYYY but store as YYYY-MM-DD ----
   function isoToMDY(iso){
     if(!iso) return "";
     const [y,m,d] = iso.split("-");
     return `${m}/${d}/${y}`;
   }
-  function mdyToIso(mdy){
-    const s = (mdy||"").trim();
-    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if(!m) return "";
-    const mm = String(parseInt(m[1],10)).padStart(2,"0");
-    const dd = String(parseInt(m[2],10)).padStart(2,"0");
-    const yy = m[3];
-    return `${yy}-${mm}-${dd}`;
-  }
 
   function formatTimeAMPM(hhmm){
-    // hhmm = "14:05"
     if(!hhmm) return "";
     const [hStr, mStr] = hhmm.split(":");
     let h = parseInt(hStr,10);
-    const m = mStr;
     const ampm = h >= 12 ? "PM" : "AM";
     h = h % 12; if(h === 0) h = 12;
-    return `${h}:${m} ${ampm}`;
+    return `${h}:${mStr} ${ampm}`;
+  }
+
+  function buildTimeOptions(selectEl, defaultHHMM){
+    selectEl.innerHTML = "";
+    for(let mins = 0; mins < 24*60; mins += 15){
+      const hh = String(Math.floor(mins/60)).padStart(2,"0");
+      const mm = String(mins%60).padStart(2,"0");
+      const hhmm = `${hh}:${mm}`;
+      const opt = document.createElement("option");
+      opt.value = hhmm;                  // store as 24h
+      opt.textContent = formatTimeAMPM(hhmm); // display as AM/PM
+      selectEl.appendChild(opt);
+    }
+    if(defaultHHMM) selectEl.value = defaultHHMM;
   }
 
   // ---- POST ----
@@ -217,8 +262,8 @@
     const owner_email = normEmail($("post_email").value);
     const direction = $("post_direction").value;
     const airport = $("post_airport").value;
+    const ride_date_iso = $("post_date").value;
 
-    const ride_date_iso = mdyToIso($("post_date_text").value);
     const from_time = $("post_from").value;
     const to_time = $("post_to").value;
     const max_seats = parseInt($("post_max_seats").value,10);
@@ -226,7 +271,7 @@
     const note = $("post_note").value.trim();
 
     if(!owner_email || !isNU(owner_email)) { fail("Please use your Northwestern email."); return; }
-    if(!ride_date_iso) { fail("Please enter date as MM/DD/YYYY."); return; }
+    if(!ride_date_iso) { fail("Please select a date."); return; }
     if(!from_time || !to_time) { fail("Please fill both From and To times."); return; }
     if(timeToMinutes(from_time) > timeToMinutes(to_time)) { fail("From time must be earlier than To time."); return; }
     if(!contact) { fail("Please provide contact info."); return; }
@@ -266,10 +311,10 @@
 
     const direction = $("find_direction").value;
     const airport = $("find_airport").value;
-    const ride_date_iso = mdyToIso($("find_date_text").value);
+    const ride_date_iso = $("find_date").value;
     const t = $("find_time").value;
 
-    if(!ride_date_iso){ fail("Please enter date as MM/DD/YYYY."); return; }
+    if(!ride_date_iso){ fail("Please select a date."); return; }
     if(!t){ fail("Please choose a time."); return; }
 
     let q = sb.from("rides")
@@ -366,7 +411,6 @@
       return;
     }
 
-    // check if full
     const { data: ride } = await sb.from("rides").select("max_seats").eq("id", rideId).single();
     const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
     const filled = (parts||[]).length;
@@ -435,10 +479,12 @@
           <span class="pill">${escapeHtml(r.airport)}</span>
           <span class="pill">${escapeHtml(isoToMDY(r.ride_date))}</span>
         </div>
+
         <div class="leave-big">
           <span>Leave window:</span>
           ${escapeHtml(formatTimeAMPM(r.from_time))} – ${escapeHtml(formatTimeAMPM(r.to_time))}
         </div>
+
         <div class="small" style="margin-top:8px;"><strong>Seats:</strong> ${filled}/${r.max_seats} filled</div>
         ${r.note ? `<div class="small" style="margin-top:8px;"><strong>Note:</strong> ${escapeHtml(r.note)}</div>` : ""}
         <div class="small" style="margin-top:8px;"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
@@ -470,20 +516,29 @@
     }
   }
 
-  // ====== wire buttons + defaults ======
+  // ====== init ======
   document.addEventListener("DOMContentLoaded", ()=>{
     $("post_btn").addEventListener("click", postRide);
     $("find_btn").addEventListener("click", searchRides);
     $("my_btn").addEventListener("click", loadMyRides);
 
-    // default dates to today in MM/DD/YYYY
-    const now = new Date();
-    const mm = String(now.getMonth()+1).padStart(2,"0");
-    const dd = String(now.getDate()).padStart(2,"0");
-    const yy = String(now.getFullYear());
-    const mdy = `${mm}/${dd}/${yy}`;
-    $("find_date_text").value = mdy;
-    $("post_date_text").value = mdy;
+    // default date = today (ISO)
+    const todayIso = new Date().toISOString().slice(0,10);
+    $("find_date").value = todayIso;
+    $("post_date").value = todayIso;
+
+    const renderDateDisplay = () => {
+      $("find_date_display").textContent = $("find_date").value ? isoToMDY($("find_date").value) : "";
+      $("post_date_display").textContent = $("post_date").value ? isoToMDY($("post_date").value) : "";
+    };
+    $("find_date").addEventListener("change", renderDateDisplay);
+    $("post_date").addEventListener("change", renderDateDisplay);
+    renderDateDisplay();
+
+    // time dropdowns: AM/PM everywhere (15-min increments)
+    buildTimeOptions($("find_time"), "14:30");
+    buildTimeOptions($("post_from"), "14:00");
+    buildTimeOptions($("post_to"), "15:00");
   });
 </script>
 </body>
