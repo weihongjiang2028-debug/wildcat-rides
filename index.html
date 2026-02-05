@@ -31,6 +31,7 @@
       gap:10px;
       max-width:980px;
       margin:0 auto;
+      flex-wrap:wrap; /* ✅ prevent mobile overlap */
     }
 
     .brandLeft{
@@ -258,11 +259,14 @@
       padding:14px;
     }
     .modalTitle{
-      font-size:18px;
+      font-size:20px; /* ✅ slightly bigger */
       font-weight:950;
       margin:4px 0 10px;
       color:#111;
       text-align:center;
+    }
+    #join_title{
+      font-size:22px; /* ✅ join success title bigger */
     }
     .modalActions{
       display:flex;
@@ -285,9 +289,16 @@
       resize:vertical;
     }
 
-    /* Slightly tighter on very small screens */
     @media (max-width:420px){
-      .brandTitle{ font-size:18px; }
+      .brandRow{ align-items:flex-start; }
+      .brandLeft{ flex:1 1 auto; min-width:0; }
+      .brandTitle{ font-size:18px; white-space:normal; line-height:1.15; }
+      .authArea{
+        width:100%;
+        justify-content:flex-end;
+        margin-top:8px;
+      }
+      .chip{ max-width:70vw; }
       .tabBtn{ font-size:13px; padding:9px 8px; }
       .card-title{ font-size:24px; }
       input,select,textarea,button{ font-size:15px; }
@@ -464,12 +475,24 @@
 </div>
 
 <script>
-  // ====== CONFIG ======
   const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA";
-  const sb = window.__nu_carpool_sb || (window.__nu_carpool_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
 
-  // ====== HELPERS ======
+  /* ✅ Explicit auth persistence so closing a tab won't "log you out" (unless browser clears storage, e.g., iOS private mode) */
+  const sb = window.__nu_carpool_sb || (window.__nu_carpool_sb = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: "pkce",
+        storage: window.localStorage
+      }
+    }
+  ));
+
   const $ = (id) => document.getElementById(id);
   const setText = (id, t) => { const el=$(id); if(el) el.textContent = t||""; };
   const normEmail = (e) => (e||"").trim().toLowerCase();
@@ -527,7 +550,6 @@
       await navigator.clipboard.writeText(txt);
       return true;
     }catch(e){
-      // fallback
       const ta = document.createElement("textarea");
       ta.value = txt;
       document.body.appendChild(ta);
@@ -538,10 +560,6 @@
     }
   }
 
-  function show(el){ el.classList.remove("hidden"); }
-  function hide(el){ el.classList.add("hidden"); }
-
-  // ====== TABS ======
   function activateTab(which){
     const tabs = { post: $("tab_post"), find: $("tab_find"), my: $("tab_my") };
     const views = { post: $("view_post"), find: $("view_find"), my: $("view_my") };
@@ -552,8 +570,7 @@
     }
   }
 
-  // ====== AUTH ======
-  let currentUser = null; // { email, id }
+  let currentUser = null;
   const PENDING_KEY = "nu_carpool_pending_action";
 
   function setAuthUI(){
@@ -586,7 +603,7 @@
     setText("signin_msg","Sending magic link...");
     $("signin_send_btn").disabled = true;
 
-    const redirectTo = window.location.origin; // must be whitelisted in Supabase Auth settings
+    const redirectTo = window.location.origin;
     const { error } = await sb.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: redirectTo }
@@ -628,8 +645,6 @@
   async function requireAuthOrQueue(action){
     await refreshUser();
     if(currentUser?.email) return true;
-
-    // queue action then open sign in
     savePendingAction(action);
     openSignInModal(action?.emailHint || "");
     return false;
@@ -642,14 +657,12 @@
     const pending = loadPendingAction();
     if(!pending) return;
 
-    // avoid super old actions
     if(pending.ts && (Date.now() - pending.ts) > 15 * 60 * 1000){
       clearPendingAction();
       return;
     }
 
     clearPendingAction();
-    // resume
     if(pending.type === "POST"){
       await doPostRide(pending.payload);
     }else if(pending.type === "JOIN"){
@@ -662,7 +675,6 @@
     }
   }
 
-  // ====== DATA OPS ======
   async function getSeatsFilledMap(rideIds){
     let countsMap = {};
     if(!rideIds.length) return countsMap;
@@ -678,7 +690,6 @@
     return [...new Set((joins||[]).map(j=>j.ride_id))];
   }
 
-  // ====== POST ======
   async function postRideClick(){
     setText("post_err","");
     setText("post_msg","");
@@ -701,7 +712,7 @@
     const max_seats = parseInt($("post_max_seats").value,10);
     const contact = $("post_contact").value.trim();
 
-    const owner_email = normEmail(currentUser?.email || ""); // once signed in
+    const owner_email = normEmail(currentUser?.email || "");
     if(!ride_date_iso){ setText("post_err","Please select a date."); return null; }
     if(!from_time || !to_time){ setText("post_err","Please fill both From and To times."); return null; }
     if(timeToMinutes(from_time) > timeToMinutes(to_time)){ setText("post_err","From time must be earlier than To time."); return null; }
@@ -723,7 +734,6 @@
     setText("post_msg","Posting...");
     $("post_btn").disabled = true;
 
-    // Ensure email now that we're signed in
     await refreshUser();
     payload.owner_email = normEmail(currentUser?.email || "");
     if(!payload.owner_email || !isNU(payload.owner_email)){
@@ -741,16 +751,12 @@
       return;
     }
 
-    // owner takes first seat
     await sb.from("ride_participants").insert([{ ride_id: data.id, user_email: payload.owner_email }]);
 
     setText("post_msg","Posted! Your ride is now open.");
     $("post_btn").disabled = false;
-
-    // Optionally refresh find results if user is on find tab
   }
 
-  // ====== FIND ======
   async function searchRides(){
     setText("find_err","");
     setText("find_msg","Searching...");
@@ -759,7 +765,7 @@
     const direction = $("find_direction").value;
     const airport = $("find_airport").value;
     const ride_date_iso = $("find_date").value;
-    const t = $("find_time").value; // optional, may be ""
+    const t = $("find_time").value;
 
     if(!ride_date_iso){
       setText("find_msg","");
@@ -768,7 +774,6 @@
       return;
     }
 
-    // Show all rides for day (open + full so user can see, but can only join open if seats available)
     let q = sb.from("rides")
       .select("*")
       .eq("ride_date", ride_date_iso)
@@ -803,12 +808,10 @@
       return { ...r, seats_filled: filled, dist, alreadyJoined, isOwner };
     });
 
-    // Sorting: if time chosen, sort by distance, else sort by earliest from_time
     enriched.sort((a,b)=>{
       if(tMin!==null){
         return (a.dist ?? 0) - (b.dist ?? 0);
       }
-      // default: earliest start
       return timeToMinutes(a.from_time) - timeToMinutes(b.from_time);
     });
 
@@ -875,12 +878,9 @@
     });
   }
 
-  // ====== JOIN / CANCEL ======
   async function joinRideClick(rideId, btn){
-    // require sign-in (Level 3)
     const ok = await requireAuthOrQueue({ type:"JOIN", payload:{ rideId } });
     if(!ok) return;
-
     await doJoinRide(rideId, btn, false);
   }
 
@@ -897,7 +897,6 @@
       btn.textContent = "Joining...";
     }
 
-    // Prevent duplicate join (client-side quick check)
     const { data: existing } = await sb
       .from("ride_participants")
       .select("id")
@@ -906,13 +905,8 @@
       .maybeSingle();
 
     if(existing){
-      // already joined
-      if(btn){
-        btn.disabled = false;
-        btn.textContent = "Cancel Join";
-      }
       await searchRides();
-      showJoinModalAfterJoin(rideId, email, true);
+      await showJoinModalAfterJoin(rideId, email);
       return;
     }
 
@@ -926,7 +920,6 @@
       return;
     }
 
-    // Update ride status if full
     const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
     const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
     const filled = (parts||[]).length;
@@ -934,22 +927,16 @@
     if(ride && filled >= ride.max_seats){
       await sb.from("rides").update({ status: "full" }).eq("id", rideId);
     }else{
-      // ensure open
       await sb.from("rides").update({ status: "open" }).eq("id", rideId);
     }
 
-    // refresh UI + modal
     await searchRides();
     showJoinModal(ride, filled, email);
-
-    // auto switch to My Rides? (You asked for Go to My Rides button; we’ll keep user in Find unless they tap.)
-    // If you want auto-switch, tell me and I’ll change it.
   }
 
   async function cancelJoinClick(rideId, btn){
     const ok = await requireAuthOrQueue({ type:"CANCEL", payload:{ rideId } });
     if(!ok) return;
-
     await doCancelJoin(rideId, btn, false);
   }
 
@@ -983,7 +970,6 @@
       return;
     }
 
-    // If ride was full, may become open again
     const { data: ride } = await sb.from("rides").select("max_seats,status").eq("id", rideId).single();
     const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
     const filled = (parts||[]).length;
@@ -992,29 +978,20 @@
       await sb.from("rides").update({ status: "open" }).eq("id", rideId);
     }
 
-    // Refresh current views
-    // If on Find tab and there are results, refresh search
     await searchRides().catch(()=>{});
-    // If on My tab, refresh too
     if(!$("view_my").classList.contains("hidden")){
       await loadMyRides();
     }
   }
 
-  // ====== JOIN MODAL ======
-  function openJoinModal(){
-    $("join_overlay").classList.add("show");
-  }
-  function closeJoinModal(){
-    $("join_overlay").classList.remove("show");
-  }
+  function openJoinModal(){ $("join_overlay").classList.add("show"); }
+  function closeJoinModal(){ $("join_overlay").classList.remove("show"); }
 
   function makeMessageTemplate(ride, myEmail){
     const dateStr = isoToMDY(ride.ride_date);
     const windowStr = `${formatTimeAMPM(ride.from_time)}–${formatTimeAMPM(ride.to_time)}`;
     const dir = ride.direction;
     const airport = ride.airport;
-
     return `Hi! I just joined your carpool on ${dateStr} (${dir}, ${airport}). My leave window is ${windowStr}. Where should we meet, and what time should we confirm? Thanks!`;
   }
 
@@ -1027,18 +1004,16 @@
     openJoinModal();
   }
 
-  async function showJoinModalAfterJoin(rideId, myEmail, already){
+  async function showJoinModalAfterJoin(rideId, myEmail){
     const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
     const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
     const filled = (parts||[]).length;
     showJoinModal(ride, filled, myEmail);
   }
 
-  // ====== MY RIDES ======
   async function loadMyRidesClick(){
     const ok = await requireAuthOrQueue({ type:"LOAD_MY", payload:{} });
     if(!ok) return;
-
     activateTab("my");
     await loadMyRides();
   }
@@ -1072,11 +1047,8 @@
     const joinedIds = await getMyJoinedIds(email);
     let joined = [];
     if(joinedIds.length){
-      const { data: jr, error: e2 } = await sb.from("rides")
-        .select("*")
-        .in("id", joinedIds)
-        .order("created_at", { ascending:false });
-      if(!e2) joined = jr || [];
+      const { data: jr } = await sb.from("rides").select("*").in("id", joinedIds).order("created_at", { ascending:false });
+      joined = jr || [];
     }
 
     const allIds = [...new Set([...(posted||[]).map(r=>r.id), ...(joined||[]).map(r=>r.id)])];
@@ -1103,8 +1075,7 @@
     const makeCard = (r, tag) => {
       const filled = countsMap[r.id] || 0;
       const isOwner = normEmail(r.owner_email) === myEmail;
-      const joinedByMe = true; // because in My Rides
-      const canCancel = !isOwner; // don't allow owner to "cancel join" (would remove their own seat)
+      const canCancel = !isOwner;
       const fullNow = filled >= r.max_seats || r.status === "full";
 
       const div = document.createElement("div");
@@ -1164,26 +1135,21 @@
     });
   }
 
-  // ====== INIT ======
   document.addEventListener("DOMContentLoaded", async ()=>{
-    // Tabs
     $("tab_post").addEventListener("click", ()=> activateTab("post"));
     $("tab_find").addEventListener("click", ()=> activateTab("find"));
     $("tab_my").addEventListener("click", ()=> loadMyRidesClick());
 
-    // Buttons
     $("post_btn").addEventListener("click", postRideClick);
     $("find_btn").addEventListener("click", searchRides);
     $("my_refresh_btn").addEventListener("click", loadMyRides);
 
-    // Auth button
     $("auth_btn").addEventListener("click", async ()=>{
       await refreshUser();
       if(currentUser?.email){
         await sb.auth.signOut();
         currentUser = null;
         setAuthUI();
-        // If user is on My tab, show message
         if(!$("view_my").classList.contains("hidden")){
           setText("my_msg","");
           setText("my_err","Signed out.");
@@ -1194,7 +1160,6 @@
       }
     });
 
-    // Sign-in modal actions
     $("signin_close").addEventListener("click", closeSignInModal);
     $("signin_overlay").addEventListener("click", (e)=>{
       if(e.target === $("signin_overlay")) closeSignInModal();
@@ -1208,7 +1173,6 @@
       await sendMagicLink(email);
     });
 
-    // Join modal actions
     $("join_close").addEventListener("click", closeJoinModal);
     $("close_join_btn").addEventListener("click", closeJoinModal);
     $("join_overlay").addEventListener("click", (e)=>{
@@ -1230,7 +1194,6 @@
       await loadMyRides();
     });
 
-    // Date defaults
     const todayIso = new Date().toISOString().slice(0,10);
     $("find_date").value = todayIso;
     $("post_date").value = todayIso;
@@ -1240,24 +1203,19 @@
     $("find_date").addEventListener("change", ()=> $("find_date_display").textContent = isoToMDY($("find_date").value));
     $("post_date").addEventListener("change", ()=> $("post_date_display").textContent = isoToMDY($("post_date").value));
 
-    // Time dropdowns
     buildTimeOptions($("post_from"), "14:00", false);
     buildTimeOptions($("post_to"), "15:00", false);
-    buildTimeOptions($("find_time"), "", true); // include Anytime
+    buildTimeOptions($("find_time"), "", true);
 
-    // Auth state listener
-    sb.auth.onAuthStateChange(async (event, session)=>{
+    sb.auth.onAuthStateChange(async ()=>{
       await refreshUser();
       if(currentUser?.email){
         closeSignInModal();
       }
     });
 
-    // Initial auth refresh + resume
     await refreshUser();
     setAuthUI();
-
-    // If user came back from magic link, resume pending action
     await maybeResumePendingAction();
   });
 </script>
