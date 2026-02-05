@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; background:#f6f7fb; margin:0; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-variant-numeric: tabular-nums; background:#f6f7fb; margin:0; }
     header { background:#4e2a84; color:#fff; padding:18px 16px; text-align:center; }
     main { max-width:900px; margin:22px auto; padding:0 14px; }
     .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
@@ -28,6 +29,10 @@
     .split { display:flex; gap:10px; }
     .split > * { flex:1; }
     .hr { height:1px; background:#eee; margin:12px 0; }
+
+    /* Make Leave Window stand out more in results */
+    .leave-big { font-size:16px; font-weight:750; margin-top:8px; }
+    .leave-big span { font-weight:800; }
   </style>
 </head>
 
@@ -49,32 +54,31 @@
       <div>
         <label>Direction</label>
         <select id="post_direction">
-          <option value="">Select</option>
-          <option value="Evanston → Airport">Evanston → Airport</option>
+          <option value="Evanston → Airport" selected>Evanston → Airport</option>
           <option value="Airport → Evanston">Airport → Evanston</option>
         </select>
       </div>
       <div>
         <label>Airport</label>
         <select id="post_airport">
-          <option value="">Select</option>
-          <option value="ORD">ORD</option>
+          <option value="ORD" selected>ORD</option>
           <option value="MDW">MDW</option>
         </select>
       </div>
     </div>
 
-    <label>Date</label>
-    <input id="post_date" type="date" />
+    <label>Date (MM/DD/YYYY)</label>
+    <input id="post_date_text" type="text" placeholder="02/10/2026" inputmode="numeric" />
+    <input id="post_date" type="date" style="display:none;" />
 
     <label>Leave window</label>
     <div class="split">
       <div>
-        <label style="margin-top:0">From (happy to leave as early as)</label>
+        <label style="margin-top:0">From (earliest)</label>
         <input id="post_from" type="time" />
       </div>
       <div>
-        <label style="margin-top:0">To (must leave by)</label>
+        <label style="margin-top:0">To (latest)</label>
         <input id="post_to" type="time" />
       </div>
     </div>
@@ -87,12 +91,11 @@
         <select id="post_max_seats">
           <option value="2">2</option>
           <option value="3" selected>3</option>
-          <option value="4">4</option>
         </select>
       </div>
       <div>
-        <label>Contact (WeChat / iMessage)</label>
-        <input id="post_contact" placeholder="WeChat: xxx / iMessage: xxx" />
+        <label>Contact (Phone / iMessage)</label>
+        <input id="post_contact" placeholder="+1 (xxx) xxx-xxxx" />
       </div>
     </div>
 
@@ -112,16 +115,14 @@
       <div>
         <label>Direction</label>
         <select id="find_direction">
-          <option value="">Any</option>
-          <option value="Evanston → Airport">Evanston → Airport</option>
+          <option value="Evanston → Airport" selected>Evanston → Airport</option>
           <option value="Airport → Evanston">Airport → Evanston</option>
         </select>
       </div>
       <div>
         <label>Airport</label>
         <select id="find_airport">
-          <option value="">Any</option>
-          <option value="ORD">ORD</option>
+          <option value="ORD" selected>ORD</option>
           <option value="MDW">MDW</option>
         </select>
       </div>
@@ -129,11 +130,12 @@
 
     <div class="split">
       <div>
-        <label>Date</label>
-        <input id="find_date" type="date" />
+        <label>Date (MM/DD/YYYY)</label>
+        <input id="find_date_text" type="text" placeholder="02/10/2026" inputmode="numeric" />
+        <input id="find_date" type="date" style="display:none;" />
       </div>
       <div>
-        <label>Leave around (your time)</label>
+        <label>Leave around</label>
         <input id="find_time" type="time" />
       </div>
     </div>
@@ -157,7 +159,7 @@
 </main>
 
 <script>
-  // ====== CONFIG (replace with yours) ======
+  // ====== CONFIG ======
   const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA";
   const sb = window.__wildcat_sb || (window.__wildcat_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
@@ -167,20 +169,46 @@
   const normEmail = (e) => (e||"").trim().toLowerCase();
   const isNU = (e) => e.endsWith("@u.northwestern.edu");
 
-  function timeToMinutes(t){ // "HH:MM" -> minutes
-    const [h,m] = t.split(":").map(Number);
-    return h*60 + m;
-  }
-  function minutesToTime(min){
-    const h = String(Math.floor(min/60)).padStart(2,"0");
-    const m = String(min%60).padStart(2,"0");
-    return `${h}:${m}`;
-  }
-  function windowMidMinutes(from_t, to_t){
-    return Math.round((timeToMinutes(from_t) + timeToMinutes(to_t))/2);
+  function timeToMinutes(t){ const [h,m] = t.split(":").map(Number); return h*60 + m; }
+  function windowMidMinutes(from_t, to_t){ return Math.round((timeToMinutes(from_t) + timeToMinutes(to_t))/2); }
+
+  function escapeHtml(str){
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-  // ---- A: POST RIDE ----
+  // ---- Date helpers: show as MM/DD/YYYY but store as YYYY-MM-DD ----
+  function isoToMDY(iso){
+    if(!iso) return "";
+    const [y,m,d] = iso.split("-");
+    return `${m}/${d}/${y}`;
+  }
+  function mdyToIso(mdy){
+    const s = (mdy||"").trim();
+    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(!m) return "";
+    const mm = String(parseInt(m[1],10)).padStart(2,"0");
+    const dd = String(parseInt(m[2],10)).padStart(2,"0");
+    const yy = m[3];
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  function formatTimeAMPM(hhmm){
+    // hhmm = "14:05"
+    if(!hhmm) return "";
+    const [hStr, mStr] = hhmm.split(":");
+    let h = parseInt(hStr,10);
+    const m = mStr;
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12; if(h === 0) h = 12;
+    return `${h}:${m} ${ampm}`;
+  }
+
+  // ---- POST ----
   async function postRide(){
     setText("post_err","");
     setText("post_msg","Posting...");
@@ -189,23 +217,23 @@
     const owner_email = normEmail($("post_email").value);
     const direction = $("post_direction").value;
     const airport = $("post_airport").value;
-    const ride_date = $("post_date").value;
+
+    const ride_date_iso = mdyToIso($("post_date_text").value);
     const from_time = $("post_from").value;
     const to_time = $("post_to").value;
     const max_seats = parseInt($("post_max_seats").value,10);
     const contact = $("post_contact").value.trim();
     const note = $("post_note").value.trim();
 
-    if(!owner_email || !isNU(owner_email)) { setText("post_err","Please use your Northwestern email."); gotoDone(); return; }
-    if(!direction) { setText("post_err","Please select direction."); gotoDone(); return; }
-    if(!airport) { setText("post_err","Please select airport."); gotoDone(); return; }
-    if(!ride_date) { setText("post_err","Please select date."); gotoDone(); return; }
-    if(!from_time || !to_time) { setText("post_err","Please fill both From and To times."); gotoDone(); return; }
-    if(timeToMinutes(from_time) > timeToMinutes(to_time)) { setText("post_err","From time must be earlier than To time."); gotoDone(); return; }
-    if(!contact) { setText("post_err","Please provide contact info."); gotoDone(); return; }
+    if(!owner_email || !isNU(owner_email)) { fail("Please use your Northwestern email."); return; }
+    if(!ride_date_iso) { fail("Please enter date as MM/DD/YYYY."); return; }
+    if(!from_time || !to_time) { fail("Please fill both From and To times."); return; }
+    if(timeToMinutes(from_time) > timeToMinutes(to_time)) { fail("From time must be earlier than To time."); return; }
+    if(!contact) { fail("Please provide contact info."); return; }
 
     const ride = {
-      owner_email, direction, airport, ride_date,
+      owner_email, direction, airport,
+      ride_date: ride_date_iso,
       from_time, to_time,
       max_seats,
       status: "open",
@@ -214,26 +242,23 @@
     };
 
     const { data, error } = await sb.from("rides").insert([ride]).select().single();
-    if(error){
-      setText("post_err","Submit failed:\n" + (error.message || JSON.stringify(error)));
-      gotoDone();
-      return;
-    }
+    if(error){ fail("Submit failed:\n" + (error.message || JSON.stringify(error))); return; }
 
-    // 发起人自动占第一个 seat（自己）
+    // owner takes first seat
     await sb.from("ride_participants").insert([{ ride_id: data.id, user_email: owner_email }]);
 
     setText("post_msg","Posted! Your ride is now open.");
     $("post_btn").disabled = false;
     return;
 
-    function gotoDone(){
+    function fail(msg){
       setText("post_msg","");
+      setText("post_err", msg);
       $("post_btn").disabled = false;
     }
   }
 
-  // ---- A: SEARCH RIDES (open only) + sorting by midpoint distance to user's time ----
+  // ---- SEARCH ----
   async function searchRides(){
     setText("find_err","");
     setText("find_msg","Searching...");
@@ -241,70 +266,53 @@
 
     const direction = $("find_direction").value;
     const airport = $("find_airport").value;
-    const ride_date = $("find_date").value;
+    const ride_date_iso = mdyToIso($("find_date_text").value);
     const t = $("find_time").value;
 
-    if(!ride_date){ setText("find_err","Please select a date."); done(); return; }
-    if(!t){ setText("find_err","Please choose a time."); done(); return; }
+    if(!ride_date_iso){ fail("Please enter date as MM/DD/YYYY."); return; }
+    if(!t){ fail("Please choose a time."); return; }
 
-    // fetch open rides for that date (and optional direction/airport)
     let q = sb.from("rides")
       .select("*")
       .eq("status","open")
-      .eq("ride_date", ride_date);
-
-    if(direction) q = q.eq("direction", direction);
-    if(airport) q = q.eq("airport", airport);
+      .eq("ride_date", ride_date_iso)
+      .eq("direction", direction)
+      .eq("airport", airport);
 
     const { data: rides, error } = await q.order("created_at", { ascending:false });
-    if(error){
-      setText("find_err","Search failed:\n" + (error.message || JSON.stringify(error)));
-      done(); return;
-    }
+    if(error){ fail("Search failed:\n" + (error.message || JSON.stringify(error))); return; }
 
-    // filter window contains user's time point
     const tMin = timeToMinutes(t);
-    const filtered = (rides||[]).filter(r=>{
-      return timeToMinutes(r.from_time) <= tMin && tMin <= timeToMinutes(r.to_time);
-    });
+    const filtered = (rides||[]).filter(r => timeToMinutes(r.from_time) <= tMin && tMin <= timeToMinutes(r.to_time));
 
-    // get participant counts for these rides
     const rideIds = filtered.map(r=>r.id);
     let countsMap = {};
     if(rideIds.length){
-      const { data: parts, error: e2 } = await sb.from("ride_participants").select("ride_id").in("ride_id", rideIds);
-      if(!e2){
-        for(const p of (parts||[])){
-          countsMap[p.ride_id] = (countsMap[p.ride_id]||0) + 1;
-        }
-      }
+      const { data: parts } = await sb.from("ride_participants").select("ride_id").in("ride_id", rideIds);
+      for(const p of (parts||[])) countsMap[p.ride_id] = (countsMap[p.ride_id]||0) + 1;
     }
 
-    // compute seats_filled and sort by abs(midpoint - user's time)
     const enriched = filtered.map(r=>{
       const filled = countsMap[r.id] || 0;
       const mid = windowMidMinutes(r.from_time, r.to_time);
       const dist = Math.abs(mid - tMin);
-      return { ...r, seats_filled: filled, mid, dist };
+      return { ...r, seats_filled: filled, dist };
     }).sort((a,b)=> a.dist - b.dist);
 
-    renderResults(enriched, tMin);
+    renderResults(enriched);
     setText("find_msg", enriched.length ? `Found ${enriched.length} ride(s).` : "No matching rides.");
     done();
 
+    function fail(msg){ setText("find_msg",""); setText("find_err", msg); done(); }
     function done(){ $("find_btn").disabled = false; }
   }
 
-  function renderResults(rides, tMin){
+  function renderResults(rides){
     const container = $("results");
     container.innerHTML = "";
     for(const r of rides){
       const filled = r.seats_filled || 0;
       const max = r.max_seats;
-      const seatsText = `${filled}/${max} filled`;
-      const rel = (r.mid - tMin);
-      const relText = rel === 0 ? "exactly your time" :
-        (rel > 0 ? `${rel} min later than your time` : `${Math.abs(rel)} min earlier than your time`);
 
       const div = document.createElement("div");
       div.className = "ride";
@@ -312,15 +320,21 @@
         <div class="row">
           <span class="pill">${escapeHtml(r.direction)}</span>
           <span class="pill">${escapeHtml(r.airport)}</span>
-          <span class="pill">${escapeHtml(r.ride_date)}</span>
+          <span class="pill">${escapeHtml(isoToMDY(r.ride_date))}</span>
         </div>
-        <div style="margin-top:8px;"><strong>Leave window:</strong> ${escapeHtml(r.from_time)} – ${escapeHtml(r.to_time)}</div>
-        <div class="small">Match: <strong>${escapeHtml(relText)}</strong></div>
+
+        <div class="leave-big">
+          <span>Leave window:</span>
+          ${escapeHtml(formatTimeAMPM(r.from_time))} – ${escapeHtml(formatTimeAMPM(r.to_time))}
+        </div>
+
         <div class="row" style="margin-top:8px;">
-          <div class="small"><strong>Seats:</strong> ${seatsText}</div>
+          <div class="small"><strong>Seats:</strong> ${filled}/${max} filled</div>
         </div>
+
         ${r.note ? `<div class="small" style="margin-top:8px;"><strong>Note:</strong> ${escapeHtml(r.note)}</div>` : ""}
         <div class="small" style="margin-top:8px;"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
+
         <div class="row" style="margin-top:10px;">
           <button data-join="${r.id}" ${filled >= max ? "disabled" : ""}>Join Ride</button>
         </div>
@@ -328,7 +342,6 @@
       container.appendChild(div);
     }
 
-    // bind join buttons
     container.querySelectorAll("button[data-join]").forEach(btn=>{
       btn.addEventListener("click", async ()=>{
         const rideId = btn.getAttribute("data-join");
@@ -337,18 +350,14 @@
     });
   }
 
-  // ---- A: JOIN RIDE (occupy a seat), full => hide from public ----
+  // ---- JOIN ----
   async function joinRide(rideId, btn){
     const email = normEmail(prompt("Enter your NU email to join:") || "");
-    if(!email || !isNU(email)){
-      alert("Please use your Northwestern email.");
-      return;
-    }
+    if(!email || !isNU(email)){ alert("Please use your Northwestern email."); return; }
 
     btn.disabled = true;
     btn.textContent = "Joining...";
 
-    // insert participant (unique constraint prevents duplicates)
     const { error: e1 } = await sb.from("ride_participants").insert([{ ride_id: rideId, user_email: email }]);
     if(e1){
       alert(e1.message || "Join failed.");
@@ -357,53 +366,44 @@
       return;
     }
 
-    // check seats filled
-    const { data: ride, error: e2 } = await sb.from("rides").select("max_seats, status").eq("id", rideId).single();
-    if(e2){
-      alert("Joined, but could not refresh ride.");
-      return;
-    }
+    // check if full
+    const { data: ride } = await sb.from("rides").select("max_seats").eq("id", rideId).single();
     const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
     const filled = (parts||[]).length;
 
-    if(filled >= ride.max_seats){
+    if(ride && filled >= ride.max_seats){
       await sb.from("rides").update({ status: "full" }).eq("id", rideId);
     }
 
     alert("Joined!");
-    // refresh results (re-run current search)
     await searchRides();
   }
 
-  // ---- MY RIDES (posted + joined, including full/closed) ----
+  // ---- MY RIDES ----
   async function loadMyRides(){
     setText("my_err","");
     setText("my_msg","Loading...");
     $("my_btn").disabled = true;
 
     const email = normEmail($("my_email").value);
-    if(!email || !isNU(email)){ setText("my_err","Please enter your Northwestern email."); done(); return; }
+    if(!email || !isNU(email)){ fail("Please enter your Northwestern email."); return; }
 
-    // posted rides
     const { data: posted, error: e1 } = await sb.from("rides")
       .select("*")
       .eq("owner_email", email)
       .order("created_at", { ascending:false });
+    if(e1){ fail(e1.message); return; }
 
-    if(e1){ setText("my_err", e1.message); done(); return; }
-
-    // joined rides
     const { data: joins, error: e2 } = await sb.from("ride_participants").select("ride_id").eq("user_email", email);
-    if(e2){ setText("my_err", e2.message); done(); return; }
+    if(e2){ fail(e2.message); return; }
 
     const joinedIds = [...new Set((joins||[]).map(j=>j.ride_id))];
     let joined = [];
     if(joinedIds.length){
-      const { data: jr, error: e3 } = await sb.from("rides").select("*").in("id", joinedIds).order("created_at", { ascending:false });
-      if(!e3) joined = jr || [];
+      const { data: jr } = await sb.from("rides").select("*").in("id", joinedIds).order("created_at", { ascending:false });
+      joined = jr || [];
     }
 
-    // counts
     const allIds = [...new Set([...(posted||[]).map(r=>r.id), ...(joined||[]).map(r=>r.id)])];
     let countsMap = {};
     if(allIds.length){
@@ -415,6 +415,7 @@
     setText("my_msg","Loaded.");
     done();
 
+    function fail(msg){ setText("my_msg",""); setText("my_err", msg); done(); }
     function done(){ $("my_btn").disabled = false; }
   }
 
@@ -432,10 +433,13 @@
           <span class="pill">${escapeHtml(r.status)}</span>
           <span class="pill">${escapeHtml(r.direction)}</span>
           <span class="pill">${escapeHtml(r.airport)}</span>
-          <span class="pill">${escapeHtml(r.ride_date)}</span>
+          <span class="pill">${escapeHtml(isoToMDY(r.ride_date))}</span>
         </div>
-        <div style="margin-top:8px;"><strong>Leave window:</strong> ${escapeHtml(r.from_time)} – ${escapeHtml(r.to_time)}</div>
-        <div class="small"><strong>Seats:</strong> ${filled}/${r.max_seats} filled</div>
+        <div class="leave-big">
+          <span>Leave window:</span>
+          ${escapeHtml(formatTimeAMPM(r.from_time))} – ${escapeHtml(formatTimeAMPM(r.to_time))}
+        </div>
+        <div class="small" style="margin-top:8px;"><strong>Seats:</strong> ${filled}/${r.max_seats} filled</div>
         ${r.note ? `<div class="small" style="margin-top:8px;"><strong>Note:</strong> ${escapeHtml(r.note)}</div>` : ""}
         <div class="small" style="margin-top:8px;"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
       `;
@@ -466,24 +470,20 @@
     }
   }
 
-  function escapeHtml(str){
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  // ====== wire buttons ======
+  // ====== wire buttons + defaults ======
   document.addEventListener("DOMContentLoaded", ()=>{
     $("post_btn").addEventListener("click", postRide);
     $("find_btn").addEventListener("click", searchRides);
     $("my_btn").addEventListener("click", loadMyRides);
 
-    // default: find_date = today
-    const today = new Date().toISOString().slice(0,10);
-    $("find_date").value = today;
+    // default dates to today in MM/DD/YYYY
+    const now = new Date();
+    const mm = String(now.getMonth()+1).padStart(2,"0");
+    const dd = String(now.getDate()).padStart(2,"0");
+    const yy = String(now.getFullYear());
+    const mdy = `${mm}/${dd}/${yy}`;
+    $("find_date_text").value = mdy;
+    $("post_date_text").value = mdy;
   });
 </script>
 </body>
