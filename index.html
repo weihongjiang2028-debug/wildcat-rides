@@ -24,7 +24,7 @@
       box-shadow:0 2px 10px rgba(0,0,0,.10);
     }
 
-    /* Header stack order: Title -> Quote -> Sign in */
+    /* ✅ NEW: stack order = Title -> Quote -> Sign in */
     .brandStack{
       max-width:980px;
       margin:0 auto;
@@ -35,6 +35,7 @@
       text-align:center;
     }
 
+    /* ✅ Big centered brand row with paws */
     .brandCenter{
       display:flex;
       align-items:center;
@@ -51,7 +52,7 @@
     }
 
     .brandTitle{
-      font-size:34px;
+      font-size:34px;  /* ✅ bigger */
       font-weight:980;
       margin:0;
       line-height:1.05;
@@ -60,14 +61,14 @@
     }
 
     .brandSub{
-      font-size:18px;
+      font-size:18px;  /* ✅ slightly smaller than title */
       font-weight:850;
       line-height:1.25;
       opacity:.98;
       margin:0;
     }
 
-    /* Make just “Uber” black (readable on purple) */
+    /* ✅ Make just “Uber” black (and readable on purple) */
     .uberBlack{
       color:#111;
       background:rgba(255,255,255,.92);
@@ -78,6 +79,7 @@
       transform:translateY(-1px);
     }
 
+    /* Auth row centered under quote */
     .authArea{
       display:flex;
       align-items:center;
@@ -300,27 +302,6 @@
       resize:vertical;
     }
 
-    /* Auth tabs inside modal */
-    .authTabs{
-      display:flex;
-      gap:8px;
-      margin:6px 0 10px;
-    }
-    .authTab{
-      flex:1;
-      border:none;
-      border-radius:12px;
-      padding:10px 10px;
-      font-weight:950;
-      cursor:pointer;
-      background:#f2effa;
-      color:#4e2a84;
-    }
-    .authTab.active{
-      background:#4e2a84;
-      color:#fff;
-    }
-
     @media (max-width:420px){
       .paw{ width:22px; height:22px; }
       .brandTitle{ font-size:28px; white-space:normal; }
@@ -336,6 +317,7 @@
 
 <body>
 <header>
+  <!-- ✅ Title on top, then quote, then sign in -->
   <div class="brandStack">
     <div class="brandCenter" aria-label="Northwestern Pool">
       <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -467,29 +449,21 @@
   </section>
 </main>
 
-<!-- AUTH MODAL (Sign in / Create account) -->
-<div id="auth_overlay" class="overlay">
+<!-- SIGN IN MODAL -->
+<div id="signin_overlay" class="overlay">
   <div class="modal">
-    <button class="modalClose" id="auth_close">✕</button>
-    <div class="modalTitle" id="auth_modal_title">Sign in</div>
+    <button class="modalClose" id="signin_close">✕</button>
+    <div class="modalTitle">Sign in with your NU email</div>
 
-    <div class="authTabs">
-      <button class="authTab active" id="auth_tab_signin" type="button">Sign in</button>
-      <button class="authTab" id="auth_tab_signup" type="button">Create account</button>
-    </div>
+    <label for="signin_email" style="margin-top:8px;">NU Email</label>
+    <input id="signin_email" placeholder="name@u.northwestern.edu" />
 
-    <label for="auth_email" style="margin-top:8px;">NU Email</label>
-    <input id="auth_email" placeholder="name@u.northwestern.edu" />
+    <button id="signin_send_btn">Send magic link</button>
+    <div id="signin_msg" class="muted"></div>
+    <div id="signin_err" class="error"></div>
 
-    <label for="auth_password">Password (8 digits)</label>
-    <input id="auth_password" type="password" inputmode="numeric" placeholder="8-digit password" />
-
-    <button id="auth_submit_btn">Sign in</button>
-    <div id="auth_msg" class="muted"></div>
-    <div id="auth_err" class="error"></div>
-
-    <div class="hint" id="auth_hint" style="margin-top:10px;">
-      Password must be exactly 8 digits. Registration requires email verification.
+    <div class="hint" style="margin-top:10px;">
+      We’ll email you a sign-in link. After you click it, you’ll return here automatically.
     </div>
   </div>
 </div>
@@ -524,7 +498,6 @@
   const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA";
 
-  // ✅ Make sessions persist "as long as possible"
   const sb = window.__nu_carpool_sb || (window.__nu_carpool_sb = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
@@ -543,7 +516,6 @@
   const setText = (id, t) => { const el=$(id); if(el) el.textContent = t||""; };
   const normEmail = (e) => (e||"").trim().toLowerCase();
   const isNU = (e) => e.endsWith("@u.northwestern.edu");
-  const is8Digits = (p) => /^\d{8}$/.test(p || "");
 
   function escapeHtml(str){
     return String(str ?? "")
@@ -634,27 +606,38 @@
     }
   }
 
-  // ---------- AUTH MODAL ----------
-  let authMode = "signin"; // "signin" | "signup"
-
-  function setAuthMode(mode){
-    authMode = mode;
-    $("auth_tab_signin").classList.toggle("active", mode==="signin");
-    $("auth_tab_signup").classList.toggle("active", mode==="signup");
-    $("auth_modal_title").textContent = (mode==="signin") ? "Sign in" : "Create account";
-    $("auth_submit_btn").textContent = (mode==="signin") ? "Sign in" : "Create account";
-    setText("auth_msg","");
-    setText("auth_err","");
+  function openSignInModal(prefillEmail=""){
+    setText("signin_msg","");
+    setText("signin_err","");
+    if(prefillEmail) $("signin_email").value = prefillEmail;
+    $("signin_overlay").classList.add("show");
   }
 
-  function openAuthModal(prefillEmail=""){
-    setText("auth_msg","");
-    setText("auth_err","");
-    if(prefillEmail) $("auth_email").value = prefillEmail;
-    $("auth_overlay").classList.add("show");
+  function closeSignInModal(){
+    $("signin_overlay").classList.remove("show");
   }
-  function closeAuthModal(){
-    $("auth_overlay").classList.remove("show");
+
+  async function sendMagicLink(email){
+    setText("signin_err","");
+    setText("signin_msg","Sending magic link...");
+    $("signin_send_btn").disabled = true;
+
+    const redirectTo = window.location.origin;
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo }
+    });
+
+    $("signin_send_btn").disabled = false;
+
+    if(error){
+      setText("signin_msg","");
+      setText("signin_err", error.message || "Failed to send link.");
+      return false;
+    }
+
+    setText("signin_msg","Sent! Check your email and click the sign-in link.");
+    return true;
   }
 
   async function refreshUser(){
@@ -682,7 +665,7 @@
     await refreshUser();
     if(currentUser?.email) return true;
     savePendingAction(action);
-    openAuthModal(action?.emailHint || "");
+    openSignInModal(action?.emailHint || "");
     return false;
   }
 
@@ -711,69 +694,6 @@
     }
   }
 
-  async function handleAuthSubmit(){
-    setText("auth_err","");
-    setText("auth_msg","");
-
-    const email = normEmail($("auth_email").value);
-    const password = $("auth_password").value || "";
-
-    if(!email || !isNU(email)){
-      setText("auth_err","Please use your Northwestern email (@u.northwestern.edu).");
-      return;
-    }
-    if(!is8Digits(password)){
-      setText("auth_err","Password must be exactly 8 digits (numbers only).");
-      return;
-    }
-
-    $("auth_submit_btn").disabled = true;
-
-    if(authMode === "signup"){
-      // ✅ Registration requires email verification (configured in Supabase)
-      setText("auth_msg","Creating account...");
-      const redirectTo = window.location.origin;
-
-      const { error } = await sb.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: redirectTo }
-      });
-
-      $("auth_submit_btn").disabled = false;
-
-      if(error){
-        setText("auth_msg","");
-        setText("auth_err", error.message || "Sign up failed.");
-        return;
-      }
-
-      // With email confirmations enabled, user must verify email before sign-in works.
-      setText("auth_msg","Account created. Please check your email to verify, then come back and sign in.");
-      return;
-    }
-
-    if(authMode === "signin"){
-      setText("auth_msg","Signing in...");
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-
-      $("auth_submit_btn").disabled = false;
-
-      if(error){
-        setText("auth_msg","");
-        // Common case: email not confirmed yet
-        setText("auth_err", error.message || "Sign in failed. If you just registered, verify your email first.");
-        return;
-      }
-
-      await refreshUser();
-      closeAuthModal();
-      await maybeResumePendingAction();
-      return;
-    }
-  }
-
-  // ---------- DATA HELPERS ----------
   async function getSeatsFilledMap(rideIds){
     let countsMap = {};
     if(!rideIds.length) return countsMap;
@@ -789,7 +709,6 @@
     return [...new Set((joins||[]).map(j=>j.ride_id))];
   }
 
-  // ---------- POST ----------
   async function postRideClick(){
     setText("post_err","");
     setText("post_msg","");
@@ -857,7 +776,6 @@
     $("post_btn").disabled = false;
   }
 
-  // ---------- FIND ----------
   async function searchRides(){
     setText("find_err","");
     setText("find_msg","Searching...");
@@ -1112,7 +1030,6 @@
     showJoinModal(ride, filled, myEmail);
   }
 
-  // ---------- MY RIDES ----------
   async function loadMyRidesClick(){
     const ok = await requireAuthOrQueue({ type:"LOAD_MY", payload:{} });
     if(!ok) return;
@@ -1246,7 +1163,6 @@
     $("find_btn").addEventListener("click", searchRides);
     $("my_refresh_btn").addEventListener("click", loadMyRides);
 
-    // Auth button
     $("auth_btn").addEventListener("click", async ()=>{
       await refreshUser();
       if(currentUser?.email){
@@ -1259,21 +1175,23 @@
           $("my_rides").innerHTML = "";
         }
       }else{
-        setAuthMode("signin");
-        openAuthModal("");
+        openSignInModal("");
       }
     });
 
-    // Auth modal controls
-    $("auth_close").addEventListener("click", closeAuthModal);
-    $("auth_overlay").addEventListener("click", (e)=>{
-      if(e.target === $("auth_overlay")) closeAuthModal();
+    $("signin_close").addEventListener("click", closeSignInModal);
+    $("signin_overlay").addEventListener("click", (e)=>{
+      if(e.target === $("signin_overlay")) closeSignInModal();
     });
-    $("auth_tab_signin").addEventListener("click", ()=> setAuthMode("signin"));
-    $("auth_tab_signup").addEventListener("click", ()=> setAuthMode("signup"));
-    $("auth_submit_btn").addEventListener("click", handleAuthSubmit);
+    $("signin_send_btn").addEventListener("click", async ()=>{
+      const email = normEmail($("signin_email").value);
+      if(!email || !isNU(email)){
+        setText("signin_err","Please enter a Northwestern email (@u.northwestern.edu).");
+        return;
+      }
+      await sendMagicLink(email);
+    });
 
-    // Join modal controls
     $("join_close").addEventListener("click", closeJoinModal);
     $("close_join_btn").addEventListener("click", closeJoinModal);
     $("join_overlay").addEventListener("click", (e)=>{
@@ -1295,7 +1213,6 @@
       await loadMyRides();
     });
 
-    // Date defaults
     const todayIso = new Date().toISOString().slice(0,10);
     $("find_date").value = todayIso;
     $("post_date").value = todayIso;
@@ -1309,12 +1226,10 @@
     buildTimeOptions($("post_to"), "15:00", false);
     buildTimeOptions($("find_time"), "", true);
 
-    // Auth state change: keep UI synced + resume pending action
     sb.auth.onAuthStateChange(async ()=>{
       await refreshUser();
       if(currentUser?.email){
-        closeAuthModal();
-        await maybeResumePendingAction();
+        closeSignInModal();
       }
     });
 
