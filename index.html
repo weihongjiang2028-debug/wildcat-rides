@@ -4,248 +4,487 @@
   <meta charset="UTF-8" />
   <title>Wildcat Rides</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f9fafb;
-      margin: 0;
-    }
-    header {
-      background: #4e2a84;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    main {
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-    h2 { margin-top: 40px; }
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-    button {
-      background: #4e2a84;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .ride {
-      background: white;
-      border-radius: 10px;
-      padding: 16px;
-      margin-top: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    }
-    .muted {
-      color: #777;
-      font-size: 14px;
-      margin-top: 10px;
-    }
-    .error {
-      color: #b91c1c;
-      font-size: 14px;
-      margin-top: 10px;
-      white-space: pre-wrap;
-    }
-    footer {
-      text-align: center;
-      margin: 60px 0;
-      color: #777;
-      font-size: 14px;
-    }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; background:#f6f7fb; margin:0; }
+    header { background:#4e2a84; color:#fff; padding:18px 16px; text-align:center; }
+    main { max-width:900px; margin:22px auto; padding:0 14px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    @media (max-width: 860px){ .grid { grid-template-columns:1fr; } }
+    .card { background:#fff; border-radius:14px; padding:14px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    h2 { margin:6px 0 12px; }
+    label { display:block; font-size:13px; color:#444; margin-top:10px; }
+    input, select, textarea, button { width:100%; padding:11px; margin-top:6px; border-radius:10px; border:1px solid #ddd; box-sizing:border-box; font-size:15px; }
+    textarea { min-height:78px; resize:vertical; }
+    button { background:#4e2a84; color:#fff; border:none; cursor:pointer; font-weight:650; }
+    button.secondary { background:#ece7f6; color:#4e2a84; border:1px solid #d9ccef; }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    .muted { color:#666; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+    .error { color:#b91c1c; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+    .ride { border:1px solid #eee; border-radius:14px; padding:12px; margin-top:12px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill { display:inline-block; padding:4px 10px; border-radius:999px; background:#f2effa; color:#4e2a84; font-size:12px; font-weight:600; }
+    .small { font-size:13px; color:#444; }
+    .split { display:flex; gap:10px; }
+    .split > * { flex:1; }
+    .hr { height:1px; background:#eee; margin:12px 0; }
   </style>
 </head>
 
 <body>
-  <header>
-    <h1>🐾 Wildcat Rides</h1>
-    <p>Airport carpools for Northwestern students</p>
-  </header>
+<header>
+  <h1>🐾 Wildcat Rides</h1>
+  <div class="small">Airport carpools for Northwestern students</div>
+</header>
 
-  <main>
+<main class="grid">
+  <!-- LEFT: Post -->
+  <div class="card">
     <h2>Post a Ride</h2>
 
-    <input id="email" placeholder="yourname@u.northwestern.edu" />
-    <select id="direction">
-      <option value="">Direction</option>
-      <option value="Evanston → Airport">Evanston → Airport</option>
-      <option value="Airport → Evanston">Airport → Evanston</option>
-    </select>
-    <select id="airport">
-      <option value="">Airport</option>
-      <option value="ORD">ORD</option>
-      <option value="MDW">MDW</option>
-    </select>
-    <input type="date" id="date" />
-    <input id="time_window" placeholder="Time window (e.g. 7:30–8:30am)" />
-    <input id="flight_number" placeholder="Flight number (optional)" />
-    <input id="contact" placeholder="Contact info (WeChat / iMessage)" />
+    <label>Your NU Email</label>
+    <input id="post_email" placeholder="name@u.northwestern.edu" />
 
-    <button id="submitBtn">Submit Ride</button>
-    <div id="postStatus" class="muted"></div>
-    <div id="postError" class="error"></div>
+    <div class="split">
+      <div>
+        <label>Direction</label>
+        <select id="post_direction">
+          <option value="">Select</option>
+          <option value="Evanston → Airport">Evanston → Airport</option>
+          <option value="Airport → Evanston">Airport → Evanston</option>
+        </select>
+      </div>
+      <div>
+        <label>Airport</label>
+        <select id="post_airport">
+          <option value="">Select</option>
+          <option value="ORD">ORD</option>
+          <option value="MDW">MDW</option>
+        </select>
+      </div>
+    </div>
 
+    <label>Date</label>
+    <input id="post_date" type="date" />
+
+    <label>Leave window</label>
+    <div class="split">
+      <div>
+        <label style="margin-top:0">From (happy to leave as early as)</label>
+        <input id="post_from" type="time" />
+      </div>
+      <div>
+        <label style="margin-top:0">To (must leave by)</label>
+        <input id="post_to" type="time" />
+      </div>
+    </div>
+
+    <div class="muted">We’ll match riders whose plans fall within this time window.</div>
+
+    <div class="split">
+      <div>
+        <label>Max seats (including you)</label>
+        <select id="post_max_seats">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+        </select>
+      </div>
+      <div>
+        <label>Contact (WeChat / iMessage)</label>
+        <input id="post_contact" placeholder="WeChat: xxx / iMessage: xxx" />
+      </div>
+    </div>
+
+    <label>Note (optional)</label>
+    <textarea id="post_note" placeholder="Example: I have one checked bag. International flight."></textarea>
+
+    <button id="post_btn">Submit Ride</button>
+    <div id="post_msg" class="muted"></div>
+    <div id="post_err" class="error"></div>
+  </div>
+
+  <!-- RIGHT: Find + My Rides -->
+  <div class="card">
     <h2>Find a Ride</h2>
-    <div id="loadStatus" class="muted"></div>
-    <div id="loadError" class="error"></div>
-    <div id="rides"></div>
-  </main>
 
-  <footer>
-    Built by Northwestern students & ChatGPT
-  </footer>
+    <div class="split">
+      <div>
+        <label>Direction</label>
+        <select id="find_direction">
+          <option value="">Any</option>
+          <option value="Evanston → Airport">Evanston → Airport</option>
+          <option value="Airport → Evanston">Airport → Evanston</option>
+        </select>
+      </div>
+      <div>
+        <label>Airport</label>
+        <select id="find_airport">
+          <option value="">Any</option>
+          <option value="ORD">ORD</option>
+          <option value="MDW">MDW</option>
+        </select>
+      </div>
+    </div>
 
-  <script>
-    // ---- CONFIG (yours) ----
-    const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA";
-    const TABLE = "rides";
+    <div class="split">
+      <div>
+        <label>Date</label>
+        <input id="find_date" type="date" />
+      </div>
+      <div>
+        <label>Leave around (your time)</label>
+        <input id="find_time" type="time" />
+      </div>
+    </div>
 
-    // ---- Safe, single client init (prevents redeclare issues) ----
-    const sb = window.__wildcat_sb || (window.__wildcat_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+    <button id="find_btn" class="secondary">Search</button>
 
-    function $(id) { return document.getElementById(id); }
+    <div id="find_msg" class="muted"></div>
+    <div id="find_err" class="error"></div>
+    <div id="results"></div>
 
-    function setText(id, text) {
-      const el = $(id);
-      if (el) el.textContent = text || "";
+    <div class="hr"></div>
+
+    <h2>My Rides</h2>
+    <div class="muted">Enter your email to see rides you posted or joined (for now).</div>
+    <input id="my_email" placeholder="name@u.northwestern.edu" />
+    <button id="my_btn" class="secondary">Load My Rides</button>
+    <div id="my_msg" class="muted"></div>
+    <div id="my_err" class="error"></div>
+    <div id="my_rides"></div>
+  </div>
+</main>
+
+<script>
+  // ====== CONFIG (replace with yours) ======
+  const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA";
+  const sb = window.__wildcat_sb || (window.__wildcat_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+
+  const $ = (id) => document.getElementById(id);
+  const setText = (id, t) => { const el=$(id); if(el) el.textContent = t||""; };
+  const normEmail = (e) => (e||"").trim().toLowerCase();
+  const isNU = (e) => e.endsWith("@u.northwestern.edu");
+
+  function timeToMinutes(t){ // "HH:MM" -> minutes
+    const [h,m] = t.split(":").map(Number);
+    return h*60 + m;
+  }
+  function minutesToTime(min){
+    const h = String(Math.floor(min/60)).padStart(2,"0");
+    const m = String(min%60).padStart(2,"0");
+    return `${h}:${m}`;
+  }
+  function windowMidMinutes(from_t, to_t){
+    return Math.round((timeToMinutes(from_t) + timeToMinutes(to_t))/2);
+  }
+
+  // ---- A: POST RIDE ----
+  async function postRide(){
+    setText("post_err","");
+    setText("post_msg","Posting...");
+    $("post_btn").disabled = true;
+
+    const owner_email = normEmail($("post_email").value);
+    const direction = $("post_direction").value;
+    const airport = $("post_airport").value;
+    const ride_date = $("post_date").value;
+    const from_time = $("post_from").value;
+    const to_time = $("post_to").value;
+    const max_seats = parseInt($("post_max_seats").value,10);
+    const contact = $("post_contact").value.trim();
+    const note = $("post_note").value.trim();
+
+    if(!owner_email || !isNU(owner_email)) { setText("post_err","Please use your Northwestern email."); gotoDone(); return; }
+    if(!direction) { setText("post_err","Please select direction."); gotoDone(); return; }
+    if(!airport) { setText("post_err","Please select airport."); gotoDone(); return; }
+    if(!ride_date) { setText("post_err","Please select date."); gotoDone(); return; }
+    if(!from_time || !to_time) { setText("post_err","Please fill both From and To times."); gotoDone(); return; }
+    if(timeToMinutes(from_time) > timeToMinutes(to_time)) { setText("post_err","From time must be earlier than To time."); gotoDone(); return; }
+    if(!contact) { setText("post_err","Please provide contact info."); gotoDone(); return; }
+
+    const ride = {
+      owner_email, direction, airport, ride_date,
+      from_time, to_time,
+      max_seats,
+      status: "open",
+      note: note || null,
+      contact
+    };
+
+    const { data, error } = await sb.from("rides").insert([ride]).select().single();
+    if(error){
+      setText("post_err","Submit failed:\n" + (error.message || JSON.stringify(error)));
+      gotoDone();
+      return;
     }
 
-    function clearMessages() {
-      setText("postError", "");
-      setText("loadError", "");
-      setText("postStatus", "");
-      setText("loadStatus", "");
+    // 发起人自动占第一个 seat（自己）
+    await sb.from("ride_participants").insert([{ ride_id: data.id, user_email: owner_email }]);
+
+    setText("post_msg","Posted! Your ride is now open.");
+    $("post_btn").disabled = false;
+    return;
+
+    function gotoDone(){
+      setText("post_msg","");
+      $("post_btn").disabled = false;
+    }
+  }
+
+  // ---- A: SEARCH RIDES (open only) + sorting by midpoint distance to user's time ----
+  async function searchRides(){
+    setText("find_err","");
+    setText("find_msg","Searching...");
+    $("find_btn").disabled = true;
+
+    const direction = $("find_direction").value;
+    const airport = $("find_airport").value;
+    const ride_date = $("find_date").value;
+    const t = $("find_time").value;
+
+    if(!ride_date){ setText("find_err","Please select a date."); done(); return; }
+    if(!t){ setText("find_err","Please choose a time."); done(); return; }
+
+    // fetch open rides for that date (and optional direction/airport)
+    let q = sb.from("rides")
+      .select("*")
+      .eq("status","open")
+      .eq("ride_date", ride_date);
+
+    if(direction) q = q.eq("direction", direction);
+    if(airport) q = q.eq("airport", airport);
+
+    const { data: rides, error } = await q.order("created_at", { ascending:false });
+    if(error){
+      setText("find_err","Search failed:\n" + (error.message || JSON.stringify(error)));
+      done(); return;
     }
 
-    function normalizeEmail(email) {
-      return (email || "").trim().toLowerCase();
-    }
-
-    function validateForm(ride) {
-      if (!ride.email.endsWith("@u.northwestern.edu")) return "Please use your Northwestern email.";
-      if (!ride.direction) return "Please select a direction.";
-      if (!ride.airport) return "Please select an airport.";
-      if (!ride.date) return "Please select a date.";
-      if (!ride.time_window) return "Please enter a time window.";
-      if (!ride.contact) return "Please enter contact info.";
-      return "";
-    }
-
-    async function submitRide() {
-      clearMessages();
-
-      const btn = $("submitBtn");
-      btn.disabled = true;
-      setText("postStatus", "Posting...");
-
-      const ride = {
-        email: normalizeEmail($("email").value),
-        direction: $("direction").value,
-        airport: $("airport").value,
-        date: $("date").value,
-        time_window: $("time_window").value.trim(),
-        flight_number: $("flight_number").value.trim(),
-        contact: $("contact").value.trim()
-      };
-
-      const msg = validateForm(ride);
-      if (msg) {
-        setText("postStatus", "");
-        setText("postError", msg);
-        btn.disabled = false;
-        return;
-      }
-
-      const { error } = await sb.from(TABLE).insert([ride]);
-
-      if (error) {
-        setText("postStatus", "");
-        setText("postError", "Submit failed:\n" + (error.message || JSON.stringify(error)));
-        btn.disabled = false;
-        return;
-      }
-
-      setText("postStatus", "Posted successfully.");
-      btn.disabled = false;
-
-      // Optional: clear some fields after success
-      $("time_window").value = "";
-      $("flight_number").value = "";
-      $("contact").value = "";
-
-      await loadRides();
-    }
-
-    async function loadRides() {
-      setText("loadError", "");
-      setText("loadStatus", "Loading rides...");
-
-      const { data, error } = await sb
-        .from(TABLE)
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        setText("loadStatus", "");
-        setText("loadError", "Load failed:\n" + (error.message || JSON.stringify(error)));
-        return;
-      }
-
-      const container = $("rides");
-      container.innerHTML = "";
-
-      if (!data || data.length === 0) {
-        setText("loadStatus", "No rides yet. Be the first to post one.");
-        return;
-      }
-
-      setText("loadStatus", "");
-
-      data.forEach(r => {
-        const div = document.createElement("div");
-        div.className = "ride";
-        div.innerHTML = `
-          <strong>${escapeHtml(r.date)} · ${escapeHtml(r.direction)}</strong><br/>
-          ${escapeHtml(r.airport)} · ${escapeHtml(r.time_window)}<br/>
-          ${r.flight_number ? "Flight: " + escapeHtml(r.flight_number) + "<br/>" : ""}
-          Contact: ${escapeHtml(r.contact)}
-          <div class="muted">Posted by: ${escapeHtml(r.email)}</div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    // Basic escaping for safety
-    function escapeHtml(str) {
-      return String(str ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      $("submitBtn").addEventListener("click", submitRide);
-      loadRides();
+    // filter window contains user's time point
+    const tMin = timeToMinutes(t);
+    const filtered = (rides||[]).filter(r=>{
+      return timeToMinutes(r.from_time) <= tMin && tMin <= timeToMinutes(r.to_time);
     });
-  </script>
+
+    // get participant counts for these rides
+    const rideIds = filtered.map(r=>r.id);
+    let countsMap = {};
+    if(rideIds.length){
+      const { data: parts, error: e2 } = await sb.from("ride_participants").select("ride_id").in("ride_id", rideIds);
+      if(!e2){
+        for(const p of (parts||[])){
+          countsMap[p.ride_id] = (countsMap[p.ride_id]||0) + 1;
+        }
+      }
+    }
+
+    // compute seats_filled and sort by abs(midpoint - user's time)
+    const enriched = filtered.map(r=>{
+      const filled = countsMap[r.id] || 0;
+      const mid = windowMidMinutes(r.from_time, r.to_time);
+      const dist = Math.abs(mid - tMin);
+      return { ...r, seats_filled: filled, mid, dist };
+    }).sort((a,b)=> a.dist - b.dist);
+
+    renderResults(enriched, tMin);
+    setText("find_msg", enriched.length ? `Found ${enriched.length} ride(s).` : "No matching rides.");
+    done();
+
+    function done(){ $("find_btn").disabled = false; }
+  }
+
+  function renderResults(rides, tMin){
+    const container = $("results");
+    container.innerHTML = "";
+    for(const r of rides){
+      const filled = r.seats_filled || 0;
+      const max = r.max_seats;
+      const seatsText = `${filled}/${max} filled`;
+      const rel = (r.mid - tMin);
+      const relText = rel === 0 ? "exactly your time" :
+        (rel > 0 ? `${rel} min later than your time` : `${Math.abs(rel)} min earlier than your time`);
+
+      const div = document.createElement("div");
+      div.className = "ride";
+      div.innerHTML = `
+        <div class="row">
+          <span class="pill">${escapeHtml(r.direction)}</span>
+          <span class="pill">${escapeHtml(r.airport)}</span>
+          <span class="pill">${escapeHtml(r.ride_date)}</span>
+        </div>
+        <div style="margin-top:8px;"><strong>Leave window:</strong> ${escapeHtml(r.from_time)} – ${escapeHtml(r.to_time)}</div>
+        <div class="small">Match: <strong>${escapeHtml(relText)}</strong></div>
+        <div class="row" style="margin-top:8px;">
+          <div class="small"><strong>Seats:</strong> ${seatsText}</div>
+        </div>
+        ${r.note ? `<div class="small" style="margin-top:8px;"><strong>Note:</strong> ${escapeHtml(r.note)}</div>` : ""}
+        <div class="small" style="margin-top:8px;"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
+        <div class="row" style="margin-top:10px;">
+          <button data-join="${r.id}" ${filled >= max ? "disabled" : ""}>Join Ride</button>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    // bind join buttons
+    container.querySelectorAll("button[data-join]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const rideId = btn.getAttribute("data-join");
+        await joinRide(rideId, btn);
+      });
+    });
+  }
+
+  // ---- A: JOIN RIDE (occupy a seat), full => hide from public ----
+  async function joinRide(rideId, btn){
+    const email = normEmail(prompt("Enter your NU email to join:") || "");
+    if(!email || !isNU(email)){
+      alert("Please use your Northwestern email.");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Joining...";
+
+    // insert participant (unique constraint prevents duplicates)
+    const { error: e1 } = await sb.from("ride_participants").insert([{ ride_id: rideId, user_email: email }]);
+    if(e1){
+      alert(e1.message || "Join failed.");
+      btn.disabled = false;
+      btn.textContent = "Join Ride";
+      return;
+    }
+
+    // check seats filled
+    const { data: ride, error: e2 } = await sb.from("rides").select("max_seats, status").eq("id", rideId).single();
+    if(e2){
+      alert("Joined, but could not refresh ride.");
+      return;
+    }
+    const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
+    const filled = (parts||[]).length;
+
+    if(filled >= ride.max_seats){
+      await sb.from("rides").update({ status: "full" }).eq("id", rideId);
+    }
+
+    alert("Joined!");
+    // refresh results (re-run current search)
+    await searchRides();
+  }
+
+  // ---- MY RIDES (posted + joined, including full/closed) ----
+  async function loadMyRides(){
+    setText("my_err","");
+    setText("my_msg","Loading...");
+    $("my_btn").disabled = true;
+
+    const email = normEmail($("my_email").value);
+    if(!email || !isNU(email)){ setText("my_err","Please enter your Northwestern email."); done(); return; }
+
+    // posted rides
+    const { data: posted, error: e1 } = await sb.from("rides")
+      .select("*")
+      .eq("owner_email", email)
+      .order("created_at", { ascending:false });
+
+    if(e1){ setText("my_err", e1.message); done(); return; }
+
+    // joined rides
+    const { data: joins, error: e2 } = await sb.from("ride_participants").select("ride_id").eq("user_email", email);
+    if(e2){ setText("my_err", e2.message); done(); return; }
+
+    const joinedIds = [...new Set((joins||[]).map(j=>j.ride_id))];
+    let joined = [];
+    if(joinedIds.length){
+      const { data: jr, error: e3 } = await sb.from("rides").select("*").in("id", joinedIds).order("created_at", { ascending:false });
+      if(!e3) joined = jr || [];
+    }
+
+    // counts
+    const allIds = [...new Set([...(posted||[]).map(r=>r.id), ...(joined||[]).map(r=>r.id)])];
+    let countsMap = {};
+    if(allIds.length){
+      const { data: parts } = await sb.from("ride_participants").select("ride_id").in("ride_id", allIds);
+      for(const p of (parts||[])) countsMap[p.ride_id] = (countsMap[p.ride_id]||0) + 1;
+    }
+
+    renderMyRides(posted||[], joined||[], countsMap);
+    setText("my_msg","Loaded.");
+    done();
+
+    function done(){ $("my_btn").disabled = false; }
+  }
+
+  function renderMyRides(posted, joined, countsMap){
+    const container = $("my_rides");
+    container.innerHTML = "";
+
+    const makeCard = (r, tag) => {
+      const filled = countsMap[r.id] || 0;
+      const div = document.createElement("div");
+      div.className = "ride";
+      div.innerHTML = `
+        <div class="row">
+          <span class="pill">${escapeHtml(tag)}</span>
+          <span class="pill">${escapeHtml(r.status)}</span>
+          <span class="pill">${escapeHtml(r.direction)}</span>
+          <span class="pill">${escapeHtml(r.airport)}</span>
+          <span class="pill">${escapeHtml(r.ride_date)}</span>
+        </div>
+        <div style="margin-top:8px;"><strong>Leave window:</strong> ${escapeHtml(r.from_time)} – ${escapeHtml(r.to_time)}</div>
+        <div class="small"><strong>Seats:</strong> ${filled}/${r.max_seats} filled</div>
+        ${r.note ? `<div class="small" style="margin-top:8px;"><strong>Note:</strong> ${escapeHtml(r.note)}</div>` : ""}
+        <div class="small" style="margin-top:8px;"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
+      `;
+      return div;
+    };
+
+    const h1 = document.createElement("div");
+    h1.className = "muted";
+    h1.textContent = "My Posted Rides";
+    container.appendChild(h1);
+    if(!posted.length){
+      const d = document.createElement("div"); d.className="muted"; d.textContent="(none)"; container.appendChild(d);
+    } else {
+      posted.forEach(r=>container.appendChild(makeCard(r,"POSTED")));
+    }
+
+    const hr = document.createElement("div"); hr.className="hr"; container.appendChild(hr);
+
+    const h2 = document.createElement("div");
+    h2.className = "muted";
+    h2.textContent = "My Joined Rides";
+    container.appendChild(h2);
+    const joinedOnly = joined.filter(r=> !posted.some(p=>p.id===r.id));
+    if(!joinedOnly.length){
+      const d = document.createElement("div"); d.className="muted"; d.textContent="(none)"; container.appendChild(d);
+    } else {
+      joinedOnly.forEach(r=>container.appendChild(makeCard(r,"JOINED")));
+    }
+  }
+
+  function escapeHtml(str){
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // ====== wire buttons ======
+  document.addEventListener("DOMContentLoaded", ()=>{
+    $("post_btn").addEventListener("click", postRide);
+    $("find_btn").addEventListener("click", searchRides);
+    $("my_btn").addEventListener("click", loadMyRides);
+
+    // default: find_date = today
+    const today = new Date().toISOString().slice(0,10);
+    $("find_date").value = today;
+  });
+</script>
 </body>
 </html>
