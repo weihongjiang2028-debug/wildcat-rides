@@ -570,6 +570,33 @@
   }
 
   // ====== AUTH ======
+function resetUIAfterSignOut(){
+  // Close any modals
+  closeSignInModal();
+  closeJoinModal();
+
+  // Clear pending actions
+  clearPendingAction();
+
+  // Clear messages and lists
+  setText("post_msg","");
+  setText("post_err","");
+  setText("find_msg","");
+  setText("find_err","");
+  setText("my_msg","");
+  setText("my_err","Signed out.");
+  $("my_rides").innerHTML = "";
+
+  // Re-enable buttons
+  $("post_btn").disabled = false;
+  $("find_btn").disabled = false;
+  $("my_refresh_btn").disabled = false;
+
+  // Go back to a safe tab
+  activateTab("post");
+}
+
+  
   let currentUser = null; // { email, id }
   const PENDING_KEY = "nu_carpool_pending_action";
 
@@ -678,11 +705,24 @@ async function signInWithPassword(email, password){
 
 
   async function refreshUser(){
-    const { data } = await sb.auth.getUser();
+  const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error("getUser timeout")), ms));
+
+  try{
+    const { data } = await Promise.race([
+      sb.auth.getUser(),
+      timeout(4000),
+    ]);
+
     currentUser = data?.user ? { email: data.user.email, id: data.user.id } : null;
-    setAuthUI();
-    return currentUser;
+  }catch(err){
+    console.warn("refreshUser failed:", err);
+    currentUser = null;
   }
+
+  setAuthUI();
+  return currentUser;
+}
+
 
   function savePendingAction(action){
     localStorage.setItem(PENDING_KEY, JSON.stringify({ ...action, ts: Date.now() }));
@@ -1249,23 +1289,29 @@ async function signInWithPassword(email, password){
     $("find_btn").addEventListener("click", searchRides);
     $("my_refresh_btn").addEventListener("click", loadMyRides);
 
-    // Auth button
-    $("auth_btn").addEventListener("click", async ()=>{
-      await refreshUser();
-      if(currentUser?.email){
-        await sb.auth.signOut();
-        currentUser = null;
-        setAuthUI();
-        // If user is on My tab, show message
-        if(!$("view_my").classList.contains("hidden")){
-          setText("my_msg","");
-          setText("my_err","Signed out.");
-          $("my_rides").innerHTML = "";
-        }
-      }else{
-        openSignInModal("");
-      }
-    });
+  // Auth button
+$("auth_btn").addEventListener("click", async ()=>{
+  await refreshUser();
+
+  if(currentUser?.email){
+    $("auth_btn").disabled = true;
+
+    try{
+      await sb.auth.signOut();
+    }catch(e){
+      console.warn("signOut failed:", e);
+    }
+
+    currentUser = null;
+    setAuthUI();
+    resetUIAfterSignOut();
+
+    $("auth_btn").disabled = false;
+  }else{
+    openSignInModal("");
+  }
+});
+
 
     // Sign-in modal actions
     $("signin_close").addEventListener("click", closeSignInModal);
@@ -1340,13 +1386,20 @@ $("signin_pw_btn").addEventListener("click", async ()=>{
     buildTimeOptions($("post_to"), "15:00", false);
     buildTimeOptions($("find_time"), "", true); // include Anytime
 
-    // Auth state listener
-    sb.auth.onAuthStateChange(async (event, session)=>{
-      await refreshUser();
-      if(currentUser?.email){
-        closeSignInModal();
-      }
-    });
+   // Auth state listener
+sb.auth.onAuthStateChange(async (event, session)=>{
+  await refreshUser();
+
+  if(event === "SIGNED_IN"){
+    closeSignInModal();
+    await maybeResumePendingAction();
+  }
+
+  if(event === "SIGNED_OUT"){
+    resetUIAfterSignOut();
+  }
+});
+
 
     // Initial auth refresh + resume
     await refreshUser();
