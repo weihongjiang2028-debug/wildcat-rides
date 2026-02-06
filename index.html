@@ -1010,6 +1010,80 @@ async function signInWithPassword(email, password){
       btn.textContent = "Joining...";
     }
 
+    async function cancelRideAsHostClick(rideId, btn){
+  const ok = await requireAuthOrQueue({ type:"CANCEL_RIDE", payload:{ rideId } });
+  if(!ok) return;
+
+  await doCancelRideAsHost(rideId, btn, false);
+}
+
+async function doCancelRideAsHost(rideId, btn, fromResume){
+  await refreshUser();
+  const email = normEmail(currentUser?.email || "");
+  if(!email || !isNU(email)){
+    alert("Please sign in with your Northwestern email.");
+    return;
+  }
+
+  if(!confirm("Cancel (delete) this ride for everyone? This cannot be undone.")) return;
+
+  if(btn){
+    btn.disabled = true;
+    btn.textContent = "Cancelling...";
+  }
+
+  // 1) Make sure this user is the owner
+  const { data: ride, error: e0 } = await sb
+    .from("rides")
+    .select("id, owner_email, max_seats, status")
+    .eq("id", rideId)
+    .single();
+
+  if(e0 || !ride){
+    alert(e0?.message || "Failed to load ride.");
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = "Cancel Ride";
+    }
+    return;
+  }
+
+  if(normEmail(ride.owner_email) !== email){
+    alert("You can only cancel rides you posted.");
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = "Cancel Ride";
+    }
+    return;
+  }
+
+  // 2) Mark as cancelled
+  const { error: e1 } = await sb
+    .from("rides")
+    .update({ status: "cancelled" })
+    .eq("id", rideId);
+
+  if(e1){
+    alert(e1.message || "Cancel failed.");
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = "Cancel Ride";
+    }
+    return;
+  }
+
+  // 3) Optional: remove all participants to clean up
+  await sb.from("ride_participants").delete().eq("ride_id", rideId);
+
+  // 4) Refresh UI
+  if(!$("view_my").classList.contains("hidden")){
+    await loadMyRides();
+  }
+  if(!$("view_find").classList.contains("hidden")){
+    await searchRides().catch(()=>{});
+  }
+}
+
     // Prevent duplicate join (client-side quick check)
     const { data: existing } = await sb
       .from("ride_participants")
@@ -1242,12 +1316,18 @@ async function signInWithPassword(email, password){
         <div class="big-row"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
 
         ${canCancel ? `
-          <div class="row" style="margin-top:12px;">
-            <button class="danger" data-cancel="${r.id}">Cancel Join</button>
-          </div>
-        ` : `
-          <div class="hint" style="margin-top:10px;">You are the host of this ride. (Cancel-ride feature can be added later.)</div>
-        `}
+  <div class="row" style="margin-top:12px;">
+    <button class="danger" data-cancel="${r.id}">Cancel Join</button>
+  </div>
+` : `
+  <div class="row" style="margin-top:12px;">
+    <button class="danger" data-cancel-ride="${r.id}">Cancel Ride</button>
+  </div>
+  <div class="hint" style="margin-top:10px;">
+    Cancelling will hide this ride from everyone.
+  </div>
+`}
+
       `;
       return div;
     };
@@ -1269,12 +1349,13 @@ async function signInWithPassword(email, password){
       joinedOnly.forEach(r=>container.appendChild(makeCard(r,"JOINED")));
     }
 
-    container.querySelectorAll("button[data-cancel]").forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-        const rideId = btn.getAttribute("data-cancel");
-        await cancelJoinClick(rideId, btn);
-      });
-    });
+   container.querySelectorAll("button[data-cancel-ride]").forEach(btn=>{
+  btn.addEventListener("click", async ()=>{
+    const rideId = btn.getAttribute("data-cancel-ride");
+    await cancelRideAsHostClick(rideId, btn);
+  });
+});
+
   }
 
   // ====== INIT ======
