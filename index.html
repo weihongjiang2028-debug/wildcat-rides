@@ -427,9 +427,26 @@
     <label for="signin_email" style="margin-top:8px;">NU Email</label>
     <input id="signin_email" placeholder="name@u.northwestern.edu" />
 
-    <button id="signin_send_btn">Send magic link</button>
-    <div id="signin_msg" class="muted"></div>
-    <div id="signin_err" class="error"></div>
+    <label for="signin_password" style="margin-top:10px;">Password</label>
+<input id="signin_password" type="password" placeholder="At least 8 characters" />
+
+<div class="modalActions">
+  <button id="signin_pw_btn" class="secondary" type="button">Sign in</button>
+  <button id="signup_pw_btn" type="button">Sign up</button>
+</div>
+
+<div class="hr"></div>
+
+<button id="signin_send_btn" class="secondary" type="button">Send magic link</button>
+<div id="signin_msg" class="muted"></div>
+<div id="signin_err" class="error"></div>
+
+<div class="hint" style="margin-top:10px;">
+  Sign in options:
+  1) Password login, or
+  2) Magic link to your NU email.
+</div>
+
 
     <div class="hint" style="margin-top:10px;">
       We’ll email you a sign-in link. After you click it, you’ll return here automatically.
@@ -581,28 +598,84 @@
     $("signin_overlay").classList.remove("show");
   }
 
-  async function sendMagicLink(email){
-    setText("signin_err","");
-    setText("signin_msg","Sending magic link...");
-    $("signin_send_btn").disabled = true;
+async function signUpWithPassword(email, password){
+  setText("signin_err","");
+  setText("signin_msg","Creating account...");
+  $("signup_pw_btn").disabled = true;
+  $("signin_pw_btn").disabled = true;
+  $("signin_send_btn").disabled = true;
 
-    const redirectTo = window.location.origin; // must be whitelisted in Supabase Auth settings
-    const { error } = await sb.auth.signInWithOtp({
+  try{
+    if(!email || !isNU(email)){
+      throw new Error("Please use your Northwestern email (@u.northwestern.edu).");
+    }
+    if(!password || password.length < 8){
+      throw new Error("Password must be at least 8 characters.");
+    }
+
+    const redirectTo = window.location.origin;
+
+    const { data, error } = await sb.auth.signUp({
       email,
+      password,
       options: { emailRedirectTo: redirectTo }
     });
 
-    if(error){
-      setText("signin_msg","");
-      setText("signin_err", error.message || "Failed to send link.");
-      $("signin_send_btn").disabled = false;
-      return false;
+    if(error) throw error;
+
+    // Supabase 默认可能会要求邮箱确认
+    // 如果项目开了 email confirmations，会提示去邮箱验证
+    setText(
+      "signin_msg",
+      "Account created. If you see a confirmation email, please confirm it, then sign in."
+    );
+    return true;
+  }catch(err){
+    setText("signin_msg","");
+    setText("signin_err", err.message || "Sign up failed.");
+    return false;
+  }finally{
+    $("signup_pw_btn").disabled = false;
+    $("signin_pw_btn").disabled = false;
+    $("signin_send_btn").disabled = false;
+  }
+}
+
+async function signInWithPassword(email, password){
+  setText("signin_err","");
+  setText("signin_msg","Signing in...");
+  $("signup_pw_btn").disabled = true;
+  $("signin_pw_btn").disabled = true;
+  $("signin_send_btn").disabled = true;
+
+  try{
+    if(!email || !isNU(email)){
+      throw new Error("Please use your Northwestern email (@u.northwestern.edu).");
+    }
+    if(!password){
+      throw new Error("Please enter your password.");
     }
 
-    setText("signin_msg","Sent! Check your email and click the sign-in link.");
-    $("signin_send_btn").disabled = false;
+    const { data, error } = await sb.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if(error) throw error;
+
+    setText("signin_msg","Signed in.");
     return true;
+  }catch(err){
+    setText("signin_msg","");
+    setText("signin_err", err.message || "Sign in failed.");
+    return false;
+  }finally{
+    $("signup_pw_btn").disabled = false;
+    $("signin_pw_btn").disabled = false;
+    $("signin_send_btn").disabled = false;
   }
+}
+
 
   async function refreshUser(){
     const { data } = await sb.auth.getUser();
@@ -1207,6 +1280,28 @@
       }
       await sendMagicLink(email);
     });
+    $("signup_pw_btn").addEventListener("click", async ()=>{
+  const email = normEmail($("signin_email").value);
+  const pw = $("signin_password").value || "";
+  const ok = await signUpWithPassword(email, pw);
+  if(ok){
+    // 如果你 Supabase 关闭了邮箱确认，这里会立刻登录
+    // 如果你开启了邮箱确认，用户要先去邮箱点确认
+    await refreshUser();
+    if(currentUser?.email) closeSignInModal();
+  }
+});
+
+$("signin_pw_btn").addEventListener("click", async ()=>{
+  const email = normEmail($("signin_email").value);
+  const pw = $("signin_password").value || "";
+  const ok = await signInWithPassword(email, pw);
+  if(ok){
+    await refreshUser();
+    if(currentUser?.email) closeSignInModal();
+  }
+});
+
 
     // Join modal actions
     $("join_close").addEventListener("click", closeJoinModal);
