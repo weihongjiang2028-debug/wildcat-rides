@@ -1037,23 +1037,36 @@ async function signInWithPassword(email, password){
       return;
     }
 
-    // 2) Mark as cancelled
-    const { error: e1 } = await sb
-      .from("rides")
-      .update({ status: "cancelled" })
-      .eq("id", rideId);
+  // 2) Delete participants first (so FK constraints won't block the ride delete)
+  const { error: pErr } = await sb
+    .from("ride_participants")
+    .delete()
+    .eq("ride_id", rideId);
 
-    if(e1){
-      alert(e1.message || "Cancel failed.");
-      if(btn){
-        btn.disabled = false;
-        btn.textContent = "Cancel Ride";
-      }
-      return;
+  if(pErr){
+    alert(pErr.message || "Cancel failed (participants).");
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = "Cancel Ride";
     }
+    return;
+  }
 
-    // 3) Optional: remove all participants to clean up
-    await sb.from("ride_participants").delete().eq("ride_id", rideId);
+  // 3) Delete the ride itself (this hides it from everyone)
+  const { error: rErr } = await sb
+    .from("rides")
+    .delete()
+    .eq("id", rideId);
+
+  if(rErr){
+    alert(rErr.message || "Cancel failed (ride).");
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = "Cancel Ride";
+    }
+    return;
+  }
+
 
     // 4) Refresh UI
     if(!$("view_my").classList.contains("hidden")){
