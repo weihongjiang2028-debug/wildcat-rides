@@ -467,7 +467,33 @@
   </div>
 </div>
 
+<!-- SIGN UP MODAL -->
+<div id="signup_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="signup_close">✕</button>
 
+    <div class="modalTitle">Create account</div>
+
+    <label for="signup_email" style="margin-top:8px;">NU Email</label>
+    <input id="signup_email" placeholder="name@u.northwestern.edu" />
+
+    <label for="signup_password" style="margin-top:10px;">Password</label>
+    <input id="signup_password" type="password" placeholder="At least 8 characters" />
+
+    <label for="signup_password2" style="margin-top:10px;">Confirm password</label>
+    <input id="signup_password2" type="password" placeholder="Type it again" />
+
+    <div class="modalActions">
+      <button id="signup_create_btn" type="button">Create account</button>
+      <button id="signup_back_btn" class="secondary" type="button">Back</button>
+    </div>
+
+    <div id="signup_msg" class="muted"></div>
+    <div id="signup_err" class="error"></div>
+  </div>
+</div>
+
+  
 <!-- JOIN CONFIRMATION MODAL -->
 <div id="join_overlay" class="overlay">
   <div class="modal">
@@ -612,7 +638,7 @@ async function sendPasswordRecovery(email){
       throw new Error("Please enter a Northwestern email (@u.northwestern.edu).");
     }
 
-    const redirectTo = window.location.origin;
+const redirectTo = window.location.origin + "/";
 
     const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
     if(error) throw error;
@@ -646,8 +672,9 @@ async function updatePasswordFromRecovery(){
     if(error) throw error;
 
     setText("reset_msg","Password updated. Please sign in again.");
-    // 回到登录视图
-    showSignInView();
+setText("signin_msg","Password updated. Please sign in.");
+showSignInView();
+
     return true;
   }catch(err){
     setText("reset_msg","");
@@ -713,6 +740,19 @@ function resetUIAfterSignOut(){
   function closeSignInModal(){
     $("signin_overlay").classList.remove("show");
   }
+  
+function openSignUpModal(prefillEmail=""){
+  setText("signup_msg","");
+  setText("signup_err","");
+  if(prefillEmail) $("signup_email").value = prefillEmail;
+  $("signup_password").value = "";
+  $("signup_password2").value = "";
+  $("signup_overlay").classList.add("show");
+}
+
+function closeSignUpModal(){
+  $("signup_overlay").classList.remove("show");
+}
 
 async function signUpWithPassword(email, password){
   setText("signin_err","");
@@ -749,41 +789,34 @@ async function signUpWithPassword(email, password){
     $("signin_pw_btn").disabled = false;
   }
 }
-
-
-async function signUpWithPassword(email, password){
+async function signInWithPassword(email, password){
   setText("signin_err","");
-  setText("signin_msg","Creating account...");
-  $("signup_pw_btn").disabled = true;
+  setText("signin_msg","Signing in...");
   $("signin_pw_btn").disabled = true;
+  $("forgot_pw_btn").disabled = true;
+  $("signup_pw_btn").disabled = true;
 
   try{
     if(!email || !isNU(email)){
       throw new Error("Please use your Northwestern email (@u.northwestern.edu).");
     }
-    if(!password || password.length < 8){
-      throw new Error("Password must be at least 8 characters.");
+    if(!password){
+      throw new Error("Please enter your password.");
     }
 
-    const redirectTo = window.location.origin;
-
-    const { error } = await sb.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: redirectTo }
-    });
-
+    const { error } = await sb.auth.signInWithPassword({ email, password });
     if(error) throw error;
 
-    setText("signin_msg","Account created. Now sign in with your password.");
+    setText("signin_msg","Signed in.");
     return true;
   }catch(err){
     setText("signin_msg","");
-    setText("signin_err", err.message || "Sign up failed.");
+    setText("signin_err", err.message || "Sign in failed.");
     return false;
   }finally{
-    $("signup_pw_btn").disabled = false;
     $("signin_pw_btn").disabled = false;
+    $("forgot_pw_btn").disabled = false;
+    $("signup_pw_btn").disabled = false;
   }
 }
 
@@ -1468,6 +1501,19 @@ async function signUpWithPassword(email, password){
 
   // ====== INIT ======
   document.addEventListener("DOMContentLoaded", async ()=>{
+      // If user comes back from Supabase recovery email, exchange code for a session
+  try{
+    const url = new URL(window.location.href);
+    if(url.searchParams.get("code")){
+      await sb.auth.exchangeCodeForSession(window.location.href);
+      // Clean URL (optional)
+      url.searchParams.delete("code");
+      window.history.replaceState({}, document.title, url.toString());
+    }
+  }catch(e){
+    console.warn("exchangeCodeForSession failed:", e);
+  }
+
     // Tabs
     $("tab_post").addEventListener("click", ()=> activateTab("post"));
     $("tab_find").addEventListener("click", ()=> activateTab("find"));
@@ -1508,17 +1554,12 @@ $("auth_btn").addEventListener("click", async ()=>{
       if(e.target === $("signin_overlay")) closeSignInModal();
     });
 
-    $("signup_pw_btn").addEventListener("click", async ()=>{
+    $("signup_pw_btn").addEventListener("click", ()=>{
   const email = normEmail($("signin_email").value);
-  const pw = $("signin_password").value || "";
-  const ok = await signUpWithPassword(email, pw);
-  if(ok){
-    // 如果你 Supabase 关闭了邮箱确认，这里会立刻登录
-    // 如果你开启了邮箱确认，用户要先去邮箱点确认
-    await refreshUser();
-    if(currentUser?.email) closeSignInModal();
-  }
+  closeSignInModal();
+  openSignUpModal(email);
 });
+
 
 $("signin_pw_btn").addEventListener("click", async ()=>{
   const email = normEmail($("signin_email").value);
@@ -1527,6 +1568,48 @@ $("signin_pw_btn").addEventListener("click", async ()=>{
   if(ok){
     await refreshUser();
     if(currentUser?.email) closeSignInModal();
+  }
+});
+
+    // Sign up modal actions
+$("signup_close").addEventListener("click", closeSignUpModal);
+$("signup_back_btn").addEventListener("click", ()=>{
+  closeSignUpModal();
+  openSignInModal($("signup_email").value || "");
+});
+
+$("signup_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("signup_overlay")) closeSignUpModal();
+});
+
+$("signup_create_btn").addEventListener("click", async ()=>{
+  setText("signup_msg","");
+  setText("signup_err","");
+
+  const email = normEmail($("signup_email").value);
+  const p1 = $("signup_password").value || "";
+  const p2 = $("signup_password2").value || "";
+
+  if(!email || !isNU(email)){
+    setText("signup_err","Please use your Northwestern email (@u.northwestern.edu).");
+    return;
+  }
+  if(p1.length < 8){
+    setText("signup_err","Password must be at least 8 characters.");
+    return;
+  }
+  if(p1 !== p2){
+    setText("signup_err","Passwords do not match.");
+    return;
+  }
+
+  // Use your existing signUpWithPassword function
+  const ok = await signUpWithPassword(email, p1);
+  if(ok){
+    setText("signup_msg","Account created. Please check your email if confirmation is required, then sign in.");
+    // Optional: go back to sign in modal
+    closeSignUpModal();
+    openSignInModal(email);
   }
 });
 
