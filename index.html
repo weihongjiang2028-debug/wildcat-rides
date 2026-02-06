@@ -17,48 +17,124 @@
     header{
       background:#4e2a84;
       color:#fff;
-      padding:18px 16px 16px;
-      text-align:center;
+      padding:14px 14px 12px;
+      position:sticky;
+      top:0;
+      z-index:50;
+      box-shadow:0 2px 10px rgba(0,0,0,.10);
     }
 
-    .brand{
+    .brandRow{
       display:flex;
       align-items:center;
-      justify-content:center;
+      justify-content:space-between;
       gap:10px;
-      margin:0;
+      max-width:980px;
+      margin:0 auto;
+      flex-wrap:wrap; /* ✅ prevent mobile overlap */
     }
 
-    .brand-title{
-      font-size:26px;
-      font-weight:900;
+    .brandLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .brandTitle{
+      font-size:20px;
+      font-weight:950;
       margin:0;
-      line-height:1.05;
+      line-height:1.1;
       letter-spacing:.2px;
+      white-space:nowrap;
     }
 
-    .brand-sub{
-      margin-top:6px;
-      font-size:14px;
-      font-weight:600;
+    .brandSub{
+      margin-top:4px;
+      font-size:12px;
+      font-weight:650;
       color:#fff;
       opacity:.98;
+      max-width:980px;
+      margin-left:auto;
+      margin-right:auto;
     }
 
     .logo{
-      width:26px;
-      height:26px;
+      width:22px;
+      height:22px;
       display:inline-block;
+      flex:0 0 auto;
     }
 
-    main{ max-width:900px; margin:22px auto; padding:0 14px; }
-    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
+    .authArea{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex:0 0 auto;
+    }
+
+    .chip{
+      max-width:180px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.25);
+      font-size:12px;
+      font-weight:700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .authBtn{
+      border:none;
+      background:rgba(255,255,255,.18);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    /* Tabs */
+    .tabsWrap{
+      max-width:980px;
+      margin:10px auto 0;
+      display:flex;
+      gap:8px;
+    }
+    .tabBtn{
+      flex:1;
+      border:none;
+      border-radius:12px;
+      padding:10px 10px;
+      font-weight:900;
+      font-size:14px;
+      cursor:pointer;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+    }
+    .tabBtn.active{
+      background:#fff;
+      color:#4e2a84;
+      border-color:#fff;
+    }
+
+    main{
+      max-width:980px;
+      margin:16px auto 28px;
+      padding:0 14px;
+    }
 
     .card{
       background:#fff;
       border-radius:14px;
-      padding:18px 14px 14px;
+      padding:16px 14px 14px;
       box-shadow:0 2px 10px rgba(0,0,0,.06);
     }
 
@@ -73,7 +149,7 @@
     label{
       display:block;
       font-size:14px;
-      font-weight:800;
+      font-weight:850;
       color:#222;
       margin-top:14px;
       text-align:left;
@@ -95,7 +171,7 @@
       color:#fff;
       border:none;
       cursor:pointer;
-      font-weight:850;
+      font-weight:900;
       margin-top:16px;
       padding:12px;
       border-radius:12px;
@@ -104,6 +180,9 @@
       background:#ece7f6;
       color:#4e2a84;
       border:1px solid #d9ccef;
+    }
+    button.danger{
+      background:#b91c1c;
     }
     button:disabled{ opacity:.6; cursor:not-allowed; }
 
@@ -115,13 +194,28 @@
 
     .hr{ height:1px; background:#eee; margin:16px 0; }
 
-    .ride{ border:1px solid #eee; border-radius:14px; padding:12px; margin-top:12px; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .pill{
-      display:inline-block; padding:4px 10px; border-radius:999px;
-      background:#f2effa; color:#4e2a84; font-size:12px; font-weight:700;
+    .ride{
+      border:1px solid #eee;
+      border-radius:14px;
+      padding:12px;
+      margin-top:12px;
+      background:#fff;
     }
-    .small{ font-size:13px; color:#444; }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#f2effa;
+      color:#4e2a84;
+      font-size:12px;
+      font-weight:800;
+    }
 
     .leave-big{
       font-size:17px;
@@ -131,71 +225,124 @@
     }
     .leave-big span{ font-weight:950; }
 
+    .big-row{
+      font-size:16px;
+      font-weight:900;
+      color:#111;
+      margin-top:10px;
+    }
+    .big-row strong{ font-weight:950; }
+
     .hint{
       color:#666;
       font-size:12px;
       margin-top:6px;
     }
 
-    .big-row{
-      font-size:15px;
-      font-weight:800;
-      color:#111;
-      margin-top:10px;
-    }
-    .big-row strong{
-      font-weight:900;
-    }
+    .hidden{ display:none !important; }
 
-    .auth-card{
-      border:1px solid #eee;
-      border-radius:14px;
-      padding:12px;
-      margin-top:10px;
+    /* Modal */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.45);
+      display:none;
+      z-index:100;
+      padding:18px;
+    }
+    .overlay.show{ display:flex; align-items:center; justify-content:center; }
+    .modal{
+      width:min(520px, 100%);
       background:#fff;
+      border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+      padding:14px;
+    }
+    .modalTitle{
+      font-size:18px;
+      font-size:20px; /* ✅ slightly bigger */
+      font-weight:950;
+      margin:4px 0 10px;
+      color:#111;
+      text-align:center;
+    }
+    #join_title{
+      font-size:22px; /* ✅ join success title bigger */
+    }
+    .modalActions{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .modalActions button{ margin-top:0; }
+    .modalClose{
+      border:none;
+      background:transparent;
+      font-size:18px;
+      cursor:pointer;
+      float:right;
+      line-height:1;
+      padding:6px 8px;
+    }
+    .textareaBox{
+      width:100%;
+      min-height:96px;
+      resize:vertical;
     }
 
-    .auth-top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
+    /* Slightly tighter on very small screens */
+    @media (max-width:420px){
+      .brandTitle{ font-size:18px; }
+      .brandRow{ align-items:flex-start; }
+      .brandLeft{ flex:1 1 auto; min-width:0; }
+      .brandTitle{ font-size:18px; white-space:normal; line-height:1.15; }
+      .authArea{
+        width:100%;
+        justify-content:flex-end;
+        margin-top:8px;
+      }
+      .chip{ max-width:70vw; }
+      .tabBtn{ font-size:13px; padding:9px 8px; }
+      .card-title{ font-size:24px; }
+      input,select,textarea,button{ font-size:15px; }
+      .big-row{ font-size:15px; }
     }
   </style>
 </head>
 
 <body>
 <header>
-  <div class="brand">
-    <svg class="logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="white"/>
-      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="white"/>
-      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="white"/>
-      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="white"/>
-      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="white"/>
-    </svg>
+  <div class="brandRow">
+    <div class="brandLeft">
+      <svg class="logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="white"/>
+        <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="white"/>
+        <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="white"/>
+        <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="white"/>
+        <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="white"/>
+      </svg>
+      <h1 class="brandTitle">Northwestern Carpool</h1>
+    </div>
 
-    <h1 class="brand-title">Northwestern Carpool</h1>
-
-    <svg class="logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="white"/>
-      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="white"/>
-      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="white"/>
-      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="white"/>
-      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.7-4.7-4.1Z" fill="white"/>
-    </svg>
+    <div class="authArea">
+      <div id="auth_chip" class="chip hidden"></div>
+      <button id="auth_btn" class="authBtn">Sign in</button>
+    </div>
   </div>
 
-  <div class="brand-sub">Log in. Search rides. Split your airport Uber.</div>
+  <div class="brandSub">Find a ride-mate. Split your airport Uber.</div>
+
+  <div class="tabsWrap">
+    <button class="tabBtn active" id="tab_post">Post a Ride</button>
+    <button class="tabBtn" id="tab_find">Find a Ride</button>
+    <button class="tabBtn" id="tab_my">My Rides</button>
+  </div>
 </header>
 
-<main class="grid">
-
-  <div class="card">
+<main>
+  <!-- POST -->
+  <section id="view_post" class="card">
     <div class="card-title">Post a Ride</div>
-
-    <div class="muted" id="post_login_hint">Please log in first to post.</div>
 
     <label for="post_direction">Direction</label>
     <select id="post_direction">
@@ -237,41 +384,11 @@
     <button id="post_btn">Submit Ride</button>
     <div id="post_msg" class="muted"></div>
     <div id="post_err" class="error"></div>
-  </div>
+  </section>
 
-  <div class="card">
+  <!-- FIND -->
+  <section id="view_find" class="card hidden">
     <div class="card-title">Find a Ride</div>
-
-    <!-- AUTH -->
-    <div class="auth-card">
-      <div class="auth-top">
-        <div class="small"><strong>Account</strong></div>
-        <div class="small" id="auth_state">Not logged in</div>
-      </div>
-
-      <div id="auth_forms" style="margin-top:10px;">
-        <label for="auth_email" style="margin-top:0;">NU Email</label>
-        <input id="auth_email" placeholder="name@u.northwestern.edu" />
-
-        <label for="auth_password">Password</label>
-        <input id="auth_password" type="password" placeholder="At least 6 characters" />
-
-        <div class="row" style="margin-top:10px;">
-          <button id="signup_btn" class="secondary" type="button">Sign up</button>
-          <button id="login_btn" type="button">Log in</button>
-        </div>
-
-        <div class="hint">If email confirmation is enabled, sign up sends a verification email.</div>
-        <div id="auth_msg" class="muted"></div>
-        <div id="auth_err" class="error"></div>
-      </div>
-
-      <div id="auth_actions" style="display:none; margin-top:10px;">
-        <div class="row">
-          <button id="logout_btn" class="secondary" type="button">Log out</button>
-        </div>
-      </div>
-    </div>
 
     <label for="find_direction">Direction</label>
     <select id="find_direction">
@@ -289,40 +406,103 @@
     <input id="find_date" type="date" />
     <div class="hint" id="find_date_display"></div>
 
-    <label for="find_time">Leave around</label>
+    <label for="find_time">Leave around (optional)</label>
     <select id="find_time"></select>
+    <div class="hint">If you pick a time, we’ll sort rides closest to that time. Otherwise, we’ll show all rides for the day.</div>
 
     <button id="find_btn" class="secondary">Search</button>
     <div id="find_msg" class="muted"></div>
     <div id="find_err" class="error"></div>
+
     <div id="results"></div>
+  </section>
+
+  <!-- MY -->
+  <section id="view_my" class="card hidden">
+    <div class="card-title">My Rides</div>
+    <div class="muted" style="margin-top:6px;">Sign in to see rides you posted or joined.</div>
+
+    <button id="my_refresh_btn" class="secondary">Refresh</button>
+    <div id="my_msg" class="muted"></div>
+    <div id="my_err" class="error"></div>
 
     <div class="hr"></div>
 
-    <div class="card-title" style="margin-top:0;">My Rides</div>
-    <div class="muted" style="margin-top:6px;">Shows rides you posted or joined under this account.</div>
-
-    <button id="my_btn" class="secondary">Load My Rides</button>
-    <div id="my_msg" class="muted"></div>
-    <div id="my_err" class="error"></div>
     <div id="my_rides"></div>
-  </div>
-
+  </section>
 </main>
+
+<!-- SIGN IN MODAL -->
+<div id="signin_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="signin_close">✕</button>
+    <div class="modalTitle">Sign in with your NU email</div>
+
+    <label for="signin_email" style="margin-top:8px;">NU Email</label>
+    <input id="signin_email" placeholder="name@u.northwestern.edu" />
+
+    <button id="signin_send_btn">Send magic link</button>
+    <div id="signin_msg" class="muted"></div>
+    <div id="signin_err" class="error"></div>
+
+    <div class="hint" style="margin-top:10px;">
+      We’ll email you a sign-in link. After you click it, you’ll return here automatically.
+    </div>
+  </div>
+</div>
+
+<!-- JOIN CONFIRMATION MODAL -->
+<div id="join_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="join_close">✕</button>
+    <div class="modalTitle" id="join_title">You’ve joined!</div>
+
+    <div id="join_summary" class="muted"></div>
+
+    <label style="margin-top:10px;">Contact</label>
+    <input id="join_contact" readonly />
+
+    <div class="modalActions">
+      <button id="copy_contact_btn" class="secondary">Copy contact</button>
+      <button id="go_my_btn">Go to My Rides</button>
+    </div>
+
+    <label style="margin-top:14px;">Message template</label>
+    <textarea id="join_message" class="textareaBox"></textarea>
+
+    <div class="modalActions">
+      <button id="copy_message_btn" class="secondary">Copy message</button>
+      <button id="close_join_btn">Done</button>
+    </div>
+  </div>
+</div>
 
 <script>
   // ====== CONFIG ======
   const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA";
-  const sb = window.__wildcat_sb || (window.__wildcat_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+  const sb = window.__nu_carpool_sb || (window.__nu_carpool_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+
+  // ====== HELPERS ======
+  /* ✅ Explicit auth persistence so closing a tab won't "log you out" (unless browser clears storage, e.g., iOS private mode) */
+  const sb = window.__nu_carpool_sb || (window.__nu_carpool_sb = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: "pkce",
+        storage: window.localStorage
+      }
+    }
+  ));
 
   const $ = (id) => document.getElementById(id);
   const setText = (id, t) => { const el=$(id); if(el) el.textContent = t||""; };
   const normEmail = (e) => (e||"").trim().toLowerCase();
   const isNU = (e) => e.endsWith("@u.northwestern.edu");
-
-  function timeToMinutes(t){ const [h,m] = t.split(":").map(Number); return h*60 + m; }
-  function windowMidMinutes(from_t, to_t){ return Math.round((timeToMinutes(from_t) + timeToMinutes(to_t))/2); }
 
   function escapeHtml(str){
     return String(str ?? "")
@@ -332,6 +512,9 @@
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
   }
+
+  function timeToMinutes(t){ const [h,m] = t.split(":").map(Number); return h*60 + m; }
+  function windowMidMinutes(from_t, to_t){ return Math.round((timeToMinutes(from_t) + timeToMinutes(to_t))/2); }
 
   function isoToMDY(iso){
     if(!iso) return "";
@@ -348,8 +531,14 @@
     return `${h}:${mStr} ${ampm}`;
   }
 
-  function buildTimeOptions(selectEl, defaultHHMM){
+  function buildTimeOptions(selectEl, defaultHHMM, includeAny=false){
     selectEl.innerHTML = "";
+    if(includeAny){
+      const anyOpt = document.createElement("option");
+      anyOpt.value = "";
+      anyOpt.textContent = "Anytime";
+      selectEl.appendChild(anyOpt);
+    }
     for(let mins = 0; mins < 24*60; mins += 15){
       const hh = String(Math.floor(mins/60)).padStart(2,"0");
       const mm = String(mins%60).padStart(2,"0");
@@ -359,214 +548,334 @@
       opt.textContent = formatTimeAMPM(hhmm);
       selectEl.appendChild(opt);
     }
-    if(defaultHHMM) selectEl.value = defaultHHMM;
+    if(defaultHHMM !== undefined && defaultHHMM !== null) selectEl.value = defaultHHMM;
   }
 
-  // ===== AUTH HELPERS =====
-  async function getUser(){
-    const { data } = await sb.auth.getUser();
-    return data.user || null;
+  async function copyText(txt){
+    try{
+      await navigator.clipboard.writeText(txt);
+      return true;
+    }catch(e){
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      return true;
+    }
   }
 
-  function requireLogin(user){
-    if(!user){
-      alert("Please log in with your NU email first.");
+  function show(el){ el.classList.remove("hidden"); }
+  function hide(el){ el.classList.add("hidden"); }
+
+  // ====== TABS ======
+  function activateTab(which){
+    const tabs = { post: $("tab_post"), find: $("tab_find"), my: $("tab_my") };
+    const views = { post: $("view_post"), find: $("view_find"), my: $("view_my") };
+
+    for(const k of Object.keys(tabs)){
+      tabs[k].classList.toggle("active", k===which);
+      views[k].classList.toggle("hidden", k!==which);
+    }
+  }
+
+  // ====== AUTH ======
+  let currentUser = null; // { email, id }
+  let currentUser = null;
+  const PENDING_KEY = "nu_carpool_pending_action";
+
+  function setAuthUI(){
+    const chip = $("auth_chip");
+    const btn = $("auth_btn");
+
+    if(currentUser?.email){
+      chip.textContent = currentUser.email;
+      chip.classList.remove("hidden");
+      btn.textContent = "Sign out";
+    }else{
+      chip.classList.add("hidden");
+      btn.textContent = "Sign in";
+    }
+  }
+
+  function openSignInModal(prefillEmail=""){
+    setText("signin_msg","");
+    setText("signin_err","");
+    if(prefillEmail) $("signin_email").value = prefillEmail;
+    $("signin_overlay").classList.add("show");
+  }
+
+  function closeSignInModal(){
+    $("signin_overlay").classList.remove("show");
+  }
+
+  async function sendMagicLink(email){
+    setText("signin_err","");
+    setText("signin_msg","Sending magic link...");
+    $("signin_send_btn").disabled = true;
+
+    const redirectTo = window.location.origin; // must be whitelisted in Supabase Auth settings
+    const redirectTo = window.location.origin;
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo }
+    });
+
+    if(error){
+      setText("signin_msg","");
+      setText("signin_err", error.message || "Failed to send link.");
+      $("signin_send_btn").disabled = false;
       return false;
     }
+
+    setText("signin_msg","Sent! Check your email and click the sign-in link.");
+    $("signin_send_btn").disabled = false;
     return true;
   }
 
-  async function signUp(email, password){
-    return await sb.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: window.location.origin }
-    });
+  async function refreshUser(){
+    const { data } = await sb.auth.getUser();
+    currentUser = data?.user ? { email: data.user.email, id: data.user.id } : null;
+    setAuthUI();
+    return currentUser;
   }
 
-  async function signIn(email, password){
-    return await sb.auth.signInWithPassword({ email, password });
+  function savePendingAction(action){
+    localStorage.setItem(PENDING_KEY, JSON.stringify({ ...action, ts: Date.now() }));
+  }
+  function loadPendingAction(){
+    try{
+      const raw = localStorage.getItem(PENDING_KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  }
+  function clearPendingAction(){
+    localStorage.removeItem(PENDING_KEY);
   }
 
-  async function signOut(){
-    return await sb.auth.signOut();
+  async function requireAuthOrQueue(action){
+    await refreshUser();
+    if(currentUser?.email) return true;
+
+    // queue action then open sign in
+    savePendingAction(action);
+    openSignInModal(action?.emailHint || "");
+    return false;
   }
 
-  function renderAuthUI(user){
-    setText("auth_err","");
-    setText("auth_msg","");
+  async function maybeResumePendingAction(){
+    await refreshUser();
+    if(!currentUser?.email) return;
 
-    if(user){
-      setText("auth_state", user.email);
-      $("auth_forms").style.display = "none";
-      $("auth_actions").style.display = "block";
-      setText("post_login_hint", "Logged in as " + user.email);
-      $("post_btn").disabled = false;
-      $("find_btn").disabled = false;
-      $("my_btn").disabled = false;
-    }else{
-      setText("auth_state", "Not logged in");
-      $("auth_forms").style.display = "block";
-      $("auth_actions").style.display = "none";
-      setText("post_login_hint", "Please log in first to post.");
-      $("post_btn").disabled = true;
-      $("find_btn").disabled = true;
-      $("my_btn").disabled = true;
-      $("results").innerHTML = "";
-      $("my_rides").innerHTML = "";
-      setText("find_msg","");
-      setText("my_msg","");
-    }
-  }
+    const pending = loadPendingAction();
+    if(!pending) return;
 
-  // ---- POST ----
-  async function postRide(){
-    setText("post_err","");
-    setText("post_msg","Posting...");
-    $("post_btn").disabled = true;
-
-    const user = await getUser();
-    if(!requireLogin(user)){
-      setText("post_msg","");
-      $("post_btn").disabled = false;
+    // avoid super old actions
+    if(pending.ts && (Date.now() - pending.ts) > 15 * 60 * 1000){
+      clearPendingAction();
       return;
     }
 
-    const owner_id = user.id;
-    const owner_email = normEmail(user.email);
+    clearPendingAction();
+    // resume
+    if(pending.type === "POST"){
+      await doPostRide(pending.payload);
+    }else if(pending.type === "JOIN"){
+      await doJoinRide(pending.payload.rideId, null, true);
+    }else if(pending.type === "CANCEL"){
+      await doCancelJoin(pending.payload.rideId, null, true);
+    }else if(pending.type === "LOAD_MY"){
+      activateTab("my");
+      await loadMyRides();
+    }
+  }
 
+  // ====== DATA OPS ======
+  async function getSeatsFilledMap(rideIds){
+    let countsMap = {};
+    if(!rideIds.length) return countsMap;
+    const { data: parts, error } = await sb.from("ride_participants").select("ride_id").in("ride_id", rideIds);
+    if(error) return countsMap;
+    for(const p of (parts||[])) countsMap[p.ride_id] = (countsMap[p.ride_id]||0) + 1;
+    return countsMap;
+  }
+
+  async function getMyJoinedIds(email){
+    const { data: joins, error } = await sb.from("ride_participants").select("ride_id").eq("user_email", email);
+    if(error) return [];
+    return [...new Set((joins||[]).map(j=>j.ride_id))];
+  }
+
+  // ====== POST ======
+  async function postRideClick(){
+    setText("post_err","");
+    setText("post_msg","");
+
+    const payload = collectPostPayload();
+    if(!payload) return;
+
+    const ok = await requireAuthOrQueue({ type:"POST", payload, emailHint: payload.owner_email });
+    if(!ok) return;
+
+    await doPostRide(payload);
+  }
+
+  function collectPostPayload(){
     const direction = $("post_direction").value;
     const airport = $("post_airport").value;
     const ride_date_iso = $("post_date").value;
-
     const from_time = $("post_from").value;
     const to_time = $("post_to").value;
     const max_seats = parseInt($("post_max_seats").value,10);
     const contact = $("post_contact").value.trim();
 
-    if(!owner_email || !isNU(owner_email)) { fail("Please use your Northwestern email."); return; }
-    if(!ride_date_iso) { fail("Please select a date."); return; }
-    if(!from_time || !to_time) { fail("Please fill both From and To times."); return; }
-    if(timeToMinutes(from_time) > timeToMinutes(to_time)) { fail("From time must be earlier than To time."); return; }
-    if(!contact) { fail("Please provide contact info."); return; }
+    const owner_email = normEmail(currentUser?.email || ""); // once signed in
+    const owner_email = normEmail(currentUser?.email || "");
+    if(!ride_date_iso){ setText("post_err","Please select a date."); return null; }
+    if(!from_time || !to_time){ setText("post_err","Please fill both From and To times."); return null; }
+    if(timeToMinutes(from_time) > timeToMinutes(to_time)){ setText("post_err","From time must be earlier than To time."); return null; }
+    if(!contact){ setText("post_err","Please provide contact info."); return null; }
 
-    const ride = {
-      owner_id,
-      r_email: owner_email,
-      direction,
-      airport,
+    return {
+      owner_email, direction, airport,
       ride_date: ride_date_iso,
-      from_time,
-      to_time,
+      from_time, to_time,
       max_seats,
       status: "open",
       note: null,
       contact
     };
+  }
 
-    const { data, error } = await sb.from("rides").insert([ride]).select().single();
-    if(error){ fail("Submit failed:\n" + (error.message || JSON.stringify(error))); return; }
+  async function doPostRide(payload){
+    setText("post_err","");
+    setText("post_msg","Posting...");
+    $("post_btn").disabled = true;
 
-    // add owner as participant
-    const { error: e2 } = await sb.from("ride_participants").insert([{
-      ride_id: data.id,
-      user_id: owner_id,
-      user_email: owner_email
-    }]);
-    if(e2){
-      setText("post_msg","Posted, but failed to add you as participant:\n" + (e2.message || JSON.stringify(e2)));
+    // Ensure email now that we're signed in
+    await refreshUser();
+    payload.owner_email = normEmail(currentUser?.email || "");
+    if(!payload.owner_email || !isNU(payload.owner_email)){
+      setText("post_msg","");
+      setText("post_err","Please sign in with your Northwestern email.");
       $("post_btn").disabled = false;
       return;
     }
 
+    const { data, error } = await sb.from("rides").insert([payload]).select().single();
+    if(error){
+      setText("post_msg","");
+      setText("post_err","Submit failed:\n" + (error.message || JSON.stringify(error)));
+      $("post_btn").disabled = false;
+      return;
+    }
+
+    // owner takes first seat
+    await sb.from("ride_participants").insert([{ ride_id: data.id, user_email: payload.owner_email }]);
+
     setText("post_msg","Posted! Your ride is now open.");
     $("post_btn").disabled = false;
-    return;
 
-    function fail(msg){
-      setText("post_msg","");
-      setText("post_err", msg);
-      $("post_btn").disabled = false;
-    }
+    // Optionally refresh find results if user is on find tab
   }
 
-  // ---- SEARCH ----
+  // ====== FIND ======
   async function searchRides(){
     setText("find_err","");
     setText("find_msg","Searching...");
     $("find_btn").disabled = true;
 
-    const user = await getUser();
-    if(!requireLogin(user)){
+    const direction = $("find_direction").value;
+    const airport = $("find_airport").value;
+    const ride_date_iso = $("find_date").value;
+    const t = $("find_time").value; // optional, may be ""
+    const t = $("find_time").value;
+
+    if(!ride_date_iso){
       setText("find_msg","");
+      setText("find_err","Please select a date.");
       $("find_btn").disabled = false;
       return;
     }
 
-    const direction = $("find_direction").value;
-    const airport = $("find_airport").value;
-    const ride_date_iso = $("find_date").value;
-    const t = $("find_time").value;
-
-    if(!ride_date_iso){ fail("Please select a date."); return; }
-    if(!t){ fail("Please choose a time."); return; }
-
+    // Show all rides for day (open + full so user can see, but can only join open if seats available)
     let q = sb.from("rides")
       .select("*")
-      .eq("status","open")
       .eq("ride_date", ride_date_iso)
       .eq("direction", direction)
-      .eq("airport", airport);
+      .eq("airport", airport)
+      .in("status", ["open","full"]);
 
     const { data: rides, error } = await q.order("created_at", { ascending:false });
-    if(error){ fail("Search failed:\n" + (error.message || JSON.stringify(error))); return; }
-
-    const tMin = timeToMinutes(t);
-    const PAD = 30;
-
-    const filtered = (rides||[]).filter(r => {
-      const fromMin = timeToMinutes(r.from_time) - PAD;
-      const toMin = timeToMinutes(r.to_time) + PAD;
-      return fromMin <= tMin && tMin <= toMin;
-    });
-
-    const rideIds = filtered.map(r=>r.id);
-    let countsMap = {};
-    if(rideIds.length){
-      const { data: parts } = await sb.from("ride_participants").select("ride_id").in("ride_id", rideIds);
-      for(const p of (parts||[])) countsMap[p.ride_id] = (countsMap[p.ride_id]||0) + 1;
+    if(error){
+      setText("find_msg","");
+      setText("find_err","Search failed:\n" + (error.message || JSON.stringify(error)));
+      $("find_btn").disabled = false;
+      return;
     }
 
-    const enriched = filtered.map(r=>{
+    const list = rides || [];
+    const rideIds = list.map(r=>r.id);
+    const countsMap = await getSeatsFilledMap(rideIds);
+
+    await refreshUser();
+    const myEmail = normEmail(currentUser?.email || "");
+    const myJoined = myEmail ? await getMyJoinedIds(myEmail) : [];
+
+    const tMin = t ? timeToMinutes(t) : null;
+
+    const enriched = list.map(r=>{
       const filled = countsMap[r.id] || 0;
       const mid = windowMidMinutes(r.from_time, r.to_time);
-      const dist = Math.abs(mid - tMin);
-      return { ...r, seats_filled: filled, dist };
-    }).sort((a,b)=> a.dist - b.dist);
+      const dist = (tMin===null) ? null : Math.abs(mid - tMin);
+      const alreadyJoined = myJoined.includes(r.id);
+      const isOwner = myEmail && normEmail(r.owner_email) === myEmail;
+      return { ...r, seats_filled: filled, dist, alreadyJoined, isOwner };
+    });
 
-    renderResults(enriched, user);
-    setText("find_msg", enriched.length ? `Found ${enriched.length} ride(s).` : "No matching rides.");
-    done();
+    // Sorting: if time chosen, sort by distance, else sort by earliest from_time
+    enriched.sort((a,b)=>{
+      if(tMin!==null){
+        return (a.dist ?? 0) - (b.dist ?? 0);
+      }
+      // default: earliest start
+      return timeToMinutes(a.from_time) - timeToMinutes(b.from_time);
+    });
 
-    function fail(msg){ setText("find_msg",""); setText("find_err", msg); done(); }
-    function done(){ $("find_btn").disabled = false; }
+    renderResults(enriched);
+    setText("find_msg", enriched.length ? `Found ${enriched.length} ride(s).` : "No rides for this day.");
+    $("find_btn").disabled = false;
   }
 
-  function renderResults(rides, user){
+  function renderResults(rides){
     const container = $("results");
     container.innerHTML = "";
 
     for(const r of rides){
       const filled = r.seats_filled || 0;
       const max = r.max_seats;
+      const fullNow = filled >= max || r.status === "full";
+      const joined = !!r.alreadyJoined;
 
       const div = document.createElement("div");
       div.className = "ride";
+
+      const joinBtnHtml = joined
+        ? `<button data-cancel="${r.id}" class="danger">Cancel Join</button>`
+        : `<button data-join="${r.id}" ${fullNow ? "disabled" : ""}>Join Ride</button>`;
+
+      const ownerNote = r.isOwner ? `<span class="pill">YOUR POST</span>` : "";
+
       div.innerHTML = `
         <div class="row">
+          ${ownerNote}
           <span class="pill">${escapeHtml(r.direction)}</span>
           <span class="pill">${escapeHtml(r.airport)}</span>
           <span class="pill">${escapeHtml(isoToMDY(r.ride_date))}</span>
+          ${fullNow ? `<span class="pill">FULL</span>` : `<span class="pill">OPEN</span>`}
         </div>
 
         <div class="leave-big">
@@ -576,10 +885,9 @@
 
         <div class="big-row"><strong>Seats:</strong> ${filled}/${max} filled</div>
         <div class="big-row"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
-        <div class="muted">Posted by: ${escapeHtml(r.r_email || "")}</div>
 
-        <div class="row" style="margin-top:10px;">
-          <button data-join="${r.id}" ${filled >= max ? "disabled" : ""}>Join Ride</button>
+        <div class="row" style="margin-top:12px;">
+          ${joinBtnHtml}
         </div>
       `;
       container.appendChild(div);
@@ -588,113 +896,268 @@
     container.querySelectorAll("button[data-join]").forEach(btn=>{
       btn.addEventListener("click", async ()=>{
         const rideId = btn.getAttribute("data-join");
-        await joinRide(rideId, btn);
+        await joinRideClick(rideId, btn);
+      });
+    });
+
+    container.querySelectorAll("button[data-cancel]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const rideId = btn.getAttribute("data-cancel");
+        await cancelJoinClick(rideId, btn);
       });
     });
   }
 
-  async function joinRide(rideId, btn){
-    const user = await getUser();
-    if(!requireLogin(user)) return;
+  // ====== JOIN / CANCEL ======
+  async function joinRideClick(rideId, btn){
+    // require sign-in (Level 3)
+    const ok = await requireAuthOrQueue({ type:"JOIN", payload:{ rideId } });
+    if(!ok) return;
 
-    const email = normEmail(user.email);
-    const user_id = user.id;
+    await doJoinRide(rideId, btn, false);
+  }
 
-    btn.disabled = true;
-    btn.textContent = "Joining...";
-
-    const { error: e1 } = await sb.from("ride_participants").insert([{
-      ride_id: rideId,
-      user_id,
-      user_email: email
-    }]);
-
-    if(e1){
-      alert(e1.message || "Join failed.");
-      btn.disabled = false;
-      btn.textContent = "Join Ride";
+  async function doJoinRide(rideId, btn, fromResume){
+    await refreshUser();
+    const email = normEmail(currentUser?.email || "");
+    if(!email || !isNU(email)){
+      alert("Please sign in with your Northwestern email.");
       return;
     }
 
-    const { data: ride } = await sb.from("rides").select("max_seats").eq("id", rideId).single();
+    if(btn){
+      btn.disabled = true;
+      btn.textContent = "Joining...";
+    }
+
+    // Prevent duplicate join (client-side quick check)
+    const { data: existing } = await sb
+      .from("ride_participants")
+      .select("id")
+      .eq("ride_id", rideId)
+      .eq("user_email", email)
+      .maybeSingle();
+
+    if(existing){
+      // already joined
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = "Cancel Join";
+      }
+      await searchRides();
+      showJoinModalAfterJoin(rideId, email, true);
+      await showJoinModalAfterJoin(rideId, email);
+      return;
+    }
+
+    const { error: e1 } = await sb.from("ride_participants").insert([{ ride_id: rideId, user_email: email }]);
+    if(e1){
+      alert(e1.message || "Join failed.");
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = "Join Ride";
+      }
+      return;
+    }
+
+    // Update ride status if full
+    const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
     const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
     const filled = (parts||[]).length;
 
     if(ride && filled >= ride.max_seats){
       await sb.from("rides").update({ status: "full" }).eq("id", rideId);
+    }else{
+      // ensure open
+      await sb.from("rides").update({ status: "open" }).eq("id", rideId);
     }
 
-    alert("Joined!");
+    // refresh UI + modal
     await searchRides();
+    showJoinModal(ride, filled, email);
+
+    // auto switch to My Rides? (You asked for Go to My Rides button; we’ll keep user in Find unless they tap.)
+    // If you want auto-switch, tell me and I’ll change it.
+  }
+
+  async function cancelJoinClick(rideId, btn){
+    const ok = await requireAuthOrQueue({ type:"CANCEL", payload:{ rideId } });
+    if(!ok) return;
+
+    await doCancelJoin(rideId, btn, false);
+  }
+
+  async function doCancelJoin(rideId, btn, fromResume){
+    await refreshUser();
+    const email = normEmail(currentUser?.email || "");
+    if(!email || !isNU(email)){
+      alert("Please sign in with your Northwestern email.");
+      return;
+    }
+
+    if(!confirm("Cancel your join for this ride?")) return;
+
+    if(btn){
+      btn.disabled = true;
+      btn.textContent = "Cancelling...";
+    }
+
+    const { error } = await sb
+      .from("ride_participants")
+      .delete()
+      .eq("ride_id", rideId)
+      .eq("user_email", email);
+
+    if(error){
+      alert(error.message || "Cancel failed.");
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = "Cancel Join";
+      }
+      return;
+    }
+
+    // If ride was full, may become open again
+    const { data: ride } = await sb.from("rides").select("max_seats,status").eq("id", rideId).single();
+    const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
+    const filled = (parts||[]).length;
+
+    if(ride && filled < ride.max_seats){
+      await sb.from("rides").update({ status: "open" }).eq("id", rideId);
+    }
+
+    // Refresh current views
+    // If on Find tab and there are results, refresh search
+    await searchRides().catch(()=>{});
+    // If on My tab, refresh too
+    if(!$("view_my").classList.contains("hidden")){
+      await loadMyRides();
+    }
+  }
+
+  // ====== JOIN MODAL ======
+  function openJoinModal(){
+    $("join_overlay").classList.add("show");
+  }
+  function closeJoinModal(){
+    $("join_overlay").classList.remove("show");
+  }
+  function openJoinModal(){ $("join_overlay").classList.add("show"); }
+  function closeJoinModal(){ $("join_overlay").classList.remove("show"); }
+
+  function makeMessageTemplate(ride, myEmail){
+    const dateStr = isoToMDY(ride.ride_date);
+    const windowStr = `${formatTimeAMPM(ride.from_time)}–${formatTimeAMPM(ride.to_time)}`;
+    const dir = ride.direction;
+    const airport = ride.airport;
+
+    return `Hi! I just joined your carpool on ${dateStr} (${dir}, ${airport}). My leave window is ${windowStr}. Where should we meet, and what time should we confirm? Thanks!`;
+  }
+
+  function showJoinModal(ride, filled, myEmail){
+    if(!ride) return;
+    setText("join_title","You’ve joined!");
+    setText("join_summary", `Ride saved to My Rides.\nSeats now: ${filled}/${ride.max_seats}\nDate: ${isoToMDY(ride.ride_date)}\nWindow: ${formatTimeAMPM(ride.from_time)} – ${formatTimeAMPM(ride.to_time)}`);
+    $("join_contact").value = ride.contact || "";
+    $("join_message").value = makeMessageTemplate(ride, myEmail);
+    openJoinModal();
+  }
+
+  async function showJoinModalAfterJoin(rideId, myEmail, already){
+  async function showJoinModalAfterJoin(rideId, myEmail){
+    const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
+    const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
+    const filled = (parts||[]).length;
+    showJoinModal(ride, filled, myEmail);
+  }
+
+  // ====== MY RIDES ======
+  async function loadMyRidesClick(){
+    const ok = await requireAuthOrQueue({ type:"LOAD_MY", payload:{} });
+    if(!ok) return;
+
+    activateTab("my");
+    await loadMyRides();
   }
 
   async function loadMyRides(){
     setText("my_err","");
     setText("my_msg","Loading...");
-    $("my_btn").disabled = true;
+    $("my_refresh_btn").disabled = true;
 
-    const user = await getUser();
-    if(!requireLogin(user)){
-      fail("Please log in first.");
+    await refreshUser();
+    const email = normEmail(currentUser?.email || "");
+    if(!email || !isNU(email)){
+      setText("my_msg","");
+      setText("my_err","Please sign in with your Northwestern email.");
+      $("my_refresh_btn").disabled = false;
       return;
     }
 
-    const email = normEmail(user.email);
-    const user_id = user.id;
-
     const { data: posted, error: e1 } = await sb.from("rides")
       .select("*")
-      .eq("owner_id", user_id)
+      .eq("owner_email", email)
       .order("created_at", { ascending:false });
-    if(e1){ fail(e1.message || "Failed to load posted rides."); return; }
 
-    const { data: joins, error: e2 } = await sb.from("ride_participants")
-      .select("ride_id")
-      .eq("user_id", user_id);
-    if(e2){ fail(e2.message || "Failed to load joins."); return; }
+    if(e1){
+      setText("my_msg","");
+      setText("my_err", e1.message || "Failed to load posted rides.");
+      $("my_refresh_btn").disabled = false;
+      return;
+    }
 
-    const joinedIds = [...new Set((joins||[]).map(j=>j.ride_id))];
+    const joinedIds = await getMyJoinedIds(email);
     let joined = [];
     if(joinedIds.length){
-      const { data: jr } = await sb.from("rides")
+      const { data: jr, error: e2 } = await sb.from("rides")
         .select("*")
         .in("id", joinedIds)
         .order("created_at", { ascending:false });
+      if(!e2) joined = jr || [];
+      const { data: jr } = await sb.from("rides").select("*").in("id", joinedIds).order("created_at", { ascending:false });
       joined = jr || [];
     }
 
     const allIds = [...new Set([...(posted||[]).map(r=>r.id), ...(joined||[]).map(r=>r.id)])];
-    let countsMap = {};
-    if(allIds.length){
-      const { data: parts } = await sb.from("ride_participants")
-        .select("ride_id")
-        .in("ride_id", allIds);
-      for(const p of (parts||[])) countsMap[p.ride_id] = (countsMap[p.ride_id]||0) + 1;
-    }
+    const countsMap = await getSeatsFilledMap(allIds);
 
-    renderMyRides(posted||[], joined||[], countsMap);
+    renderMyRides(posted||[], joined||[], countsMap, email);
     setText("my_msg","Loaded.");
-    done();
-
-    function fail(msg){ setText("my_msg",""); setText("my_err", msg); done(); }
-    function done(){ $("my_btn").disabled = false; }
+    $("my_refresh_btn").disabled = false;
   }
 
-  function renderMyRides(posted, joined, countsMap){
+  function renderMyRides(posted, joined, countsMap, myEmail){
     const container = $("my_rides");
     container.innerHTML = "";
 
+    const sectionTitle = (txt) => {
+      const d = document.createElement("div");
+      d.className = "muted";
+      d.style.fontWeight = "900";
+      d.style.marginTop = "8px";
+      d.textContent = txt;
+      return d;
+    };
+
     const makeCard = (r, tag) => {
       const filled = countsMap[r.id] || 0;
+      const isOwner = normEmail(r.owner_email) === myEmail;
+      const joinedByMe = true; // because in My Rides
+      const canCancel = !isOwner; // don't allow owner to "cancel join" (would remove their own seat)
+      const canCancel = !isOwner;
+      const fullNow = filled >= r.max_seats || r.status === "full";
+
       const div = document.createElement("div");
       div.className = "ride";
+
       div.innerHTML = `
         <div class="row">
           <span class="pill">${escapeHtml(tag)}</span>
-          <span class="pill">${escapeHtml(r.status)}</span>
+          ${isOwner ? `<span class="pill">HOST</span>` : `<span class="pill">RIDER</span>`}
           <span class="pill">${escapeHtml(r.direction)}</span>
           <span class="pill">${escapeHtml(r.airport)}</span>
           <span class="pill">${escapeHtml(isoToMDY(r.ride_date))}</span>
+          ${fullNow ? `<span class="pill">FULL</span>` : `<span class="pill">OPEN</span>`}
         </div>
 
         <div class="leave-big">
@@ -704,46 +1167,110 @@
 
         <div class="big-row"><strong>Seats:</strong> ${filled}/${r.max_seats} filled</div>
         <div class="big-row"><strong>Contact:</strong> ${escapeHtml(r.contact)}</div>
-        <div class="muted">Posted by: ${escapeHtml(r.r_email || "")}</div>
+
+        ${canCancel ? `
+          <div class="row" style="margin-top:12px;">
+            <button class="danger" data-cancel="${r.id}">Cancel Join</button>
+          </div>
+        ` : `
+          <div class="hint" style="margin-top:10px;">You are the host of this ride. (Cancel-ride feature can be added later.)</div>
+        `}
       `;
       return div;
     };
 
-    const title1 = document.createElement("div");
-    title1.className = "muted";
-    title1.textContent = "My Posted Rides";
-    container.appendChild(title1);
-
+    container.appendChild(sectionTitle("My Posted Rides"));
     if(!posted.length){
       const d = document.createElement("div"); d.className="muted"; d.textContent="(none)"; container.appendChild(d);
     } else {
       posted.forEach(r=>container.appendChild(makeCard(r,"POSTED")));
     }
 
-    const hr = document.createElement("div"); hr.className="hr"; container.appendChild(hr);
+    container.appendChild(document.createElement("div")).className = "hr";
 
-    const title2 = document.createElement("div");
-    title2.className = "muted";
-    title2.textContent = "My Joined Rides";
-    container.appendChild(title2);
-
+    container.appendChild(sectionTitle("My Joined Rides"));
     const joinedOnly = joined.filter(r=> !posted.some(p=>p.id===r.id));
     if(!joinedOnly.length){
       const d = document.createElement("div"); d.className="muted"; d.textContent="(none)"; container.appendChild(d);
     } else {
       joinedOnly.forEach(r=>container.appendChild(makeCard(r,"JOINED")));
     }
+
+    container.querySelectorAll("button[data-cancel]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const rideId = btn.getAttribute("data-cancel");
+        await cancelJoinClick(rideId, btn);
+      });
+    });
   }
 
+  // ====== INIT ======
   document.addEventListener("DOMContentLoaded", async ()=>{
-    $("post_btn").addEventListener("click", postRide);
+    // Tabs
+    $("tab_post").addEventListener("click", ()=> activateTab("post"));
+    $("tab_find").addEventListener("click", ()=> activateTab("find"));
+    $("tab_my").addEventListener("click", ()=> loadMyRidesClick());
+
+    // Buttons
+    $("post_btn").addEventListener("click", postRideClick);
     $("find_btn").addEventListener("click", searchRides);
-    $("my_btn").addEventListener("click", loadMyRides);
+    $("my_refresh_btn").addEventListener("click", loadMyRides);
 
-    buildTimeOptions($("find_time"), "14:30");
-    buildTimeOptions($("post_from"), "14:00");
-    buildTimeOptions($("post_to"), "15:00");
+    // Auth button
+    $("auth_btn").addEventListener("click", async ()=>{
+      await refreshUser();
+      if(currentUser?.email){
+        await sb.auth.signOut();
+        currentUser = null;
+        setAuthUI();
+        // If user is on My tab, show message
+        if(!$("view_my").classList.contains("hidden")){
+          setText("my_msg","");
+          setText("my_err","Signed out.");
+          $("my_rides").innerHTML = "";
+        }
+      }else{
+        openSignInModal("");
+      }
+    });
 
+    // Sign-in modal actions
+    $("signin_close").addEventListener("click", closeSignInModal);
+    $("signin_overlay").addEventListener("click", (e)=>{
+      if(e.target === $("signin_overlay")) closeSignInModal();
+    });
+    $("signin_send_btn").addEventListener("click", async ()=>{
+      const email = normEmail($("signin_email").value);
+      if(!email || !isNU(email)){
+        setText("signin_err","Please enter a Northwestern email (@u.northwestern.edu).");
+        return;
+      }
+      await sendMagicLink(email);
+    });
+
+    // Join modal actions
+    $("join_close").addEventListener("click", closeJoinModal);
+    $("close_join_btn").addEventListener("click", closeJoinModal);
+    $("join_overlay").addEventListener("click", (e)=>{
+      if(e.target === $("join_overlay")) closeJoinModal();
+    });
+    $("copy_contact_btn").addEventListener("click", async ()=>{
+      const ok = await copyText($("join_contact").value || "");
+      $("copy_contact_btn").textContent = ok ? "Copied!" : "Copy failed";
+      setTimeout(()=> $("copy_contact_btn").textContent = "Copy contact", 900);
+    });
+    $("copy_message_btn").addEventListener("click", async ()=>{
+      const ok = await copyText($("join_message").value || "");
+      $("copy_message_btn").textContent = ok ? "Copied!" : "Copy failed";
+      setTimeout(()=> $("copy_message_btn").textContent = "Copy message", 900);
+    });
+    $("go_my_btn").addEventListener("click", async ()=>{
+      closeJoinModal();
+      activateTab("my");
+      await loadMyRides();
+    });
+
+    // Date defaults
     const todayIso = new Date().toISOString().slice(0,10);
     $("find_date").value = todayIso;
     $("post_date").value = todayIso;
@@ -753,50 +1280,27 @@
     $("find_date").addEventListener("change", ()=> $("find_date_display").textContent = isoToMDY($("find_date").value));
     $("post_date").addEventListener("change", ()=> $("post_date_display").textContent = isoToMDY($("post_date").value));
 
-    // Auth buttons
-    $("signup_btn").addEventListener("click", async () => {
-      setText("auth_err","");
-      setText("auth_msg","Signing up...");
-      const email = normEmail($("auth_email").value);
-      const pw = $("auth_password").value;
+    // Time dropdowns
+    buildTimeOptions($("post_from"), "14:00", false);
+    buildTimeOptions($("post_to"), "15:00", false);
+    buildTimeOptions($("find_time"), "", true); // include Anytime
+    buildTimeOptions($("find_time"), "", true);
 
-      if(!email || !isNU(email)){ setText("auth_msg",""); setText("auth_err","NU email only."); return; }
-      if(!pw || pw.length < 6){ setText("auth_msg",""); setText("auth_err","Password must be at least 6 characters."); return; }
-
-      const { error } = await signUp(email, pw);
-      if(error){ setText("auth_msg",""); setText("auth_err", error.message); return; }
-
-      setText("auth_msg","Check your email to verify your account, then log in.");
+    // Auth state listener
+    sb.auth.onAuthStateChange(async (event, session)=>{
+    sb.auth.onAuthStateChange(async ()=>{
+      await refreshUser();
+      if(currentUser?.email){
+        closeSignInModal();
+      }
     });
 
-    $("login_btn").addEventListener("click", async () => {
-      setText("auth_err","");
-      setText("auth_msg","Logging in...");
-      const email = normEmail($("auth_email").value);
-      const pw = $("auth_password").value;
+    // Initial auth refresh + resume
+    await refreshUser();
+    setAuthUI();
 
-      if(!email || !isNU(email)){ setText("auth_msg",""); setText("auth_err","NU email only."); return; }
-
-      const { error } = await signIn(email, pw);
-      if(error){ setText("auth_msg",""); setText("auth_err", error.message); return; }
-
-      setText("auth_msg","");
-      const u = await getUser();
-      renderAuthUI(u);
-    });
-
-    $("logout_btn").addEventListener("click", async () => {
-      await signOut();
-      renderAuthUI(null);
-    });
-
-    // initial auth state
-    const u = await getUser();
-    renderAuthUI(u);
-
-    sb.auth.onAuthStateChange(async (_event, session) => {
-      renderAuthUI(session?.user || null);
-    });
+    // If user came back from magic link, resume pending action
+    await maybeResumePendingAction();
   });
 </script>
 </body>
