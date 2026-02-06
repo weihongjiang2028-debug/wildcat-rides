@@ -422,37 +422,51 @@
 <div id="signin_overlay" class="overlay">
   <div class="modal">
     <button class="modalClose" id="signin_close">✕</button>
-    <div class="modalTitle">Sign in with your NU email</div>
 
-    <label for="signin_email" style="margin-top:8px;">NU Email</label>
-    <input id="signin_email" placeholder="name@u.northwestern.edu" />
+    <div class="modalTitle" id="signin_title">Sign in</div>
 
-    <label for="signin_password" style="margin-top:10px;">Password</label>
-<input id="signin_password" type="password" placeholder="At least 8 characters" />
+    <!-- SIGN IN VIEW -->
+    <div id="signin_view">
+      <label for="signin_email" style="margin-top:8px;">NU Email</label>
+      <input id="signin_email" placeholder="name@u.northwestern.edu" />
 
-<div class="modalActions">
-  <button id="signin_pw_btn" class="secondary" type="button">Sign in</button>
-  <button id="signup_pw_btn" type="button">Sign up</button>
-</div>
+      <label for="signin_password" style="margin-top:10px;">Password</label>
+      <input id="signin_password" type="password" placeholder="At least 8 characters" />
 
-<div class="hr"></div>
+      <!-- Big primary sign in button -->
+      <button id="signin_pw_btn" type="button">Sign in</button>
 
-<button id="signin_send_btn" class="secondary" type="button">Send magic link</button>
-<div id="signin_msg" class="muted"></div>
-<div id="signin_err" class="error"></div>
+      <!-- bottom row: forgot left, signup right -->
+      <div class="modalActions" style="margin-top:10px;">
+        <button id="forgot_pw_btn" class="secondary" type="button">Forgot password</button>
+        <button id="signup_pw_btn" class="secondary" type="button">Sign up</button>
+      </div>
 
-<div class="hint" style="margin-top:10px;">
-  Sign in options:
-  1) Password login, or
-  2) Magic link to your NU email.
-</div>
+      <div id="signin_msg" class="muted"></div>
+      <div id="signin_err" class="error"></div>
+    </div>
 
+    <!-- RESET PASSWORD VIEW (hidden by default) -->
+    <div id="reset_view" class="hidden">
+      <div class="hint" style="margin-top:6px;">
+        Set a new password for your account.
+      </div>
 
-    <div class="hint" style="margin-top:10px;">
-      We’ll email you a sign-in link. After you click it, you’ll return here automatically.
+      <label for="reset_pw1" style="margin-top:10px;">New password</label>
+      <input id="reset_pw1" type="password" placeholder="At least 8 characters" />
+
+      <label for="reset_pw2" style="margin-top:10px;">Confirm new password</label>
+      <input id="reset_pw2" type="password" placeholder="Type it again" />
+
+      <button id="reset_save_btn" type="button">Update password</button>
+      <button id="reset_back_btn" class="secondary" type="button">Back to sign in</button>
+
+      <div id="reset_msg" class="muted"></div>
+      <div id="reset_err" class="error"></div>
     </div>
   </div>
 </div>
+
 
 <!-- JOIN CONFIRMATION MODAL -->
 <div id="join_overlay" class="overlay">
@@ -570,6 +584,81 @@
   }
 
   // ====== AUTH ======
+
+  function showResetView(){
+  hide($("signin_view"));
+  show($("reset_view"));
+  setText("reset_msg","");
+  setText("reset_err","");
+  $("reset_pw1").value = "";
+  $("reset_pw2").value = "";
+}
+
+function showSignInView(){
+  show($("signin_view"));
+  hide($("reset_view"));
+  setText("signin_msg","");
+  setText("signin_err","");
+}
+async function sendPasswordRecovery(email){
+  setText("signin_err","");
+  setText("signin_msg","Sending recovery email...");
+  $("forgot_pw_btn").disabled = true;
+  $("signin_pw_btn").disabled = true;
+  $("signup_pw_btn").disabled = true;
+
+  try{
+    if(!email || !isNU(email)){
+      throw new Error("Please enter a Northwestern email (@u.northwestern.edu).");
+    }
+
+    const redirectTo = window.location.origin;
+
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    if(error) throw error;
+
+    setText("signin_msg","Recovery email sent. Check your inbox, then come back here.");
+    return true;
+  }catch(err){
+    setText("signin_msg","");
+    setText("signin_err", err.message || "Failed to send recovery email.");
+    return false;
+  }finally{
+    $("forgot_pw_btn").disabled = false;
+    $("signin_pw_btn").disabled = false;
+    $("signup_pw_btn").disabled = false;
+  }
+}
+async function updatePasswordFromRecovery(){
+  setText("reset_err","");
+  setText("reset_msg","Updating password...");
+  $("reset_save_btn").disabled = true;
+  $("reset_back_btn").disabled = true;
+
+  try{
+    const p1 = $("reset_pw1").value || "";
+    const p2 = $("reset_pw2").value || "";
+
+    if(p1.length < 8) throw new Error("Password must be at least 8 characters.");
+    if(p1 !== p2) throw new Error("Passwords do not match.");
+
+    const { error } = await sb.auth.updateUser({ password: p1 });
+    if(error) throw error;
+
+    setText("reset_msg","Password updated. Please sign in again.");
+    // 回到登录视图
+    showSignInView();
+    return true;
+  }catch(err){
+    setText("reset_msg","");
+    setText("reset_err", err.message || "Failed to update password.");
+    return false;
+  }finally{
+    $("reset_save_btn").disabled = false;
+    $("reset_back_btn").disabled = false;
+  }
+}
+
 function resetUIAfterSignOut(){
   // Close any modals
   closeSignInModal();
@@ -630,7 +719,6 @@ async function signUpWithPassword(email, password){
   setText("signin_msg","Creating account...");
   $("signup_pw_btn").disabled = true;
   $("signin_pw_btn").disabled = true;
-  $("signin_send_btn").disabled = true;
 
   try{
     if(!email || !isNU(email)){
@@ -642,7 +730,7 @@ async function signUpWithPassword(email, password){
 
     const redirectTo = window.location.origin;
 
-    const { data, error } = await sb.auth.signUp({
+    const { error } = await sb.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: redirectTo }
@@ -650,12 +738,7 @@ async function signUpWithPassword(email, password){
 
     if(error) throw error;
 
-    // Supabase 默认可能会要求邮箱确认
-    // 如果项目开了 email confirmations，会提示去邮箱验证
-    setText(
-      "signin_msg",
-      "Account created. If you see a confirmation email, please confirm it, then sign in."
-    );
+    setText("signin_msg","Account created. Now sign in with your password.");
     return true;
   }catch(err){
     setText("signin_msg","");
@@ -664,44 +747,46 @@ async function signUpWithPassword(email, password){
   }finally{
     $("signup_pw_btn").disabled = false;
     $("signin_pw_btn").disabled = false;
-    $("signin_send_btn").disabled = false;
   }
 }
 
-async function signInWithPassword(email, password){
+
+async function signUpWithPassword(email, password){
   setText("signin_err","");
-  setText("signin_msg","Signing in...");
+  setText("signin_msg","Creating account...");
   $("signup_pw_btn").disabled = true;
   $("signin_pw_btn").disabled = true;
-  $("signin_send_btn").disabled = true;
 
   try{
     if(!email || !isNU(email)){
       throw new Error("Please use your Northwestern email (@u.northwestern.edu).");
     }
-    if(!password){
-      throw new Error("Please enter your password.");
+    if(!password || password.length < 8){
+      throw new Error("Password must be at least 8 characters.");
     }
 
-    const { data, error } = await sb.auth.signInWithPassword({
+    const redirectTo = window.location.origin;
+
+    const { error } = await sb.auth.signUp({
       email,
-      password
+      password,
+      options: { emailRedirectTo: redirectTo }
     });
 
     if(error) throw error;
 
-    setText("signin_msg","Signed in.");
+    setText("signin_msg","Account created. Now sign in with your password.");
     return true;
   }catch(err){
     setText("signin_msg","");
-    setText("signin_err", err.message || "Sign in failed.");
+    setText("signin_err", err.message || "Sign up failed.");
     return false;
   }finally{
     $("signup_pw_btn").disabled = false;
     $("signin_pw_btn").disabled = false;
-    $("signin_send_btn").disabled = false;
   }
 }
+
 
 
   async function refreshUser(){
@@ -1422,14 +1507,7 @@ $("auth_btn").addEventListener("click", async ()=>{
     $("signin_overlay").addEventListener("click", (e)=>{
       if(e.target === $("signin_overlay")) closeSignInModal();
     });
-    $("signin_send_btn").addEventListener("click", async ()=>{
-      const email = normEmail($("signin_email").value);
-      if(!email || !isNU(email)){
-        setText("signin_err","Please enter a Northwestern email (@u.northwestern.edu).");
-        return;
-      }
-      await sendMagicLink(email);
-    });
+
     $("signup_pw_btn").addEventListener("click", async ()=>{
   const email = normEmail($("signin_email").value);
   const pw = $("signin_password").value || "";
@@ -1452,6 +1530,17 @@ $("signin_pw_btn").addEventListener("click", async ()=>{
   }
 });
 
+// Forgot password + reset password actions
+$("forgot_pw_btn").addEventListener("click", async ()=>{
+  const email = normEmail($("signin_email").value);
+  await sendPasswordRecovery(email);
+});
+
+$("reset_save_btn").addEventListener("click", updatePasswordFromRecovery);
+
+$("reset_back_btn").addEventListener("click", ()=>{
+  showSignInView();
+});
 
     // Join modal actions
     $("join_close").addEventListener("click", closeJoinModal);
@@ -1494,6 +1583,13 @@ $("signin_pw_btn").addEventListener("click", async ()=>{
 sb.auth.onAuthStateChange(async (event, session)=>{
   await refreshUser();
 
+  if(event === "PASSWORD_RECOVERY"){
+    // 用户点了邮箱里的 recover 链接回到网站时会触发
+    openSignInModal("");
+    showResetView();
+    return;
+  }
+
   if(event === "SIGNED_IN"){
     closeSignInModal();
     await maybeResumePendingAction();
@@ -1503,6 +1599,7 @@ sb.auth.onAuthStateChange(async (event, session)=>{
     resetUIAfterSignOut();
   }
 });
+
 
 
     // Initial auth refresh + resume
