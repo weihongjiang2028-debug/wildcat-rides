@@ -31,7 +31,6 @@
       gap:10px;
       max-width:980px;
       margin:0 auto;
-      flex-wrap:wrap; /* ✅ prevent mobile overlap */
     }
 
     .brandLeft{
@@ -260,14 +259,10 @@
     }
     .modalTitle{
       font-size:18px;
-      font-size:20px; /* ✅ slightly bigger */
       font-weight:950;
       margin:4px 0 10px;
       color:#111;
       text-align:center;
-    }
-    #join_title{
-      font-size:22px; /* ✅ join success title bigger */
     }
     .modalActions{
       display:flex;
@@ -293,15 +288,6 @@
     /* Slightly tighter on very small screens */
     @media (max-width:420px){
       .brandTitle{ font-size:18px; }
-      .brandRow{ align-items:flex-start; }
-      .brandLeft{ flex:1 1 auto; min-width:0; }
-      .brandTitle{ font-size:18px; white-space:normal; line-height:1.15; }
-      .authArea{
-        width:100%;
-        justify-content:flex-end;
-        margin-top:8px;
-      }
-      .chip{ max-width:70vw; }
       .tabBtn{ font-size:13px; padding:9px 8px; }
       .card-title{ font-size:24px; }
       input,select,textarea,button{ font-size:15px; }
@@ -484,21 +470,6 @@
   const sb = window.__nu_carpool_sb || (window.__nu_carpool_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
 
   // ====== HELPERS ======
-  /* ✅ Explicit auth persistence so closing a tab won't "log you out" (unless browser clears storage, e.g., iOS private mode) */
-  const sb = window.__nu_carpool_sb || (window.__nu_carpool_sb = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        flowType: "pkce",
-        storage: window.localStorage
-      }
-    }
-  ));
-
   const $ = (id) => document.getElementById(id);
   const setText = (id, t) => { const el=$(id); if(el) el.textContent = t||""; };
   const normEmail = (e) => (e||"").trim().toLowerCase();
@@ -583,7 +554,6 @@
 
   // ====== AUTH ======
   let currentUser = null; // { email, id }
-  let currentUser = null;
   const PENDING_KEY = "nu_carpool_pending_action";
 
   function setAuthUI(){
@@ -617,7 +587,6 @@
     $("signin_send_btn").disabled = true;
 
     const redirectTo = window.location.origin; // must be whitelisted in Supabase Auth settings
-    const redirectTo = window.location.origin;
     const { error } = await sb.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: redirectTo }
@@ -733,7 +702,6 @@
     const contact = $("post_contact").value.trim();
 
     const owner_email = normEmail(currentUser?.email || ""); // once signed in
-    const owner_email = normEmail(currentUser?.email || "");
     if(!ride_date_iso){ setText("post_err","Please select a date."); return null; }
     if(!from_time || !to_time){ setText("post_err","Please fill both From and To times."); return null; }
     if(timeToMinutes(from_time) > timeToMinutes(to_time)){ setText("post_err","From time must be earlier than To time."); return null; }
@@ -792,7 +760,6 @@
     const airport = $("find_airport").value;
     const ride_date_iso = $("find_date").value;
     const t = $("find_time").value; // optional, may be ""
-    const t = $("find_time").value;
 
     if(!ride_date_iso){
       setText("find_msg","");
@@ -946,7 +913,6 @@
       }
       await searchRides();
       showJoinModalAfterJoin(rideId, email, true);
-      await showJoinModalAfterJoin(rideId, email);
       return;
     }
 
@@ -1042,8 +1008,6 @@
   function closeJoinModal(){
     $("join_overlay").classList.remove("show");
   }
-  function openJoinModal(){ $("join_overlay").classList.add("show"); }
-  function closeJoinModal(){ $("join_overlay").classList.remove("show"); }
 
   function makeMessageTemplate(ride, myEmail){
     const dateStr = isoToMDY(ride.ride_date);
@@ -1064,7 +1028,6 @@
   }
 
   async function showJoinModalAfterJoin(rideId, myEmail, already){
-  async function showJoinModalAfterJoin(rideId, myEmail){
     const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
     const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
     const filled = (parts||[]).length;
@@ -1114,8 +1077,6 @@
         .in("id", joinedIds)
         .order("created_at", { ascending:false });
       if(!e2) joined = jr || [];
-      const { data: jr } = await sb.from("rides").select("*").in("id", joinedIds).order("created_at", { ascending:false });
-      joined = jr || [];
     }
 
     const allIds = [...new Set([...(posted||[]).map(r=>r.id), ...(joined||[]).map(r=>r.id)])];
@@ -1144,7 +1105,6 @@
       const isOwner = normEmail(r.owner_email) === myEmail;
       const joinedByMe = true; // because in My Rides
       const canCancel = !isOwner; // don't allow owner to "cancel join" (would remove their own seat)
-      const canCancel = !isOwner;
       const fullNow = filled >= r.max_seats || r.status === "full";
 
       const div = document.createElement("div");
@@ -1284,11 +1244,9 @@
     buildTimeOptions($("post_from"), "14:00", false);
     buildTimeOptions($("post_to"), "15:00", false);
     buildTimeOptions($("find_time"), "", true); // include Anytime
-    buildTimeOptions($("find_time"), "", true);
 
     // Auth state listener
     sb.auth.onAuthStateChange(async (event, session)=>{
-    sb.auth.onAuthStateChange(async ()=>{
       await refreshUser();
       if(currentUser?.email){
         closeSignInModal();
