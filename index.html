@@ -1349,14 +1349,29 @@ async function doCancelRideAsHost(rideId, btn, fromResume){
       joinedOnly.forEach(r=>container.appendChild(makeCard(r,"JOINED")));
     }
 
-   container.querySelectorAll("button[data-cancel-ride]").forEach(btn=>{
-  btn.addEventListener("click", async ()=>{
-    const rideId = btn.getAttribute("data-cancel-ride");
-    await cancelRideAsHostClick(rideId, btn);
-  });
-});
+   // Event delegation (bind once) so buttons always work after re-render
+if(!container.__boundClicks){
+  container.__boundClicks = true;
 
-  }
+  container.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button");
+    if(!btn) return;
+
+    // Cancel Join (rider)
+    const rideIdCancelJoin = btn.getAttribute("data-cancel");
+    if(rideIdCancelJoin){
+      await cancelJoinClick(rideIdCancelJoin, btn);
+      return;
+    }
+
+    // Cancel Ride (host)
+    const rideIdCancelRide = btn.getAttribute("data-cancel-ride");
+    if(rideIdCancelRide){
+      await cancelRideAsHostClick(rideIdCancelRide, btn);
+      return;
+    }
+  });
+}
 
   // ====== INIT ======
   document.addEventListener("DOMContentLoaded", async ()=>{
