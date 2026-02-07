@@ -143,6 +143,31 @@
   .chip{ max-width:220px; }
 }
 
+/* Auth placed near My Rides (above tabs) */
+.tabsAuth{
+  position:absolute;
+  right:0;
+  top:-38px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  z-index:60;
+}
+
+/* Make sure auth button is not full width */
+.authBtn{
+  width:auto;
+  margin-top:0;
+}
+.chip{
+  width:auto;
+}
+
+/* Mobile: hide chip, keep small button */
+@media (max-width:520px){
+  .tabsAuth{ top:-34px; }
+  .chip{ display:none; }
+}
 
     /* Tabs */
     .tabsWrap{
@@ -150,6 +175,7 @@
       margin:10px auto 0;
       display:flex;
       gap:8px;
+      position:relative;
     }
     .tabBtn{
       flex:1;
@@ -400,11 +426,6 @@
 <header>
   <!-- Top brand block -->
 <div class="brandTop">
-  <!-- Right-top auth -->
-  <div class="authRow">
-    <div id="auth_chip" class="chip hidden"></div>
-    <button id="auth_btn" class="authBtn">Sign in</button>
-  </div>
 
   <!-- Center title -->
   <div class="brandTitleRow">
@@ -438,10 +459,17 @@
 
   <!-- Tabs: Find, Post, My -->
   <div class="tabsWrap">
-    <button class="tabBtn active" id="tab_find">Find a Ride</button>
-    <button class="tabBtn" id="tab_post">Post a Ride</button>
-    <button class="tabBtn" id="tab_my">My Rides</button>
+  <div class="tabsAuth">
+    <div id="auth_chip" class="chip hidden"></div>
+    <button id="auth_btn" class="authBtn">Sign in</button>
   </div>
+
+  <button class="tabBtn active" id="tab_find">Find a Ride</button>
+  <button class="tabBtn" id="tab_post">Post a Ride</button>
+  <button class="tabBtn" id="tab_my">My Rides</button>
+</div>
+
+
 </header>
 
 
@@ -1182,25 +1210,25 @@ const myJoined = myEmail ? await getMyJoinedIds(myEmail) : [];
     const container = $("results");
     container.innerHTML = "";
 
-    for(const r of rides){
-      const filled = r.seats_filled || 0;
-      const max = r.max_seats;
-      const fullNow = filled >= max || r.status === "full";
-      const joined = !!r.alreadyJoined;
+for(const r of rides){
+  const filled = r.seats_filled || 0;
+  const max = r.max_seats;
+  const isFull = filled >= max;
+  const joined = !!r.alreadyJoined;
 
       const div = document.createElement("div");
       div.className = "ride";
 
       const joinBtnHtml = joined
         ? `<button data-cancel="${r.id}" class="danger">Cancel Join</button>`
-        : `<button data-join="${r.id}" ${fullNow ? "disabled" : ""}>Join Ride</button>`;
+        : `<button data-join="${r.id}" ${isFull ? "disabled" : ""}>Join Ride</button>`;
 
       const ownerNote = r.isOwner ? `<span class="pill">YOUR POST</span>` : "";
 
 const timeLine = `${formatTimeAMPM(r.from_time)}–${formatTimeAMPM(r.to_time)}`;
 const metaLine = `${isoToMDY(r.ride_date)} · ${r.direction} · ${r.airport}`;
-const statusText = fullNow ? "OPEN" : "FULL";
-
+const statusText = isFull ? "FULL" : "OPEN";
+  
 div.innerHTML = `
   <div class="rideTime">${escapeHtml(timeLine)}</div>
 
@@ -1563,15 +1591,15 @@ div.innerHTML = `
       const isOwner = normEmail(r.owner_email) === myEmail;
       const joinedByMe = true; // because in My Rides
       const canCancel = !isOwner; // don't allow owner to "cancel join" (would remove their own seat)
-      const fullNow = filled >= r.max_seats || r.status === "full";
+      const isFull = filled >= r.max_seats;
 
       const div = document.createElement("div");
       div.className = "ride";
 
 const timeLine = `${formatTimeAMPM(r.from_time)}–${formatTimeAMPM(r.to_time)}`;
 const metaLine = `${isoToMDY(r.ride_date)} · ${r.direction} · ${r.airport}`;
-const statusText = fullNow ? "FULL" : "OPEN";
-
+const statusText = isFull ? "FULL" : "OPEN";
+      
 div.innerHTML = `
   <div class="row" style="justify-content:space-between; gap:10px;">
     <div class="row" style="gap:8px;">
