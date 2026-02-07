@@ -98,6 +98,69 @@
       font-weight:800;
       cursor:pointer;
     }
+    /* New header layout */
+.brandTop{
+  max-width:980px;
+  margin:0 auto;
+  padding:10px 0 4px;
+}
+
+.brandTitleRow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.brandTitleBig{
+  margin:0;
+  font-size:22px;
+  font-weight:950;
+  letter-spacing:.2px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+.paw{
+  font-size:18px;
+  line-height:1;
+}
+
+.brandSubCenter{
+  text-align:center;
+  margin-top:6px;
+  font-size:13px;
+  font-weight:700;
+  opacity:.98;
+}
+
+.uberPill{
+  display:inline-block;
+  background:#fff;
+  color:#111;
+  padding:5px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12px;
+}
+
+.authRow{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+
+/* Make chip + auth button look clean on mobile */
+@media (max-width:520px){
+  .brandTitleBig{ font-size:20px; }
+  .tabsWrap{ gap:6px; }
+  .tabBtn{ font-size:13px; padding:10px 8px; }
+  .chip{ max-width:220px; }
+}
+
 
     /* Tabs */
     .tabsWrap{
@@ -298,36 +361,40 @@
 
 <body>
 <header>
-  <div class="brandRow">
-    <div class="brandLeft">
-      <svg class="logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="white"/>
-        <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="white"/>
-        <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="white"/>
-        <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="white"/>
-        <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="white"/>
-      </svg>
-      <h1 class="brandTitle">Northwestern Carpool</h1>
+  <!-- Top brand block -->
+  <div class="brandTop">
+    <div class="brandTitleRow">
+      <span class="paw">🐾</span>
+      <h1 class="brandTitleBig">Northwestern Carpool</h1>
+      <span class="paw">🐾</span>
     </div>
 
-    <div class="authArea">
+    <div class="brandSubCenter">Find a ride-mate.</div>
+
+    <div class="brandSubCenter">
+      <span class="uberPill">Split your airport Uber.</span>
+    </div>
+
+    <!-- Auth row -->
+    <div class="authRow">
       <div id="auth_chip" class="chip hidden"></div>
       <button id="auth_btn" class="authBtn">Sign in</button>
     </div>
   </div>
 
-  <div class="brandSub">Find a ride-mate. Split your airport Uber.</div>
-
+  <!-- Tabs: Find, Post, My -->
   <div class="tabsWrap">
-    <button class="tabBtn active" id="tab_post">Post a Ride</button>
-    <button class="tabBtn" id="tab_find">Find a Ride</button>
+    <button class="tabBtn active" id="tab_find">Find a Ride</button>
+    <button class="tabBtn" id="tab_post">Post a Ride</button>
     <button class="tabBtn" id="tab_my">My Rides</button>
   </div>
 </header>
 
+
 <main>
   <!-- POST -->
-  <section id="view_post" class="card">
+  <section id="view_post" class="card hidden">
+
     <div class="card-title">Post a Ride</div>
 
     <label for="post_direction">Direction</label>
@@ -373,7 +440,8 @@
   </section>
 
   <!-- FIND -->
-  <section id="view_find" class="card hidden">
+ <section id="view_find" class="card">
+
     <div class="card-title">Find a Ride</div>
 
     <label for="find_direction">Direction</label>
@@ -1000,12 +1068,21 @@ async function signInWithPassword(email, password){
     }
 
     // Show all rides for day (open + full so user can see, but can only join open if seats available)
-    let q = sb.from("rides")
-      .select("*")
-      .eq("ride_date", ride_date_iso)
-      .eq("direction", direction)
-      .eq("airport", airport)
-      .in("status", ["open","full"]);
+   // If signed in, hide rides that I posted myself
+await refreshUser();
+const myEmail = normEmail(currentUser?.email || "");
+
+let q = sb.from("rides")
+  .select("*")
+  .eq("ride_date", ride_date_iso)
+  .eq("direction", direction)
+  .eq("airport", airport)
+  .in("status", ["open","full"]);
+
+if(myEmail){
+  q = q.neq("owner_email", myEmail);
+}
+;
 
     const { data: rides, error } = await q.order("created_at", { ascending:false });
     if(error){
@@ -1019,9 +1096,8 @@ async function signInWithPassword(email, password){
     const rideIds = list.map(r=>r.id);
     const countsMap = await getSeatsFilledMap(rideIds);
 
-    await refreshUser();
-    const myEmail = normEmail(currentUser?.email || "");
-    const myJoined = myEmail ? await getMyJoinedIds(myEmail) : [];
+const myJoined = myEmail ? await getMyJoinedIds(myEmail) : [];
+
 
     const tMin = t ? timeToMinutes(t) : null;
 
