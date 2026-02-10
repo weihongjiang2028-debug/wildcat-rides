@@ -540,6 +540,32 @@ input[type="date"]{
     font-weight:950;
     margin-bottom:2px;
   }
+    /* Hide the X close on Ride Posted modal */
+#postdone_overlay .modalClose{
+  display:none !important;
+}
+/* Step blocks: title lower + bigger */
+#postdone_overlay .stepItem{
+  align-items:flex-start;  /* stop vertical “floating” */
+}
+
+#postdone_overlay .stepNum{
+  margin-top:10px;         /* push the number down into the box */
+}
+
+#postdone_overlay .stepText{
+  padding-top:6px;         /* push the text block down a bit */
+  font-size:13px;
+  font-weight:600;
+  line-height:1.35;
+}
+
+#postdone_overlay .stepText strong{
+  font-size:18px;          /* bigger title */
+  font-weight:950;
+  margin-bottom:3px;
+}
+
   </style>
 </head>
 
@@ -801,7 +827,7 @@ input[type="date"]{
     <div class="stepList">
       <div class="stepItem">
         <div class="stepNum">1</div>
-        <div class="stepText"><strong>Wait for a message</strong><br/>Other NU students will text you to join the ride.</div>
+        <div class="stepText"><strong>Wait for a message</strong><br/>Other NU students who have joined will text you.</div>
       </div>
 
       <div class="stepItem">
@@ -864,6 +890,21 @@ input[type="date"]{
     h = h % 12; if(h === 0) h = 12;
     return `${h}:${mStr} ${ampm}`;
   }
+// ====== DATE FILTER (hide old rides, keep 1-day buffer) ======
+const RIDE_BUFFER_DAYS = 1; // keep yesterday + today, hide earlier
+
+function isoLocalDate(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+function cutoffRideDateIso(){
+  const d = new Date();
+  d.setDate(d.getDate() - RIDE_BUFFER_DAYS);
+  return isoLocalDate(d); // local-safe YYYY-MM-DD
+}
 
   function buildTimeOptions(selectEl, defaultHHMM, includeAny=false){
     selectEl.innerHTML = "";
@@ -1707,10 +1748,12 @@ function closePostDoneModal(){
       return;
     }
 
-    const { data: posted, error: e1 } = await sb.from("rides")
-      .select("*")
-      .eq("owner_email", email)
-      .order("created_at", { ascending:false });
+const { data: posted, error: e1 } = await sb.from("rides")
+  .select("*")
+  .eq("owner_email", email)
+  .gte("ride_date", cutoffRideDateIso())
+  .order("created_at", { ascending:false });
+
 
     if(e1){
       setText("my_msg","");
@@ -1722,10 +1765,12 @@ function closePostDoneModal(){
     const joinedIds = await getMyJoinedIds(email);
     let joined = [];
     if(joinedIds.length){
-      const { data: jr, error: e2 } = await sb.from("rides")
-        .select("*")
-        .in("id", joinedIds)
-        .order("created_at", { ascending:false });
+     const { data: jr, error: e2 } = await sb.from("rides")
+  .select("*")
+  .in("id", joinedIds)
+  .gte("ride_date", cutoffRideDateIso())
+  .order("created_at", { ascending:false });
+
       if(!e2) joined = jr || [];
     }
 
