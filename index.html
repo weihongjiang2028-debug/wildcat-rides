@@ -30,7 +30,7 @@
 .brandTop{
   max-width:980px;
   margin:0 auto;
-  padding:10px 0 0px;
+  padding:10px 0 8px;
   position:relative; /* for right-top auth */
 }
 
@@ -114,14 +114,8 @@
 
 /* Mobile tweaks */
 @media (max-width:520px){
-  header{ padding:12px 12px 0px; }
- .brandTop{
-  max-width:980px;
-  margin:0 auto;
-  padding:10px 0 0px;   /* ✅ 底部 0 */
-  position:relative;
-}
-
+  header{ padding:12px 12px 10px; }
+  .brandTop{ padding:10px 0 10px; }
 
   .brandTitleBig{ font-size:22px; }
 
@@ -149,34 +143,31 @@
   .chip{ max-width:220px; }
 }
 
-/* Auth row sits UNDER the tagline (no overlap) */
-.authBelowTagline{
-  max-width:980px;
-  margin:10px auto 0;  
-  padding:0 14px;
+/* Auth placed near My Rides (above tabs) */
+.tabsAuth{
+  position:absolute;
+  right:0;
+  top:-38px;
   display:flex;
-  justify-content:flex-end;
   align-items:center;
   gap:8px;
+  z-index:60;
 }
 
-
-/* Keep button/chip compact */
-.authBelowTagline .chip,
-.authBelowTagline .authBtn{
+/* Make sure auth button is not full width */
+.authBtn{
+  width:auto;
+  margin-top:0;
+}
+.chip{
   width:auto;
 }
 
-/* Mobile: keep it neat */
+/* Mobile: hide chip, keep small button */
 @media (max-width:520px){
-  .authBelowTagline{
-    margin-top:10px;
-  }
-  .authBelowTagline .chip{
-    display:none;
-  }
+  .tabsAuth{ top:-34px; }
+  .chip{ display:none; }
 }
-
 
     /* Tabs */
     .tabsWrap{
@@ -244,7 +235,7 @@
       font-size:16px;
       background:#fff;
     }
-    input[type="date"]{
+input[type="date"]{
   max-width:100%;
   height:48px;
   line-height:24px;
@@ -257,7 +248,6 @@
     appearance:none;
   }
 }
-
     button{
       background:#4e2a84;
       color:#fff;
@@ -268,17 +258,6 @@
       padding:12px;
       border-radius:12px;
     }
-    /* ✅ Header auth button should NOT inherit global button margin */
-.authBelowTagline .authBtn{
-  margin-top:0 !important;
-  width:auto !important;
-  padding:6px 10px;
-  border-radius:999px;
-}
-.authBelowTagline .chip{
-  margin-top:0 !important;
-}
-
     button.secondary{
       background:#ece7f6;
       color:#4e2a84;
@@ -491,19 +470,16 @@
 
 
   <!-- Tabs: Find, Post, My -->
-<!-- Auth row BELOW tagline -->
-<div class="authBelowTagline">
-  <div id="auth_chip" class="chip hidden"></div>
-  <button id="auth_btn" class="authBtn">Sign in</button>
-</div>
+  <div class="tabsWrap">
+  <div class="tabsAuth">
+    <div id="auth_chip" class="chip hidden"></div>
+    <button id="auth_btn" class="authBtn">Sign in</button>
+  </div>
 
-<!-- Tabs: Find, Post, My -->
-<div class="tabsWrap">
   <button class="tabBtn active" id="tab_find">Find a Ride</button>
   <button class="tabBtn" id="tab_post">Post a Ride</button>
   <button class="tabBtn" id="tab_my">My Rides</button>
 </div>
-
 
 
 </header>
