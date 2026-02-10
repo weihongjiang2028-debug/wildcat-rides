@@ -422,6 +422,68 @@ input[type="date"]{
       min-height:96px;
       resize:vertical;
     }
+    /* ===== Post-success modal (Ride posted) ===== */
+.postNextSub{
+  text-align:center;
+  font-weight:900;
+  color:#333;
+  margin:0 0 10px;
+  font-size:14px;
+}
+
+.stepList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+}
+
+.stepItem{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  background:#f6f7fb;
+  border:1px solid #eee;
+  border-radius:12px;
+  padding:10px;
+}
+
+.stepNum{
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  background:#4e2a84;
+  color:#fff;
+  font-weight:950;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  margin-top:1px;
+}
+
+.stepText{
+  font-size:13px;
+  color:#222;
+  line-height:1.35;
+  font-weight:750;
+}
+
+.stepText strong{
+  font-weight:950;
+}
+
+.postDisclaimer{
+  margin-top:12px;
+  font-size:12.5px;
+  color:#666;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:12px;
+  padding:10px;
+}
+
 
     /* Slightly tighter on very small screens */
     @media (max-width:420px){
@@ -683,6 +745,41 @@ input[type="date"]{
     <div class="modalActions">
       <button id="copy_message_btn" class="secondary">Copy message</button>
       <button id="close_join_btn">Done</button>
+    </div>
+  </div>
+</div>
+<!-- POST SUCCESS MODAL -->
+<div id="postdone_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="postdone_close">✕</button>
+
+    <div class="modalTitle">🎉 Ride posted!</div>
+    <div class="postNextSub">What happens next</div>
+
+    <div class="stepList">
+      <div class="stepItem">
+        <div class="stepNum">1</div>
+        <div class="stepText"><strong>Wait for a message</strong><br/>Other NU students will text you to join the ride.</div>
+      </div>
+
+      <div class="stepItem">
+        <div class="stepNum">2</div>
+        <div class="stepText"><strong>Coordinate details</strong><br/>Confirm pickup time, location, and luggage.</div>
+      </div>
+
+      <div class="stepItem">
+        <div class="stepNum">3</div>
+        <div class="stepText"><strong>Book &amp; split</strong><br/>Book Uber/Lyft together and split the cost (Venmo, Zelle, or cash).</div>
+      </div>
+    </div>
+
+    <div class="postDisclaimer">
+      NUCarpool helps you connect — it doesn’t book rides or handle payments.
+    </div>
+
+    <div class="modalActions">
+      <button id="postdone_view_my" class="secondary" type="button">View My Rides</button>
+      <button id="postdone_got_it" type="button">Got it</button>
     </div>
   </div>
 </div>
@@ -1142,7 +1239,8 @@ async function signInWithPassword(email, password){
     // owner takes first seat
     await sb.from("ride_participants").insert([{ ride_id: data.id, user_email: payload.owner_email }]);
 
-    setText("post_msg","Posted! Your ride is now open.");
+    setText("post_msg","Posted! Your ride is now open.");openPostDoneModal();
+
     $("post_btn").disabled = false;
 
     // Optionally refresh find results if user is on find tab
@@ -1511,6 +1609,13 @@ div.innerHTML = `
   function closeJoinModal(){
     $("join_overlay").classList.remove("show");
   }
+// ====== POST SUCCESS MODAL ======
+function openPostDoneModal(){
+  $("postdone_overlay").classList.add("show");
+}
+function closePostDoneModal(){
+  $("postdone_overlay").classList.remove("show");
+}
 
   function makeMessageTemplate(ride, myEmail){
     const dateStr = isoToMDY(ride.ride_date);
@@ -1842,6 +1947,19 @@ $("reset_back_btn").addEventListener("click", ()=>{
       activateTab("my");
       await loadMyRides();
     });
+// Post-success modal actions
+$("postdone_close").addEventListener("click", closePostDoneModal);
+$("postdone_got_it").addEventListener("click", closePostDoneModal);
+
+$("postdone_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("postdone_overlay")) closePostDoneModal();
+});
+
+$("postdone_view_my").addEventListener("click", async ()=>{
+  closePostDoneModal();
+  activateTab("my");
+  await loadMyRides();
+});
 
     // Date defaults
     const todayIso = new Date().toISOString().slice(0,10);
