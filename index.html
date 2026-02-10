@@ -143,31 +143,33 @@
   .chip{ max-width:220px; }
 }
 
-/* Auth placed near My Rides (above tabs) */
-.tabsAuth{
-  position:absolute;
-  right:0;
-  top:-38px;
+/* Auth row sits UNDER the tagline (no overlap) */
+.authBelowTagline{
+  max-width:980px;
+  margin:10px auto 0;      /* pushes it DOWN below slogan */
+  padding:0 14px;
   display:flex;
+  justify-content:flex-end;
   align-items:center;
   gap:8px;
-  z-index:60;
 }
 
-/* Make sure auth button is not full width */
-.authBtn{
-  width:auto;
-  margin-top:0;
-}
-.chip{
+/* Keep button/chip compact */
+.authBelowTagline .chip,
+.authBelowTagline .authBtn{
   width:auto;
 }
 
-/* Mobile: hide chip, keep small button */
+/* Mobile: keep it neat */
 @media (max-width:520px){
-  .tabsAuth{ top:-34px; }
-  .chip{ display:none; }
+  .authBelowTagline{
+    margin-top:10px;
+  }
+  .authBelowTagline .chip{
+    display:none;
+  }
 }
+
 
     /* Tabs */
     .tabsWrap{
@@ -235,6 +237,19 @@
       font-size:16px;
       background:#fff;
     }
+    input[type="date"]{
+  max-width:100%;
+  height:48px;
+  line-height:24px;
+  padding:12px;
+}
+
+@supports (-webkit-touch-callout: none){
+  input[type="date"]{
+    -webkit-appearance:none;
+    appearance:none;
+  }
+}
 
     button{
       background:#4e2a84;
@@ -458,16 +473,19 @@
 
 
   <!-- Tabs: Find, Post, My -->
-  <div class="tabsWrap">
-  <div class="tabsAuth">
-    <div id="auth_chip" class="chip hidden"></div>
-    <button id="auth_btn" class="authBtn">Sign in</button>
-  </div>
+<!-- Auth row BELOW tagline -->
+<div class="authBelowTagline">
+  <div id="auth_chip" class="chip hidden"></div>
+  <button id="auth_btn" class="authBtn">Sign in</button>
+</div>
 
+<!-- Tabs: Find, Post, My -->
+<div class="tabsWrap">
   <button class="tabBtn active" id="tab_find">Find a Ride</button>
   <button class="tabBtn" id="tab_post">Post a Ride</button>
   <button class="tabBtn" id="tab_my">My Rides</button>
 </div>
+
 
 
 </header>
