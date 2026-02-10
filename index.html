@@ -114,8 +114,14 @@
 
 /* Mobile tweaks */
 @media (max-width:520px){
-  header{ padding:12px 12px 10px; }
-  .brandTop{ padding:10px 0 10px; }
+  header{ padding:12px 12px 0px; }
+ .brandTop{
+  max-width:980px;
+  margin:0 auto;
+  padding:10px 0 0px;   /* ✅ 底部 0 */
+  position:relative;
+}
+
 
   .brandTitleBig{ font-size:22px; }
 
