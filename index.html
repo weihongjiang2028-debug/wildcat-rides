@@ -1585,7 +1585,14 @@ async function refreshUser({ force=false } = {}){
 
   return __refreshInFlight;
 }
-
+async function warmAuth(){
+  try{
+    const { data } = await sb.auth.getSession();
+    const user = data?.session?.user;
+    currentUser = user ? { email: user.email, id: user.id } : null;
+    setAuthUI();
+  }catch(e){}
+}
 
 
   function savePendingAction(action){
@@ -1603,25 +1610,27 @@ async function refreshUser({ force=false } = {}){
   }
 
 async function requireAuthOrQueue(action){
-  // 不要在这里 await getUser（会卡）；直接用 session 判断
-  const su = await getSessionUserWithGrace();
+  // ✅ 如果内存里已经有登录态，别卡 UI，直接放行
+  if (currentUser?.email) return true;
 
-  if(su){
-    currentUser = { email: su.email, id: su.id };
+  // ✅ 尝试用本地 session 快速恢复（通常比 getUser 快很多）
+  try{
+    const { data } = await sb.auth.getSession();
+    const user = data?.session?.user;
+    currentUser = user ? { email: user.email, id: user.id } : null;
     setAuthUI();
-    // 可选：后台再校验一下，不阻塞用户点击
-    refreshUser({ force:false }).catch(()=>{});
-    return true;
+  }catch(e){
+    currentUser = null;
   }
 
-  // 没 session => 真没登录
-  currentUser = null;
-  setAuthUI();
+  if(currentUser?.email) return true;
 
+  // 仍未登录：再走你原来的队列 + 弹窗逻辑
   savePendingAction(action);
   openSignInModal(action?.emailHint || "");
   return false;
 }
+
 
 
 async function maybeResumePendingAction(){
@@ -2159,13 +2168,22 @@ function closePostDoneModal(){
   }
 
   // ====== MY RIDES ======
-  async function loadMyRidesClick(){
-    const ok = await requireAuthOrQueue({ type:"LOAD_MY", payload:{} });
-    if(!ok) return;
+async function loadMyRidesClick(){
+  // ✅ 先立刻切过去，用户不会觉得“点不了”
+  activateTab("my");
+  setText("my_err","");
+  setText("my_msg","Signing you back in…");
 
-    activateTab("my");
-    await loadMyRides();
+  const ok = await requireAuthOrQueue({ type:"LOAD_MY", payload:{} });
+  if(!ok){
+    // 没登录：这里会弹 sign in，你也可以保留提示或清掉
+    return;
   }
+
+  // 已登录：开始拉数据（如果还需要 1–2 秒，用户也能看到 Loading）
+  await loadMyRides();
+}
+
 
   async function loadMyRides(){
     setText("my_err","");
@@ -2367,6 +2385,17 @@ $("auth_btn").addEventListener("click", async ()=>{
     openSignInModal("");
   }
 });
+    // ✅ 这里加：从后台回到前台就预热 session
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible") warmAuth();
+});
+
+window.addEventListener("pageshow", (e)=>{
+  if(e.persisted) warmAuth();
+});
+
+// ✅ 页面初次加载也预热一次（可选但推荐）
+await warmAuth();
 // ===== Join Preview modal actions =====
 $("joinpreview_close").addEventListener("click", closeJoinPreviewModal);
 $("joinpreview_cancel").addEventListener("click", closeJoinPreviewModal);
