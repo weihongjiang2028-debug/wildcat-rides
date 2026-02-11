@@ -512,6 +512,75 @@ input[type="date"]{
   font-weight:950;
   margin-bottom:0px;
 }
+    /* ===== Search result card (new layout) ===== */
+.rideNewTop{
+  font-weight:900;
+  color:#111;
+  margin-bottom:10px;
+}
+
+.rideBlockPill{
+  display:inline-block;
+  font-size:12px;
+  font-weight:950;
+  color:#4e2a84;
+  background:#f2effa;
+  padding:4px 10px;
+  border-radius:999px;
+  margin-bottom:10px;
+}
+
+.rideNewTime{
+  font-size:18px;
+  font-weight:950;
+  margin:6px 0 8px;
+  color:#111;
+}
+
+.rideNewMeta{
+  font-size:14px;
+  font-weight:900;
+  color:#111;
+  margin:4px 0;
+}
+
+.rideNewHint{
+  font-size:13px;
+  color:#555;
+  font-weight:800;
+  margin:6px 0 10px;
+}
+
+.rideDivider{
+  height:1px;
+  background:#eee;
+  margin:12px 0;
+}
+
+.ridePersonLine{
+  font-size:14px;
+  font-weight:900;
+  color:#111;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:6px 0;
+}
+
+.rideSeatsLine{
+  font-size:13px;
+  font-weight:800;
+  color:#555;
+  margin:6px 0 12px;
+}
+
+.rideContactLocked{
+  font-size:13px;
+  font-weight:800;
+  color:#666;
+  margin:8px 0 12px;
+}
+
   </style>
 </head>
 
@@ -836,6 +905,22 @@ input[type="date"]{
     h = h % 12; if(h === 0) h = 12;
     return `${h}:${mStr} ${ampm}`;
   }
+  function riderLabelFromEmail(email){
+  const e = normEmail(email || "");
+  const local = e.split("@")[0] || "";
+  // match trailing 4 digits as grad year: lukexiang2028 -> name=lukexiang, yy=28
+  const m = local.match(/^(.*?)(\d{4})$/);
+  if(!m) return `👤 ${local}`;
+  const namePart = m[1] || local;
+  const yy = (m[2] || "").slice(2); // 2028 -> 28
+  return `👤 ${namePart} ${yy}'`;
+}
+
+function prettyRoute(direction, airport){
+  if((direction || "").includes("Evanston")) return `Evanston → ${airport}`;
+  return `${airport} → Evanston`;
+}
+
 // ====== DATE FILTER (hide old rides, keep 1-day buffer) ======
 const RIDE_BUFFER_DAYS = 1; // keep yesterday + today, hide earlier
 
@@ -1350,71 +1435,75 @@ const myJoined = myEmail ? await getMyJoinedIds(myEmail) : [];
     $("find_btn").disabled = false;
   }
 
-  function renderResults(rides){
-    const container = $("results");
-    container.innerHTML = "";
+function renderResults(rides){
+  const container = $("results");
+  container.innerHTML = "";
 
-for(const r of rides){
-  const filled = r.seats_filled || 0;
-  const max = r.max_seats;
-  const isFull = filled >= max;
-  const joined = !!r.alreadyJoined;
+  for(const r of rides){
+    const filled = r.seats_filled || 0;
+    const max = r.max_seats;
+    const isFull = filled >= max;
+    const joined = !!r.alreadyJoined;
 
-      const div = document.createElement("div");
-      div.className = "ride";
+    const div = document.createElement("div");
+    div.className = "ride";
 
-      const joinBtnHtml = joined
-        ? `<button data-cancel="${r.id}" class="danger">Cancel Join</button>`
-        : `<button data-join="${r.id}" ${isFull ? "disabled" : ""}>Join Ride</button>`;
+    const joinBtnHtml = joined
+      ? `<button data-cancel="${r.id}" class="danger">Cancel Join</button>`
+      : `<button data-join="${r.id}" ${isFull ? "disabled" : ""}>Join Ride</button>`;
 
-      const ownerNote = r.isOwner ? `<span class="pill">YOUR POST</span>` : "";
+    const timeLine = `${formatTimeAMPM(r.from_time)} – ${formatTimeAMPM(r.to_time)}`;
+    const dateLine = isoToMDY(r.ride_date);
+    const routeLine = prettyRoute(r.direction, r.airport);
 
-const timeLine = `${formatTimeAMPM(r.from_time)}–${formatTimeAMPM(r.to_time)}`;
-const metaLine = `${isoToMDY(r.ride_date)} · ${r.direction} · ${r.airport}`;
-const statusText = isFull ? "FULL" : "OPEN";
-  
-div.innerHTML = `
-  <div class="rideTime">${escapeHtml(timeLine)}</div>
+    // 人物行：用 owner_email 生成 👤lukexiang 28'
+    const personLine = riderLabelFromEmail(r.owner_email);
 
-  <div class="rideMeta">
-    <span>${escapeHtml(metaLine)}</span>
-    <span class="rideStatus">${statusText}</span>
-  </div>
+    // Contact：未 join 时锁住；join 后才显示真实 contact
+    const contactLine = joined
+      ? `📱 ${escapeHtml(r.contact || "")}`
+      : `📱 Contact unlocked once joined`;
 
-  <div class="kv">
-    <div class="kvRow">
-      <div class="kvLabel">Seats</div>
-      <div class="kvValue">${filled}/${max} filled</div>
-    </div>
+    div.innerHTML = `
+      <div class="rideBlockPill">[ TIME BLOCK ]</div>
 
-    <div class="kvRow">
-      <div class="kvLabel">Contact</div>
-      <div class="kvValue">${escapeHtml(r.contact)}</div>
-    </div>
-  </div>
+      <div class="rideNewTime">${escapeHtml(timeLine)}</div>
+      <div class="rideNewMeta">${escapeHtml(dateLine)}</div>
 
-  <div class="row" style="margin-top:12px;">
-    ${joinBtnHtml}
-  </div>
-`;
+      <div style="height:10px;"></div>
 
-      container.appendChild(div);
-    }
+      <div class="rideNewMeta">${escapeHtml(routeLine)}</div>
+      <div class="rideNewHint">Estimated pickup <span style="color:#4e2a84;font-weight:950;">window</span></div>
 
-    container.querySelectorAll("button[data-join]").forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-        const rideId = btn.getAttribute("data-join");
-        await joinRideClick(rideId, btn);
-      });
-    });
+      <div class="rideDivider"></div>
 
-    container.querySelectorAll("button[data-cancel]").forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-        const rideId = btn.getAttribute("data-cancel");
-        await cancelJoinClick(rideId, btn);
-      });
-    });
+      <div class="ridePersonLine">${escapeHtml(personLine)}</div>
+      <div class="rideSeatsLine">Seats: ${filled} / ${max} filled</div>
+
+      <div class="rideContactLocked">${escapeHtml(contactLine)}</div>
+
+      <div class="row" style="margin-top:10px;">
+        ${joinBtnHtml}
+      </div>
+    `;
+
+    container.appendChild(div);
   }
+
+  container.querySelectorAll("button[data-join]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const rideId = btn.getAttribute("data-join");
+      await joinRideClick(rideId, btn);
+    });
+  });
+
+  container.querySelectorAll("button[data-cancel]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const rideId = btn.getAttribute("data-cancel");
+      await cancelJoinClick(rideId, btn);
+    });
+  });
+}
 
   // ====== JOIN / CANCEL ======
 
