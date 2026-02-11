@@ -1853,12 +1853,8 @@ function renderResults(rides){
     const routeLine = prettyRoute(r.direction, r.airport);
 
     // 👤 Posted by ...
-const signedIn = !!(currentUser?.email);
-const poster = riderLabelFromEmail(r.owner_email).replace(/^👤\s*/, "");
-const postedByLine = signedIn
-  ? `👤 Posted by ${poster}`
-  : `👤 Posted by NU student (sign in to view)`;
-
+    const poster = riderLabelFromEmail(r.owner_email).replace(/^👤\s*/, "");
+    const postedByLine = `👤 Posted by ${poster}`;
 
     // Contact locked until joined (no double-escape)
     const contactLine = joined
@@ -2632,15 +2628,14 @@ window.addEventListener("pageshow", onAppResume); // iOS bfcache 常用
 
 
     // Initial auth refresh + resume
-await refreshUser();
-setAuthUI();
-await maybeResumePendingAction();
-activateTab("find");
+    await refreshUser();
+    setAuthUI();
 
-if (currentUser?.email) {
-  await searchRides();
-}
+    // If user came back from magic link, resume pending action
+    await maybeResumePendingAction();
+    activateTab("find");
 
+  });
 </script>
 </body>
 </html>
