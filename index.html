@@ -1410,7 +1410,8 @@ function resetUIAfterSignOut(){
   activateTab("find");
 }
 
-  
+  let authHydrating = true;   // 页面回来时：Auth 正在恢复
+
   let currentUser = null; // { email, id }
   const PENDING_KEY = "nu_carpool_pending_action";
 
@@ -1520,6 +1521,26 @@ async function signInWithPassword(email, password){
   }
 }
 
+async function hydrateAuthFast(){
+  authHydrating = true;
+
+  try{
+    // ✅ 本地瞬间恢复（不等网络）
+    const { data } = await sb.auth.getSession();
+    const user = data?.session?.user;
+
+    currentUser = user?.email ? { email: user.email, id: user.id } : null;
+    setAuthUI(); // 立刻更新 chip + Sign out
+
+    // ✅ 后台再用 getUser() 校验（慢也没关系）
+    refreshUser(); // 不 await，让它后台跑
+  }catch(e){
+    currentUser = null;
+    setAuthUI();
+  }finally{
+    authHydrating = false;
+  }
+}
 
 
   async function refreshUser(){
@@ -1556,15 +1577,23 @@ async function signInWithPassword(email, password){
     localStorage.removeItem(PENDING_KEY);
   }
 
-  async function requireAuthOrQueue(action){
+async function requireAuthOrQueue(action){
+  // ✅ 如果页面刚回来，auth 还在恢复：先等 fast hydrate 完成
+  if(authHydrating){
+    await hydrateAuthFast();
+  }else{
+    // 平时正常刷新
     await refreshUser();
-    if(currentUser?.email) return true;
-
-    // queue action then open sign in
-    savePendingAction(action);
-    openSignInModal(action?.emailHint || "");
-    return false;
   }
+
+  if(currentUser?.email) return true;
+
+  // queue action then open sign in
+  savePendingAction(action);
+  openSignInModal(action?.emailHint || "");
+  return false;
+}
+
 
 async function maybeResumePendingAction(){
   await refreshUser();
@@ -2289,7 +2318,9 @@ div.innerHTML = `
 
   // Auth button
 $("auth_btn").addEventListener("click", async ()=>{
-  await refreshUser();
+  if(authHydrating) await hydrateAuthFast();
+  else await refreshUser();
+  ...
 
   if(currentUser?.email){
     $("auth_btn").disabled = true;
@@ -2517,13 +2548,10 @@ sb.auth.onAuthStateChange(async (event, session)=>{
 
 
 
-    // Initial auth refresh + resume
-    await refreshUser();
-    setAuthUI();
+await hydrateAuthFast();           // ✅ 关键：瞬间恢复 UI
+await maybeResumePendingAction();  // pending action 依然正常
+activateTab("find");
 
-    // If user came back from magic link, resume pending action
-    await maybeResumePendingAction();
-    activateTab("find");
 
   });
 </script>
