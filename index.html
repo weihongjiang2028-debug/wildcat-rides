@@ -756,50 +756,17 @@ input[type="date"]{
 </div>
 
 
- <!-- Top brand block -->
-<div class="brandTop">
-
-  <!-- ✅ 右上角登录/登出（移到这里） -->
-  <div class="authRow">
+  <!-- Tabs: Find, Post, My -->
+  <div class="tabsWrap">
+  <div class="tabsAuth">
     <div id="auth_chip" class="chip hidden"></div>
     <button id="auth_btn" class="authBtn">Sign in</button>
   </div>
 
-  <!-- Center title -->
-  <div class="brandTitleRow">
-    <!-- Left white paw -->
-    <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
-    </svg>
-
-    <h1 class="brandTitleBig">Northwestern Carpool</h1>
-
-    <!-- Right white paw -->
-    <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
-    </svg>
-  </div>
-
-  <div class="brandSubCenter">
-    <span class="taglinePill">Find a ride-mate. Split your airport Uber.</span>
-  </div>
-</div>
-
-<!-- Tabs: Find, Post, My -->
-<div class="tabsWrap">
   <button class="tabBtn active" id="tab_find">Find a Ride</button>
   <button class="tabBtn" id="tab_post">Post a Ride</button>
   <button class="tabBtn" id="tab_my">My Rides</button>
 </div>
-
 
 
 </header>
@@ -1443,8 +1410,7 @@ function resetUIAfterSignOut(){
   activateTab("find");
 }
 
-  let authHydrating = true;   // 页面回来时：Auth 正在恢复
-
+  
   let currentUser = null; // { email, id }
   const PENDING_KEY = "nu_carpool_pending_action";
 
@@ -1554,60 +1520,26 @@ async function signInWithPassword(email, password){
   }
 }
 
-async function hydrateAuthFast(){
-  authHydrating = true;
-  try{
-    const { data } = await sb.auth.getSession();
-    const user = data?.session?.user;
-
-    currentUser = user?.email ? { email: user.email, id: user.id } : null;
-    setAuthUI();
-
-    // ✅ 现在 refreshUser 安全了，可以 await 一下（不会把你清成 null）
-    await refreshUser();
-  }catch(e){
-    currentUser = null;
-    setAuthUI();
-  }finally{
-    authHydrating = false;
-  }
-}
 
 
-
- async function refreshUser(){
-  // 1) 先用本地 session 立刻把 UI 变成“已登录”
-  try{
-    const { data: s } = await sb.auth.getSession();
-    const su = s?.session?.user;
-    if(su?.email){
-      currentUser = { email: su.email, id: su.id };
-      setAuthUI();
-    }
-  }catch(e){ /* ignore */ }
-
-  // 2) 再用 getUser 做网络校验（短超时），失败就别清 currentUser
+  async function refreshUser(){
   const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error("getUser timeout")), ms));
 
   try{
     const { data } = await Promise.race([
       sb.auth.getUser(),
-      timeout(1200), // 👈 建议短一点，别卡体验
+      timeout(4000),
     ]);
 
-    if(data?.user?.email){
-      currentUser = { email: data.user.email, id: data.user.id };
-    }
-    // 如果 data.user 为空：也不要把 currentUser 清空（保留 session）
+    currentUser = data?.user ? { email: data.user.email, id: data.user.id } : null;
   }catch(err){
     console.warn("refreshUser failed:", err);
-    // 👇 关键：不要 currentUser=null
+    currentUser = null;
   }
 
   setAuthUI();
   return currentUser;
 }
-
 
 
   function savePendingAction(action){
@@ -1624,23 +1556,15 @@ async function hydrateAuthFast(){
     localStorage.removeItem(PENDING_KEY);
   }
 
-async function requireAuthOrQueue(action){
-  // ✅ 如果页面刚回来，auth 还在恢复：先等 fast hydrate 完成
-  if(authHydrating){
-    await hydrateAuthFast();
-  }else{
-    // 平时正常刷新
+  async function requireAuthOrQueue(action){
     await refreshUser();
+    if(currentUser?.email) return true;
+
+    // queue action then open sign in
+    savePendingAction(action);
+    openSignInModal(action?.emailHint || "");
+    return false;
   }
-
-  if(currentUser?.email) return true;
-
-  // queue action then open sign in
-  savePendingAction(action);
-  openSignInModal(action?.emailHint || "");
-  return false;
-}
-
 
 async function maybeResumePendingAction(){
   await refreshUser();
@@ -2365,9 +2289,7 @@ div.innerHTML = `
 
   // Auth button
 $("auth_btn").addEventListener("click", async ()=>{
-  if(authHydrating) await hydrateAuthFast();
-  else await refreshUser();
-
+  await refreshUser();
 
   if(currentUser?.email){
     $("auth_btn").disabled = true;
@@ -2574,12 +2496,10 @@ $("postdone_view_my").addEventListener("click", async ()=>{
 
    // Auth state listener
 sb.auth.onAuthStateChange(async (event, session)=>{
-  // ✅ 直接用 session 更新，不要先 refreshUser()
-  const u = session?.user;
-  currentUser = u?.email ? { email: u.email, id: u.id } : currentUser;
-  setAuthUI();
+  await refreshUser();
 
   if(event === "PASSWORD_RECOVERY"){
+    // 用户点了邮箱里的 recover 链接回到网站时会触发
     openSignInModal("");
     showResetView();
     return;
@@ -2588,23 +2508,22 @@ sb.auth.onAuthStateChange(async (event, session)=>{
   if(event === "SIGNED_IN"){
     closeSignInModal();
     await maybeResumePendingAction();
-    return;
   }
 
   if(event === "SIGNED_OUT"){
-    currentUser = null;
-    setAuthUI();
     resetUIAfterSignOut();
-    return;
   }
 });
 
 
 
-await hydrateAuthFast();           // ✅ 关键：瞬间恢复 UI
-await maybeResumePendingAction();  // pending action 依然正常
-activateTab("find");
+    // Initial auth refresh + resume
+    await refreshUser();
+    setAuthUI();
 
+    // If user came back from magic link, resume pending action
+    await maybeResumePendingAction();
+    activateTab("find");
 
   });
 </script>
