@@ -1081,6 +1081,21 @@ input[type="date"]{
   </div>
 </div>
 
+  <!-- NO MATCH MODAL -->
+<div id="nomatch_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="nomatch_close">✕</button>
+
+    <div class="modalTitle">No rides found</div>
+    <div class="muted" id="nomatch_body" style="margin-top:6px;"></div>
+
+    <div class="modalActions" style="margin-top:12px;">
+      <button id="nomatch_cancel" class="secondary" type="button">Not now</button>
+      <button id="nomatch_post" type="button">Post this ride</button>
+    </div>
+  </div>
+</div>
+  
 <script>
   // ====== CONFIG ======
   const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
@@ -1755,6 +1770,43 @@ async function maybeResumePendingAction(){
 
     // Optionally refresh find results if user is on find tab
   }
+function openNoMatchModal(msg){
+  $("nomatch_body").textContent = msg || "";
+  $("nomatch_overlay").classList.add("show");
+}
+function closeNoMatchModal(){
+  $("nomatch_overlay").classList.remove("show");
+}
+
+function addMinutesHHMM(hhmm, minsToAdd){
+  const [h, m] = (hhmm || "00:00").split(":").map(Number);
+  let total = h * 60 + m + minsToAdd;
+  total = Math.max(0, Math.min(total, 23*60 + 45));
+  const nh = String(Math.floor(total / 60)).padStart(2, "0");
+  const nm = String(total % 60).padStart(2, "0");
+  return `${nh}:${nm}`;
+}
+
+function prefillPostFromFind(){
+  const direction = $("find_direction").value;
+  const airport = $("find_airport").value;
+  const rideDate = $("find_date").value;
+  const around = $("find_time").value; // "" or "HH:MM"
+
+  $("post_direction").value = direction;
+  $("post_airport").value = airport;
+
+  if(rideDate){
+    $("post_date").value = rideDate;
+    const dEl = $("post_date_display");
+    if(dEl) dEl.textContent = isoToMDY(rideDate);
+  }
+
+  if(around){
+    $("post_from").value = around;
+    $("post_to").value = addMinutesHHMM(around, 60);
+  }
+}
 
   // ====== FIND ======
  // ====== TODAY FEED (show all rides today on landing) ======
@@ -1803,13 +1855,21 @@ async function loadTodayRides(){
   // sort by earliest leave window start
   enriched.sort((a,b)=> timeToMinutes(a.from_time) - timeToMinutes(b.from_time));
 
-  renderResults(enriched);
+renderResults(enriched);
 
-  setText("find_msg", enriched.length ? `Today: ${enriched.length} ride(s).` : "No rides posted for today yet.");
-  $("find_btn").disabled = false;
+setText("find_msg", enriched.length ? `Found ${enriched.length} ride(s).` : "No rides for this day.");
+
+if(enriched.length === 0 && showNoMatchModal){
+  const d = isoToMDY(ride_date_iso);
+  const route = prettyRoute(direction, airport);
+  openNoMatchModal(
+    `Sorry, we couldn’t find a match for ${d} (${route}).\n\nYou can post your ride instead. Once someone joins, they will message you to coordinate.`
+  );
 }
 
-  async function searchRides(){
+$("find_btn").disabled = false;
+
+  async function searchRides({ showNoMatchModal = true } = {}){
     setText("find_err","");
     setText("find_msg","Searching...");
     $("find_btn").disabled = true;
@@ -2432,7 +2492,7 @@ div.innerHTML = `
 
     // Buttons
     $("post_btn").addEventListener("click", postRideClick);
-    $("find_btn").addEventListener("click", searchRides);
+    $("find_btn").addEventListener("click", ()=> searchRides({ showNoMatchModal: true }));
     $("my_refresh_btn").addEventListener("click", loadMyRides);
 
 
@@ -2526,6 +2586,19 @@ $("joindone_text_poster").addEventListener("click", async ()=>{
   setTimeout(()=> $("joindone_text_poster").textContent = "Copy Contact", 900);
 });
 
+// No-match modal actions
+$("nomatch_close").addEventListener("click", closeNoMatchModal);
+$("nomatch_cancel").addEventListener("click", closeNoMatchModal);
+
+$("nomatch_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("nomatch_overlay")) closeNoMatchModal();
+});
+
+$("nomatch_post").addEventListener("click", ()=>{
+  closeNoMatchModal();
+  prefillPostFromFind();
+  activateTab("post");
+});
 
 
     // Sign-in modal actions
@@ -2714,6 +2787,7 @@ window.addEventListener("pageshow", onAppResume); // iOS bfcache 常用
     // If user came back from magic link, resume pending action
     await maybeResumePendingAction();
     activateTab("find");
+    await searchRides({ showNoMatchModal: false });
     await loadTodayRides();
   });
 </script>
