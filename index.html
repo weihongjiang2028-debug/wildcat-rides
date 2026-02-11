@@ -586,6 +586,48 @@ input[type="date"]{
   color:#111;
   margin:6px 0 6px;
 }
+/* ===== Search card: Leaving window block ===== */
+.leaveWindowLabel{
+  font-size:12px;
+  font-weight:900;
+  color:#666;
+  letter-spacing:.2px;
+  margin-bottom:4px;
+}
+
+.leaveWindowTime{
+  font-size:22px;
+  font-weight:950;
+  color:#111;
+  margin:2px 0 2px;
+}
+
+.leaveWindowDate{
+  font-size:14px;
+  font-weight:800;
+  color:#555;
+  margin-bottom:8px;
+}
+
+.rideDivider{
+  height:1px;
+  background:#eee;
+  margin:10px 0;
+}
+
+.rideMetaLine{
+  font-size:14px;
+  font-weight:900;
+  color:#111;
+  margin:6px 0;
+}
+
+.rideSubMeta{
+  font-size:13px;
+  font-weight:800;
+  color:#555;
+  margin:6px 0;
+}
 
   </style>
 </head>
@@ -1468,26 +1510,33 @@ const postedBy = `Posted by ${riderLabelFromEmail(r.owner_email).replace("👤 "
       ? `📱 ${escapeHtml(r.contact || "")}`
       : `📱 Contact unlocked once joined`;
 
-    div.innerHTML = `
+   const timeLine = `${formatTimeAMPM(r.from_time)} – ${formatTimeAMPM(r.to_time)}`;
+const dateLine = isoToMDY(r.ride_date);
+const routeLine = prettyRoute(r.direction, r.airport);
+const postedBy = `👤 Posted by ${riderLabelFromEmail(r.owner_email).replace("👤 ","")}`;
 
-      <div class="rideNewTime">${escapeHtml(timeLine)}</div>
-      <div class="rideNewMeta">${escapeHtml(dateLine)}</div>
+const contactLine = joined
+  ? `📱 ${escapeHtml(r.contact || "")}`
+  : `📱 Contact unlocked once joined`;
 
-      <div style="height:10px;"></div>
+div.innerHTML = `
+  <div class="leaveWindowLabel">Leaving window</div>
+  <div class="leaveWindowTime">${escapeHtml(timeLine)}</div>
+  <div class="leaveWindowDate">${escapeHtml(dateLine)}</div>
 
-      <div class="rideNewMeta">${escapeHtml(routeLine)}</div>
+  <div class="rideDivider"></div>
 
-      <div class="rideDivider"></div>
+  <div class="rideMetaLine">🧭 ${escapeHtml(routeLine)}</div>
+  <div class="rideMetaLine">${escapeHtml(postedBy)}</div>
+  <div class="rideSubMeta">💺 ${filled} / ${max} seats filled</div>
 
-<div class="ridePostedBy">${escapeHtml(postedBy)}</div>
-<div class="rideSeatsLine">Seats: ${filled} / ${max} filled</div>
+  <div class="rideSubMeta">${escapeHtml(contactLine)}</div>
 
-      <div class="rideContactLocked">${escapeHtml(contactLine)}</div>
+  <div class="row" style="margin-top:10px;">
+    ${joinBtnHtml}
+  </div>
+`;
 
-      <div class="row" style="margin-top:10px;">
-        ${joinBtnHtml}
-      </div>
-    `;
 
     container.appendChild(div);
   }
