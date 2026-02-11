@@ -1826,6 +1826,17 @@ async function loadTodayRides(){
       return;
     }
 
+    async function loadTodayRides(){
+  const todayIso = new Date().toISOString().slice(0,10);
+
+  // 保持 Find 的筛选器一致
+  $("find_date").value = todayIso;
+  $("find_date_display").textContent = isoToMDY(todayIso);
+
+  // 直接复用你现成的 searchRides 逻辑
+  await searchRides();
+}
+
     // Show all rides for day (open + full so user can see, but can only join open if seats available)
    // If signed in, hide rides that I posted myself
 await refreshUser();
@@ -2660,9 +2671,15 @@ sb.auth.onAuthStateChange(async (event, session)=>{
   }
 
   if(event === "SIGNED_IN"){
-    closeSignInModal();
-    await maybeResumePendingAction();
+  closeSignInModal();
+  await maybeResumePendingAction();
+
+  // ✅ 关键：登录后立刻重刷 Find 页列表，让 poster 立刻显示出来
+  if(!$("view_find").classList.contains("hidden")){
+    await loadTodayRides();  // 或者 await searchRides();
   }
+}
+
 
   if(event === "SIGNED_OUT"){
     resetUIAfterSignOut();
