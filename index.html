@@ -645,6 +645,25 @@ input[type="date"]{
   font-weight:950;
 }
 #joindone_overlay a:active{ opacity:.85; }
+/* Make Confirm Join modal match Ride Posted / Ride Joined spacing */
+#joinpreview_overlay .modalTitle{
+  font-size:32px;
+  font-weight:950;
+  margin:10px 0 0px;
+}
+
+#joinpreview_overlay .postNextSub{
+  margin:2px 0 10px;
+}
+
+#joinpreview_overlay .joinpreviewActions{
+  margin-top:10px;          /* 往上提 */
+}
+
+#joinpreview_overlay #joinpreview_msg,
+#joinpreview_overlay #joinpreview_err{
+  margin-top:8px;           /* 更紧凑 */
+}
 
   </style>
 </head>
@@ -931,23 +950,31 @@ input[type="date"]{
   </div>
 </div>
 <!-- JOIN PREVIEW / CONFIRM MODAL -->
+<!-- JOIN PREVIEW / CONFIRM MODAL (match Ride Posted / Ride Joined style) -->
 <div id="joinpreview_overlay" class="overlay">
   <div class="modal">
     <button class="modalClose" id="joinpreview_close">✕</button>
 
-    <div class="modalTitle" id="joinpreview_title">Confirm join</div>
+    <div class="modalTitle">🤝 Confirm join</div>
+    <div class="postNextSub">You are joining:</div>
 
-    <div id="joinpreview_body" class="muted" style="margin-top:8px; color:#111; font-weight:850; white-space:pre-wrap;"></div>
-
-    <div class="hr" style="margin:12px 0;"></div>
-
-    <div class="muted" style="margin-top:0; color:#111;">
-      By joining, you agree to:
-      <div style="margin-top:8px; font-weight:900;">
-        ✓ Show up on time<br/>
-        ✓ Communicate if plans change
+    <div class="stepList" style="margin-top:10px;">
+      <div class="stepItem">
+        <div class="stepNum">1</div>
+        <div class="stepText" id="joinpreview_body"></div>
       </div>
     </div>
+
+    <div class="modalActions joinpreviewActions">
+      <button id="joinpreview_cancel" class="secondary" type="button">Not now</button>
+      <button id="joinpreview_confirm" type="button">Confirm Join</button>
+    </div>
+
+    <div id="joinpreview_msg" class="muted"></div>
+    <div id="joinpreview_err" class="error"></div>
+  </div>
+</div>
+
 
     <div class="modalActions" style="margin-top:14px;">
       <button id="joinpreview_cancel" class="secondary" type="button">Not now</button>
@@ -1101,13 +1128,12 @@ async function buildJoinPreviewById(rideId){
   const timeLine = `${formatTimeAMPM(ride.from_time)}–${formatTimeAMPM(ride.to_time)}`;
 
   // Render preview text
-  $("joinpreview_body").innerHTML =
-`You're requesting to join:
-<strong>${escapeHtml(poster)}’s ride</strong>
-${escapeHtml(dateLine)} · ${escapeHtml(routeLine)}
+$("joinpreview_body").innerHTML =
+  `<strong>${escapeHtml(poster)}’s ride</strong><br/>
+   ${escapeHtml(dateLine)} · ${escapeHtml(routeLine)}<br/>
+   • ${escapeHtml(timeLine)}<br/>
+   • ${remaining} seat remaining`;
 
-• ${escapeHtml(timeLine)}
-• ${remaining} seat remaining`;
 
   setText("joinpreview_msg","");
   $("joinpreview_confirm").disabled = false;
