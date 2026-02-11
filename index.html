@@ -664,6 +664,59 @@ input[type="date"]{
 #joinpreview_overlay #joinpreview_err{
   margin-top:8px;           /* 更紧凑 */
 }
+/* ===== Join Preview (clean list style) ===== */
+.joinPreviewModal{
+  padding:16px 14px 14px;
+}
+
+.joinPreviewTitle{
+  text-align:center;
+  font-size:26px;
+  font-weight:950;
+  color:#111;
+  margin:6px 0 12px;
+  letter-spacing:.1px;
+}
+
+.joinPreviewLines{
+  background:#f6f7fb;
+  border:1px solid #eee;
+  border-radius:12px;
+  padding:12px;
+}
+
+.joinPreviewLine{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  font-size:14px;
+  font-weight:850;
+  color:#111;
+  line-height:1.35;
+  padding:8px 0;
+}
+
+.joinPreviewLine + .joinPreviewLine{
+  border-top:1px solid #eaeaea;
+}
+
+.joinPreviewKey{
+  flex:0 0 auto;
+  min-width:92px;
+  color:#555;
+  font-weight:900;
+}
+
+.joinPreviewVal{
+  flex:1 1 auto;
+  font-weight:950;
+  color:#111;
+  word-break:break-word;
+}
+
+#joinpreview_overlay .joinpreviewActions{
+  margin-top:12px;
+}
 
   </style>
 </head>
@@ -951,19 +1004,14 @@ input[type="date"]{
 </div>
 <!-- JOIN PREVIEW / CONFIRM MODAL -->
 <!-- JOIN PREVIEW / CONFIRM MODAL (match Ride Posted / Ride Joined style) -->
+<!-- JOIN PREVIEW / CONFIRM MODAL (clean, no step number) -->
 <div id="joinpreview_overlay" class="overlay">
-  <div class="modal">
+  <div class="modal joinPreviewModal">
     <button class="modalClose" id="joinpreview_close">✕</button>
 
-    <div class="modalTitle">🤝 Confirm join</div>
-    <div class="postNextSub">You are joining:</div>
+    <div class="joinPreviewTitle">You are joining:</div>
 
-    <div class="stepList" style="margin-top:10px;">
-      <div class="stepItem">
-        <div class="stepNum">1</div>
-        <div class="stepText" id="joinpreview_body"></div>
-      </div>
-    </div>
+    <div class="joinPreviewLines" id="joinpreview_body"></div>
 
     <div class="modalActions joinpreviewActions">
       <button id="joinpreview_cancel" class="secondary" type="button">Not now</button>
@@ -976,7 +1024,7 @@ input[type="date"]{
 </div>
 
 
-    <div class="modalActions" style="margin-top:14px;">
+    <div class="modalActions joinpreviewActions">
       <button id="joinpreview_cancel" class="secondary" type="button">Not now</button>
       <button id="joinpreview_confirm" type="button">Confirm Join</button>
     </div>
@@ -985,6 +1033,9 @@ input[type="date"]{
     <div id="joinpreview_err" class="error"></div>
   </div>
 </div>
+
+
+
 
 <!-- JOIN SUCCESS MODAL (same style as Ride Posted) -->
 <div id="joindone_overlay" class="overlay">
