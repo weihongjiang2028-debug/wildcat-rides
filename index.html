@@ -1499,48 +1499,42 @@ function renderResults(rides){
       ? `<button data-cancel="${r.id}" class="danger">Cancel Join</button>`
       : `<button data-join="${r.id}" ${isFull ? "disabled" : ""}>Join Ride</button>`;
 
+    // Leaving window block
     const timeLine = `${formatTimeAMPM(r.from_time)} – ${formatTimeAMPM(r.to_time)}`;
     const dateLine = isoToMDY(r.ride_date);
     const routeLine = prettyRoute(r.direction, r.airport);
 
-    // 人物行：用 owner_email 生成 👤lukexiang 28'
-const postedBy = `Posted by ${riderLabelFromEmail(r.owner_email).replace("👤 ","")}`;
-    // Contact：未 join 时锁住；join 后才显示真实 contact
+    // 👤 Posted by ...
+    const poster = riderLabelFromEmail(r.owner_email).replace(/^👤\s*/, "");
+    const postedByLine = `👤 Posted by ${poster}`;
+
+    // Contact locked until joined (no double-escape)
     const contactLine = joined
-      ? `📱 ${escapeHtml(r.contact || "")}`
+      ? `📱 ${r.contact || ""}`
       : `📱 Contact unlocked once joined`;
 
-   const timeLine = `${formatTimeAMPM(r.from_time)} – ${formatTimeAMPM(r.to_time)}`;
-const dateLine = isoToMDY(r.ride_date);
-const routeLine = prettyRoute(r.direction, r.airport);
-const postedBy = `👤 Posted by ${riderLabelFromEmail(r.owner_email).replace("👤 ","")}`;
+    div.innerHTML = `
+      <div class="leaveWindowLabel">Leaving window</div>
+      <div class="leaveWindowTime">${escapeHtml(timeLine)}</div>
+      <div class="leaveWindowDate">${escapeHtml(dateLine)}</div>
 
-const contactLine = joined
-  ? `📱 ${escapeHtml(r.contact || "")}`
-  : `📱 Contact unlocked once joined`;
+      <div class="rideDivider"></div>
 
-div.innerHTML = `
-  <div class="leaveWindowLabel">Leaving window</div>
-  <div class="leaveWindowTime">${escapeHtml(timeLine)}</div>
-  <div class="leaveWindowDate">${escapeHtml(dateLine)}</div>
+      <div class="rideMetaLine">🧭 ${escapeHtml(routeLine)}</div>
+      <div class="rideMetaLine">${escapeHtml(postedByLine)}</div>
+      <div class="rideSubMeta">💺 ${filled} / ${max} seats filled</div>
 
-  <div class="rideDivider"></div>
+      <div class="rideSubMeta">${escapeHtml(contactLine)}</div>
 
-  <div class="rideMetaLine">🧭 ${escapeHtml(routeLine)}</div>
-  <div class="rideMetaLine">${escapeHtml(postedBy)}</div>
-  <div class="rideSubMeta">💺 ${filled} / ${max} seats filled</div>
-
-  <div class="rideSubMeta">${escapeHtml(contactLine)}</div>
-
-  <div class="row" style="margin-top:10px;">
-    ${joinBtnHtml}
-  </div>
-`;
-
+      <div class="row" style="margin-top:10px;">
+        ${joinBtnHtml}
+      </div>
+    `;
 
     container.appendChild(div);
   }
 
+  // bind buttons
   container.querySelectorAll("button[data-join]").forEach(btn=>{
     btn.addEventListener("click", async ()=>{
       const rideId = btn.getAttribute("data-join");
@@ -1555,6 +1549,7 @@ div.innerHTML = `
     });
   });
 }
+
 
   // ====== JOIN / CANCEL ======
 
