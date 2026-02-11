@@ -844,10 +844,7 @@ input[type="date"]{
     <label for="find_time">Leave around</label>
     <select id="find_time"></select>
 
-    <div class="split" style="margin-top:16px;">
-  <button id="today_btn" class="secondary" type="button">Today</button>
-  <button id="find_btn" class="secondary" type="button">Search</button>
-</div>
+    <button id="find_btn" class="secondary">Search</button>
 
     <div id="find_msg" class="muted"></div>
     <div id="find_err" class="error"></div>
@@ -1909,8 +1906,16 @@ function renderResults(rides){
     const routeLine = prettyRoute(r.direction, r.airport);
 
     // 👤 Posted by ...
-    const poster = riderLabelFromEmail(r.owner_email).replace(/^👤\s*/, "");
-    const postedByLine = `👤 Posted by ${poster}`;
+const authed = !!(currentUser?.email && isNU(normEmail(currentUser.email)));
+
+let postedByHtml = "";
+if(authed){
+  const poster = riderLabelFromEmail(r.owner_email).replace(/^👤\s*/, "");
+  postedByHtml = `<div class="rideMetaLine">👤 Posted by ${escapeHtml(poster)}</div>`;
+}else{
+  postedByHtml = `<div class="rideMetaLine">👤 Poster unlocked once signed in</div>`;
+}
+
 
     // Contact locked until joined (no double-escape)
     const contactLine = joined
@@ -1925,7 +1930,7 @@ function renderResults(rides){
       <div class="rideDivider"></div>
 
       <div class="rideMetaLine">🧭 ${escapeHtml(routeLine)}</div>
-      <div class="rideMetaLine">${escapeHtml(postedByLine)}</div>
+      ${postedByHtml}
       <div class="rideSubMeta">💺 ${filled} / ${max} seats filled</div>
 
       <div class="rideSubMeta">${escapeHtml(contactLine)}</div>
@@ -2418,7 +2423,7 @@ div.innerHTML = `
     $("post_btn").addEventListener("click", postRideClick);
     $("find_btn").addEventListener("click", searchRides);
     $("my_refresh_btn").addEventListener("click", loadMyRides);
-    $("today_btn").addEventListener("click", loadTodayRides);
+
 
 
   // Auth button
