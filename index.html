@@ -2632,17 +2632,15 @@ window.addEventListener("pageshow", onAppResume); // iOS bfcache 常用
 
 
     // Initial auth refresh + resume
-    await refreshUser();
-    setAuthUI();
+await refreshUser();
+setAuthUI();
+await maybeResumePendingAction();
+activateTab("find");
 
-    // If user came back from magic link, resume pending action
-    await maybeResumePendingAction();
-    activateTab("find");
-// Auto-load today's rides
-setText("find_msg", "Loading today’s rides...");
-setText("find_err", "");
-await searchRides().catch(()=>{});
-  });
+if (currentUser?.email) {
+  await searchRides();
+}
+
 </script>
 </body>
 </html>
