@@ -580,6 +580,12 @@ input[type="date"]{
   color:#666;
   margin:8px 0 12px;
 }
+.ridePostedBy{
+  font-size:14px;
+  font-weight:900;
+  color:#111;
+  margin:6px 0 6px;
+}
 
   </style>
 </head>
@@ -704,9 +710,8 @@ input[type="date"]{
     <input id="find_date" type="date" />
     <div class="hint" id="find_date_display"></div>
 
-    <label for="find_time">Leave around (optional)</label>
+    <label for="find_time">Leave around</label>
     <select id="find_time"></select>
-    <div class="hint">If you pick a time, we’ll sort rides closest to that time. Otherwise, we’ll show all rides for the day.</div>
 
     <button id="find_btn" class="secondary">Search</button>
     <div id="find_msg" class="muted"></div>
@@ -1457,15 +1462,13 @@ function renderResults(rides){
     const routeLine = prettyRoute(r.direction, r.airport);
 
     // 人物行：用 owner_email 生成 👤lukexiang 28'
-    const personLine = riderLabelFromEmail(r.owner_email);
-
+const postedBy = `Posted by ${riderLabelFromEmail(r.owner_email).replace("👤 ","")}`;
     // Contact：未 join 时锁住；join 后才显示真实 contact
     const contactLine = joined
       ? `📱 ${escapeHtml(r.contact || "")}`
       : `📱 Contact unlocked once joined`;
 
     div.innerHTML = `
-      <div class="rideBlockPill">[ TIME BLOCK ]</div>
 
       <div class="rideNewTime">${escapeHtml(timeLine)}</div>
       <div class="rideNewMeta">${escapeHtml(dateLine)}</div>
@@ -1473,12 +1476,11 @@ function renderResults(rides){
       <div style="height:10px;"></div>
 
       <div class="rideNewMeta">${escapeHtml(routeLine)}</div>
-      <div class="rideNewHint">Estimated pickup <span style="color:#4e2a84;font-weight:950;">window</span></div>
 
       <div class="rideDivider"></div>
 
-      <div class="ridePersonLine">${escapeHtml(personLine)}</div>
-      <div class="rideSeatsLine">Seats: ${filled} / ${max} filled</div>
+<div class="ridePostedBy">${escapeHtml(postedBy)}</div>
+<div class="rideSeatsLine">Seats: ${filled} / ${max} filled</div>
 
       <div class="rideContactLocked">${escapeHtml(contactLine)}</div>
 
