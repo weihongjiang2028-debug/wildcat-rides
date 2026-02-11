@@ -1413,6 +1413,30 @@ function resetUIAfterSignOut(){
   
   let currentUser = null; // { email, id }
   const PENDING_KEY = "nu_carpool_pending_action";
+  // ===== iOS Safari resume anti-flicker =====
+let lastResumeAt = 0;
+
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+async function getSessionUserFast(){
+  try{
+    const { data } = await sb.auth.getSession();
+    return data?.session?.user || null;
+  }catch(e){
+    return null;
+  }
+}
+
+// iOS 切回前台的 1s 内：给 session 一个“宽限重试”，避免误判登出
+async function getSessionUserWithGrace(){
+  let u = await getSessionUserFast();
+  if(!u && (Date.now() - lastResumeAt) < 1500){
+    await sleep(250);
+    u = await getSessionUserFast();
+  }
+  return u;
+}
+
 
   function setAuthUI(){
     const chip = $("auth_chip");
@@ -1522,24 +1546,46 @@ async function signInWithPassword(email, password){
 
 
 
-  async function refreshUser(){
-  const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error("getUser timeout")), ms));
+let __refreshInFlight = null;
 
-  try{
-    const { data } = await Promise.race([
-      sb.auth.getUser(),
-      timeout(4000),
-    ]);
+async function refreshUser({ force=false } = {}){
+  if(__refreshInFlight) return __refreshInFlight;
 
-    currentUser = data?.user ? { email: data.user.email, id: data.user.id } : null;
-  }catch(err){
-    console.warn("refreshUser failed:", err);
-    currentUser = null;
-  }
+  __refreshInFlight = (async ()=>{
+    // 1) 先用本地 session 快速恢复（不会卡）
+    const su = await getSessionUserWithGrace();
+    if(su){
+      currentUser = { email: su.email, id: su.id };
+      setAuthUI(); // 立刻稳定成“已登录 UI”
+    }else{
+      // session 真没有了，才算登出
+      currentUser = null;
+      setAuthUI();
+      return currentUser;
+    }
 
-  setAuthUI();
-  return currentUser;
+    // 2) 后台校验（可能会卡/失败，但失败不闪退 UI）
+    //    只在 force 或你想更严谨时做
+    if(force){
+      try{
+        const timeout = (ms) => new Promise((_, rej)=>setTimeout(()=>rej(new Error("getUser timeout")), ms));
+        const { data } = await Promise.race([ sb.auth.getUser(), timeout(4000) ]);
+        if(data?.user){
+          currentUser = { email: data.user.email, id: data.user.id };
+        }
+      }catch(e){
+        console.warn("refreshUser getUser failed (ignored):", e);
+        // 不要把 currentUser 清空！否则 iOS resume 会闪 Sign in
+      }
+      setAuthUI();
+    }
+
+    return currentUser;
+  })().finally(()=>{ __refreshInFlight = null; });
+
+  return __refreshInFlight;
 }
+
 
 
   function savePendingAction(action){
@@ -1556,15 +1602,27 @@ async function signInWithPassword(email, password){
     localStorage.removeItem(PENDING_KEY);
   }
 
-  async function requireAuthOrQueue(action){
-    await refreshUser();
-    if(currentUser?.email) return true;
+async function requireAuthOrQueue(action){
+  // 不要在这里 await getUser（会卡）；直接用 session 判断
+  const su = await getSessionUserWithGrace();
 
-    // queue action then open sign in
-    savePendingAction(action);
-    openSignInModal(action?.emailHint || "");
-    return false;
+  if(su){
+    currentUser = { email: su.email, id: su.id };
+    setAuthUI();
+    // 可选：后台再校验一下，不阻塞用户点击
+    refreshUser({ force:false }).catch(()=>{});
+    return true;
   }
+
+  // 没 session => 真没登录
+  currentUser = null;
+  setAuthUI();
+
+  savePendingAction(action);
+  openSignInModal(action?.emailHint || "");
+  return false;
+}
+
 
 async function maybeResumePendingAction(){
   await refreshUser();
@@ -2496,10 +2554,14 @@ $("postdone_view_my").addEventListener("click", async ()=>{
 
    // Auth state listener
 sb.auth.onAuthStateChange(async (event, session)=>{
-  await refreshUser();
+  if(session?.user){
+    currentUser = { email: session.user.email, id: session.user.id };
+  }else{
+    currentUser = null;
+  }
+  setAuthUI();
 
   if(event === "PASSWORD_RECOVERY"){
-    // 用户点了邮箱里的 recover 链接回到网站时会触发
     openSignInModal("");
     showResetView();
     return;
@@ -2515,6 +2577,25 @@ sb.auth.onAuthStateChange(async (event, session)=>{
   }
 });
 
+
+function onAppResume(){
+  lastResumeAt = Date.now();
+
+  // 只用 session 先稳定 UI（不阻塞）
+  getSessionUserFast().then(u=>{
+    if(u){
+      currentUser = { email: u.email, id: u.id };
+    }
+    setAuthUI();
+    // 后台轻量校验（可选）
+    refreshUser({ force:false }).catch(()=>{});
+  });
+}
+
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible") onAppResume();
+});
+window.addEventListener("pageshow", onAppResume); // iOS bfcache 常用
 
 
     // Initial auth refresh + resume
