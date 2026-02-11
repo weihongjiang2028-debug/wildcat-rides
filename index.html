@@ -497,73 +497,10 @@ input[type="date"]{
   .brandTitleBig{ font-size: clamp(22px, 6.2vw, 30px); }
   .paw{ width: clamp(18px, 5vw, 28px); height: clamp(18px, 5vw, 28px); }
 }
-/* ===== Fix post-success modal on mobile (easy overrides) ===== */
-  #postdone_overlay .modal{
-    position:relative;
-    padding:16px 16px 16px;
-  }
-  #postdone_overlay .modalClose{
-    position:absolute;
-    top:10px;
-    right:10px;
-    float:none;
-    font-size:20px;
-    line-height:1;
-  }
-  #postdone_overlay .modalTitle{
-    font-size:30px;
-    font-weight:950;
-    margin:10px 0 6px;
-  }
-  #postdone_overlay .postNextSub{
-    font-size:18px;
-    font-weight:900;
-    margin:0 0 12px;
-  }
-  #postdone_overlay .stepItem{
-    align-items:center;
-  }
-  #postdone_overlay .stepNum{
-    width:30px;
-    height:30px;
-    font-size:14px;
-    margin-top:0;
-  }
-  #postdone_overlay .stepText{
-    font-size:13px;
-    font-weight:600;
-    line-height:1.35;
-  }
-  #postdone_overlay .stepText strong{
-    display:block;
-    font-size:16px;
-    font-weight:950;
-    margin-bottom:2px;
-  }
+
     /* Hide the X close on Ride Posted modal */
 #postdone_overlay .modalClose{
   display:none !important;
-}
-/* Step blocks: title lower + bigger */
-#postdone_overlay .stepItem{
-  align-items:flex-start;  /* stop vertical “floating” */
-}
-
-#postdone_overlay .stepNum{
-  margin-top:2px;         /* push the number down into the box */
-}
-
-#postdone_overlay .stepText{
-  padding-top:2px;         /* push the text block down a bit */
-  font-size:13px;
-  font-weight:600;
-  line-height:1.35;
-}
-
-#postdone_overlay .stepText strong{
-  font-size:18px;          /* bigger title */
-  font-weight:950;
-  margin-bottom:3px;
 }
 
   </style>
