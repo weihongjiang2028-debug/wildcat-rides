@@ -628,6 +628,23 @@ input[type="date"]{
   color:#555;
   margin:6px 0;
 }
+/* ===== Join modals: match Ride Posted styling ===== */
+#joindone_overlay .modalClose{ display:none !important; } /* 如果你也不想要叉 */
+#joinpreview_overlay .modalTitle{ font-size:18px; font-weight:950; text-align:center; }
+
+#joindone_overlay .modalTitle{
+  font-size:32px;
+  font-weight:950;
+  margin:10px 0 0px;
+}
+
+/* Link style inside modal steps (phone/sms) */
+#joindone_overlay a{
+  color:#4e2a84;
+  text-decoration:none;
+  font-weight:950;
+}
+#joindone_overlay a:active{ opacity:.85; }
 
   </style>
 </head>
@@ -913,6 +930,81 @@ input[type="date"]{
     </div>
   </div>
 </div>
+<!-- JOIN PREVIEW / CONFIRM MODAL -->
+<div id="joinpreview_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="joinpreview_close">✕</button>
+
+    <div class="modalTitle" id="joinpreview_title">Confirm join</div>
+
+    <div id="joinpreview_body" class="muted" style="margin-top:8px; color:#111; font-weight:850; white-space:pre-wrap;"></div>
+
+    <div class="hr" style="margin:12px 0;"></div>
+
+    <div class="muted" style="margin-top:0; color:#111;">
+      By joining, you agree to:
+      <div style="margin-top:8px; font-weight:900;">
+        ✓ Show up on time<br/>
+        ✓ Communicate if plans change
+      </div>
+    </div>
+
+    <div class="modalActions" style="margin-top:14px;">
+      <button id="joinpreview_cancel" class="secondary" type="button">Not now</button>
+      <button id="joinpreview_confirm" type="button">Confirm Join</button>
+    </div>
+
+    <div id="joinpreview_msg" class="muted"></div>
+    <div id="joinpreview_err" class="error"></div>
+  </div>
+</div>
+
+<!-- JOIN SUCCESS MODAL (same style as Ride Posted) -->
+<div id="joindone_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="joindone_close">✕</button>
+
+    <div class="modalTitle">🎉 Ride joined 🎉</div>
+    <div class="postNextSub">What happens next?</div>
+
+    <div class="stepList">
+      <div class="stepItem">
+        <div class="stepNum">1</div>
+        <div class="stepText" id="joindone_step1"></div>
+      </div>
+
+      <div class="stepItem">
+        <div class="stepNum">2</div>
+        <div class="stepText">
+          <strong>Coordinate the plan</strong><br/>
+          Communicate time + specific location.
+        </div>
+      </div>
+
+      <div class="stepItem">
+        <div class="stepNum">3</div>
+        <div class="stepText">
+          <strong>Save money together</strong><br/>
+          Book 1 Uber/Lyft, split with Venmo/Zelle/Cash.
+        </div>
+      </div>
+    </div>
+
+    <div class="postDisclaimer" style="margin-top:10px;">
+      <div style="font-weight:950; color:#111; margin-bottom:6px;">💸 You’ll save about $25 by sharing</div>
+      <div style="font-weight:950; color:#111;">💡 Tip: Add a pickup stop if you live far apart</div>
+    </div>
+
+    <div class="postDisclaimer" style="margin-top:10px;">
+      NUCarpool helps you connect — it doesn’t book rides or handle payments.
+    </div>
+
+    <div class="modalActions">
+      <button id="joindone_view_my" class="secondary" type="button">View My Rides</button>
+      <button id="joindone_got_it" type="button">Got it</button>
+    </div>
+  </div>
+</div>
 
 <script>
   // ====== CONFIG ======
@@ -943,6 +1035,95 @@ input[type="date"]{
     const [y,m,d] = iso.split("-");
     return `${m}/${d}/${y}`;
   }
+// ===== Join two-step state =====
+let pendingJoinRideId = null;
+
+// phone + sms clickable helpers
+function extractPhone(contact){
+  const raw = String(contact || "").trim();
+  if(!raw) return null;
+
+  let cleaned = raw.replace(/[^\d+]/g, "");
+  const digits = cleaned.replace(/[^\d]/g, "");
+  if(digits.length < 10) return null;
+
+  if(digits.length === 10 && !cleaned.startsWith("+")) cleaned = "+1" + digits;
+  if(!cleaned.startsWith("+")) cleaned = "+" + digits;
+
+  return { display: raw, e164: cleaned };
+}
+
+function smsLink(numberE164, body){
+  const msg = encodeURIComponent(body || "");
+  const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return isiOS ? `sms:${numberE164}&body=${msg}` : `sms:${numberE164}?body=${msg}`;
+}
+
+function renderContactSmart(contact, prefillMsg){
+  const phone = extractPhone(contact);
+  if(!phone){
+    return `📱 ${escapeHtml(contact || "")}`;
+  }
+  return `📱 <a href="tel:${phone.e164}">${escapeHtml(phone.display)}</a>
+          &nbsp;·&nbsp;💬 <a href="${smsLink(phone.e164, prefillMsg)}">Text</a>`;
+}
+
+// Preview modal open/close
+function openJoinPreviewModal(){ $("joinpreview_overlay").classList.add("show"); }
+function closeJoinPreviewModal(){ $("joinpreview_overlay").classList.remove("show"); }
+
+// JoinDone modal open/close
+function openJoinDoneModal(){ $("joindone_overlay").classList.add("show"); }
+function closeJoinDoneModal(){ $("joindone_overlay").classList.remove("show"); }
+
+async function buildJoinPreviewById(rideId){
+  setText("joinpreview_err","");
+  setText("joinpreview_msg","Loading...");
+  $("joinpreview_confirm").disabled = true;
+
+  // load ride
+  const { data: ride, error: e0 } = await sb.from("rides").select("*").eq("id", rideId).single();
+  if(e0 || !ride){
+    setText("joinpreview_msg","");
+    setText("joinpreview_err", e0?.message || "Failed to load ride.");
+    $("joinpreview_confirm").disabled = false;
+    return null;
+  }
+
+  // seats remaining
+  const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
+  const filled = (parts||[]).length;
+  const remaining = Math.max(ride.max_seats - filled, 0);
+
+  const poster = riderLabelFromEmail(ride.owner_email).replace("👤 ","");
+  const dateLine = isoToMDY(ride.ride_date);
+  const routeLine = prettyRoute(ride.direction, ride.airport);
+  const timeLine = `${formatTimeAMPM(ride.from_time)}–${formatTimeAMPM(ride.to_time)}`;
+
+  // Render preview text
+  $("joinpreview_body").innerHTML =
+`You're requesting to join:
+<strong>${escapeHtml(poster)}’s ride</strong>
+${escapeHtml(dateLine)} · ${escapeHtml(routeLine)}
+
+• ${escapeHtml(timeLine)}
+• ${remaining} seat remaining`;
+
+  setText("joinpreview_msg","");
+  $("joinpreview_confirm").disabled = false;
+  return { ride, filled, remaining };
+}
+
+function fillJoinDoneStep1(ride, myEmail){
+  const poster = riderLabelFromEmail(ride.owner_email).replace("👤 ","");
+  const msg = makeMessageTemplate(ride, myEmail);
+  const contactHtml = renderContactSmart(ride.contact || "", msg);
+
+  $("joindone_step1").innerHTML =
+    `<strong>Reach out to poster</strong><br/>
+     👤 Posted by ${escapeHtml(poster)}<br/>
+     ${contactHtml}`;
+}
 
   function formatTimeAMPM(hhmm){
     if(!hhmm) return "";
@@ -1306,10 +1487,19 @@ async function signInWithPassword(email, password){
 
     clearPendingAction();
     // resume
-    if(pending.type === "POST"){
+       if(pending.type === "POST"){
       await doPostRide(pending.payload);
-    }else if(pending.type === "JOIN"){
-      await doJoinRide(pending.payload.rideId, null, true);
+    }else if(pending.type === "JOIN_PREVIEW"){
+      pendingJoinRideId = pending.payload.rideId;
+      await buildJoinPreviewById(pending.payload.rideId);
+      openJoinPreviewModal();
+    }else if(pending.type === "CANCEL"){
+      await doCancelJoin(pending.payload.rideId, null, true);
+    }else if(pending.type === "LOAD_MY"){
+      activateTab("my");
+      await loadMyRides();
+    }
+
     }else if(pending.type === "CANCEL"){
       await doCancelJoin(pending.payload.rideId, null, true);
     }else if(pending.type === "LOAD_MY"){
@@ -1640,13 +1830,16 @@ function renderResults(rides){
     }
   }
 
-  async function joinRideClick(rideId, btn){
-    // require sign-in (Level 3)
-    const ok = await requireAuthOrQueue({ type:"JOIN", payload:{ rideId } });
-    if(!ok) return;
+async function joinRideClick(rideId, btn){
+  // Step 0: require auth first
+  const ok = await requireAuthOrQueue({ type:"JOIN_PREVIEW", payload:{ rideId } });
+  if(!ok) return;
 
-    await doJoinRide(rideId, btn, false);
-  }
+  pendingJoinRideId = rideId;
+  await buildJoinPreviewById(rideId);
+  openJoinPreviewModal();
+}
+
 
   async function doJoinRide(rideId, btn, fromResume){
     await refreshUser();
@@ -1670,16 +1863,22 @@ function renderResults(rides){
       .eq("user_email", email)
       .maybeSingle();
 
-    if(existing){
-      // already joined
-      if(btn){
-        btn.disabled = false;
-        btn.textContent = "Cancel Join";
-      }
-      await searchRides();
-      showJoinModalAfterJoin(rideId, email, true);
-      return;
-    }
+  if(existing){
+  if(btn){
+    btn.disabled = false;
+    btn.textContent = "Cancel Join";
+  }
+  await searchRides();
+
+  // load ride + show joindone
+  const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
+  if(ride){
+    fillJoinDoneStep1(ride, email);
+    openJoinDoneModal();
+  }
+  return;
+}
+
 
     const { error: e1 } = await sb.from("ride_participants").insert([{ ride_id: rideId, user_email: email }]);
     if(e1){
@@ -1703,9 +1902,13 @@ function renderResults(rides){
       await sb.from("rides").update({ status: "open" }).eq("id", rideId);
     }
 
-    // refresh UI + modal
-    await searchRides();
-    showJoinModal(ride, filled, email);
+// refresh UI + modal
+await searchRides();
+
+// Step 2 modal: Ride joined (same style as Ride posted)
+fillJoinDoneStep1(ride, email);
+openJoinDoneModal();
+
 
     // auto switch to My Rides? (You asked for Go to My Rides button; we’ll keep user in Find unless they tap.)
     // If you want auto-switch, tell me and I’ll change it.
@@ -2014,6 +2217,50 @@ $("auth_btn").addEventListener("click", async ()=>{
   }else{
     openSignInModal("");
   }
+});
+// ===== Join Preview modal actions =====
+$("joinpreview_close").addEventListener("click", closeJoinPreviewModal);
+$("joinpreview_cancel").addEventListener("click", closeJoinPreviewModal);
+
+$("joinpreview_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("joinpreview_overlay")) closeJoinPreviewModal();
+});
+
+$("joinpreview_confirm").addEventListener("click", async ()=>{
+  setText("joinpreview_err","");
+  setText("joinpreview_msg","Joining...");
+  $("joinpreview_confirm").disabled = true;
+  $("joinpreview_cancel").disabled = true;
+
+  try{
+    const rideId = pendingJoinRideId;
+    if(!rideId) throw new Error("Missing ride id.");
+
+    closeJoinPreviewModal();
+    await doJoinRide(rideId, null, false); // doJoinRide will open joindone modal after success
+  }catch(err){
+    setText("joinpreview_msg","");
+    setText("joinpreview_err", err.message || "Join failed.");
+    $("joinpreview_confirm").disabled = false;
+    $("joinpreview_cancel").disabled = false;
+  }finally{
+    $("joinpreview_confirm").disabled = false;
+    $("joinpreview_cancel").disabled = false;
+  }
+});
+
+// ===== Join Done modal actions =====
+$("joindone_close").addEventListener("click", closeJoinDoneModal);
+$("joindone_got_it").addEventListener("click", closeJoinDoneModal);
+
+$("joindone_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("joindone_overlay")) closeJoinDoneModal();
+});
+
+$("joindone_view_my").addEventListener("click", async ()=>{
+  closeJoinDoneModal();
+  activateTab("my");
+  await loadMyRides();
 });
 
 
