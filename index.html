@@ -844,7 +844,11 @@ input[type="date"]{
     <label for="find_time">Leave around</label>
     <select id="find_time"></select>
 
-    <button id="find_btn" class="secondary">Search</button>
+    <div class="split" style="margin-top:16px;">
+  <button id="today_btn" class="secondary" type="button">Today</button>
+  <button id="find_btn" class="secondary" type="button">Search</button>
+</div>
+
     <div id="find_msg" class="muted"></div>
     <div id="find_err" class="error"></div>
 
@@ -1756,6 +1760,58 @@ async function maybeResumePendingAction(){
   }
 
   // ====== FIND ======
+ // ====== TODAY FEED (show all rides today on landing) ======
+async function loadTodayRides(){
+  setText("find_err","");
+  setText("find_msg","Loading today’s rides...");
+  $("find_btn").disabled = true;
+
+  // use local date to avoid timezone issues
+  const todayIso = isoLocalDate(new Date());
+
+  await refreshUser();
+  const myEmail = normEmail(currentUser?.email || "");
+
+  let q = sb.from("rides")
+    .select("*")
+    .eq("ride_date", todayIso)
+    .in("status", ["open","full"]);
+
+  // signed-in: hide rides I posted myself
+  if(myEmail){
+    q = q.neq("owner_email", myEmail);
+  }
+
+  const { data: rides, error } = await q.order("created_at", { ascending:false });
+
+  if(error){
+    setText("find_msg","");
+    setText("find_err","Load failed:\n" + (error.message || JSON.stringify(error)));
+    $("find_btn").disabled = false;
+    return;
+  }
+
+  const list = rides || [];
+  const rideIds = list.map(r=>r.id);
+  const countsMap = await getSeatsFilledMap(rideIds);
+  const myJoined = myEmail ? await getMyJoinedIds(myEmail) : [];
+
+  const enriched = list.map(r=>{
+    const filled = countsMap[r.id] || 0;
+    const alreadyJoined = myJoined.includes(r.id);
+    const isOwner = myEmail && normEmail(r.owner_email) === myEmail;
+    return { ...r, seats_filled: filled, alreadyJoined, isOwner };
+  });
+
+  // sort by earliest leave window start
+  enriched.sort((a,b)=> timeToMinutes(a.from_time) - timeToMinutes(b.from_time));
+
+  renderResults(enriched);
+
+  setText("find_msg", enriched.length ? `Today: ${enriched.length} ride(s).` : "No rides posted for today yet.");
+  $("find_btn").disabled = false;
+}
+
   async function searchRides(){
     setText("find_err","");
     setText("find_msg","Searching...");
@@ -2362,6 +2418,8 @@ div.innerHTML = `
     $("post_btn").addEventListener("click", postRideClick);
     $("find_btn").addEventListener("click", searchRides);
     $("my_refresh_btn").addEventListener("click", loadMyRides);
+    $("today_btn").addEventListener("click", loadTodayRides);
+
 
   // Auth button
 $("auth_btn").addEventListener("click", async ()=>{
@@ -2634,7 +2692,7 @@ window.addEventListener("pageshow", onAppResume); // iOS bfcache 常用
     // If user came back from magic link, resume pending action
     await maybeResumePendingAction();
     activateTab("find");
-
+    await loadTodayRides();
   });
 </script>
 </body>
