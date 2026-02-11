@@ -1336,12 +1336,14 @@ function resetUIAfterSignOut(){
     }
   }
 
-  function openSignInModal(prefillEmail=""){
-    setText("signin_msg","");
-    setText("signin_err","");
-    if(prefillEmail) $("signin_email").value = prefillEmail;
-    $("signin_overlay").classList.add("show");
-  }
+function openSignInModal(prefillEmail=""){
+  showSignInView(); // ✅ always start from sign-in view
+  setText("signin_msg","");
+  setText("signin_err","");
+  if(prefillEmail) $("signin_email").value = prefillEmail;
+  $("signin_overlay").classList.add("show");
+}
+
 
   function closeSignInModal(){
     $("signin_overlay").classList.remove("show");
@@ -1472,41 +1474,38 @@ async function signInWithPassword(email, password){
     return false;
   }
 
-  async function maybeResumePendingAction(){
-    await refreshUser();
-    if(!currentUser?.email) return;
+async function maybeResumePendingAction(){
+  await refreshUser();
+  if(!currentUser?.email) return;
 
-    const pending = loadPendingAction();
-    if(!pending) return;
+  const pending = loadPendingAction();
+  if(!pending) return;
 
-    // avoid super old actions
-    if(pending.ts && (Date.now() - pending.ts) > 15 * 60 * 1000){
-      clearPendingAction();
-      return;
-    }
-
+  // avoid super old actions
+  if(pending.ts && (Date.now() - pending.ts) > 15 * 60 * 1000){
     clearPendingAction();
-    // resume
-       if(pending.type === "POST"){
-      await doPostRide(pending.payload);
-    }else if(pending.type === "JOIN_PREVIEW"){
-      pendingJoinRideId = pending.payload.rideId;
-      await buildJoinPreviewById(pending.payload.rideId);
-      openJoinPreviewModal();
-    }else if(pending.type === "CANCEL"){
-      await doCancelJoin(pending.payload.rideId, null, true);
-    }else if(pending.type === "LOAD_MY"){
-      activateTab("my");
-      await loadMyRides();
-    }
-
-    }else if(pending.type === "CANCEL"){
-      await doCancelJoin(pending.payload.rideId, null, true);
-    }else if(pending.type === "LOAD_MY"){
-      activateTab("my");
-      await loadMyRides();
-    }
+    return;
   }
+
+  clearPendingAction();
+
+  // resume
+  if(pending.type === "POST"){
+    await doPostRide(pending.payload);
+  }else if(pending.type === "JOIN_PREVIEW"){
+    pendingJoinRideId = pending.payload.rideId;
+    await buildJoinPreviewById(pending.payload.rideId);
+    openJoinPreviewModal();
+  }else if(pending.type === "CANCEL"){
+    await doCancelJoin(pending.payload.rideId, null, true);
+  }else if(pending.type === "LOAD_MY"){
+    activateTab("my");
+    await loadMyRides();
+  }else if(pending.type === "CANCEL_RIDE"){
+    await doCancelRideAsHost(pending.payload.rideId, null, true);
+  }
+}
+
 
   // ====== DATA OPS ======
   async function getSeatsFilledMap(rideIds){
