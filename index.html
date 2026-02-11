@@ -1523,17 +1523,15 @@ async function signInWithPassword(email, password){
 
 async function hydrateAuthFast(){
   authHydrating = true;
-
   try{
-    // ✅ 本地瞬间恢复（不等网络）
     const { data } = await sb.auth.getSession();
     const user = data?.session?.user;
 
     currentUser = user?.email ? { email: user.email, id: user.id } : null;
-    setAuthUI(); // 立刻更新 chip + Sign out
+    setAuthUI();
 
-    // ✅ 后台再用 getUser() 校验（慢也没关系）
-    refreshUser(); // 不 await，让它后台跑
+    // ✅ 现在 refreshUser 安全了，可以 await 一下（不会把你清成 null）
+    await refreshUser();
   }catch(e){
     currentUser = null;
     setAuthUI();
@@ -1543,24 +1541,40 @@ async function hydrateAuthFast(){
 }
 
 
-  async function refreshUser(){
+
+ async function refreshUser(){
+  // 1) 先用本地 session 立刻把 UI 变成“已登录”
+  try{
+    const { data: s } = await sb.auth.getSession();
+    const su = s?.session?.user;
+    if(su?.email){
+      currentUser = { email: su.email, id: su.id };
+      setAuthUI();
+    }
+  }catch(e){ /* ignore */ }
+
+  // 2) 再用 getUser 做网络校验（短超时），失败就别清 currentUser
   const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error("getUser timeout")), ms));
 
   try{
     const { data } = await Promise.race([
       sb.auth.getUser(),
-      timeout(4000),
+      timeout(1200), // 👈 建议短一点，别卡体验
     ]);
 
-    currentUser = data?.user ? { email: data.user.email, id: data.user.id } : null;
+    if(data?.user?.email){
+      currentUser = { email: data.user.email, id: data.user.id };
+    }
+    // 如果 data.user 为空：也不要把 currentUser 清空（保留 session）
   }catch(err){
     console.warn("refreshUser failed:", err);
-    currentUser = null;
+    // 👇 关键：不要 currentUser=null
   }
 
   setAuthUI();
   return currentUser;
 }
+
 
 
   function savePendingAction(action){
@@ -2320,7 +2334,7 @@ div.innerHTML = `
 $("auth_btn").addEventListener("click", async ()=>{
   if(authHydrating) await hydrateAuthFast();
   else await refreshUser();
-  ...
+
 
   if(currentUser?.email){
     $("auth_btn").disabled = true;
@@ -2527,10 +2541,12 @@ $("postdone_view_my").addEventListener("click", async ()=>{
 
    // Auth state listener
 sb.auth.onAuthStateChange(async (event, session)=>{
-  await refreshUser();
+  // ✅ 直接用 session 更新，不要先 refreshUser()
+  const u = session?.user;
+  currentUser = u?.email ? { email: u.email, id: u.id } : currentUser;
+  setAuthUI();
 
   if(event === "PASSWORD_RECOVERY"){
-    // 用户点了邮箱里的 recover 链接回到网站时会触发
     openSignInModal("");
     showResetView();
     return;
@@ -2539,10 +2555,14 @@ sb.auth.onAuthStateChange(async (event, session)=>{
   if(event === "SIGNED_IN"){
     closeSignInModal();
     await maybeResumePendingAction();
+    return;
   }
 
   if(event === "SIGNED_OUT"){
+    currentUser = null;
+    setAuthUI();
     resetUIAfterSignOut();
+    return;
   }
 });
 
