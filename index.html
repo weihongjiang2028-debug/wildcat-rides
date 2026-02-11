@@ -1068,10 +1068,15 @@ input[type="date"]{
       NUCarpool helps you connect — it doesn’t book rides or handle payments.
     </div>
 
-    <div class="modalActions">
-      <button id="joindone_view_my" class="secondary" type="button">View My Rides</button>
-      <button id="joindone_got_it" type="button">Got it</button>
-    </div>
+<div class="modalActions" style="flex-direction:column; gap:10px;">
+  <button id="joindone_text_poster" type="button" style="width:100%;">Text Poster</button>
+
+  <div id="joindone_close_text"
+       style="text-align:center; font-size:13px; font-weight:900; color:#4e2a84; text-decoration:underline; cursor:pointer;">
+    Close
+  </div>
+</div>
+
   </div>
 </div>
 
@@ -1182,16 +1187,35 @@ $("joinpreview_body").innerHTML =
   return { ride, filled, remaining };
 }
 
+let joindoneSmsUrl = null; // 全局：存短信跳转链接
+
 function fillJoinDoneStep1(ride, myEmail){
   const poster = riderLabelFromEmail(ride.owner_email).replace("👤 ","");
   const msg = makeMessageTemplate(ride, myEmail);
-  const contactHtml = renderContactSmart(ride.contact || "", msg);
 
-  $("joindone_step1").innerHTML =
-    `<strong>Reach out to poster</strong><br/>
-     👤 Posted by ${escapeHtml(poster)}<br/>
-     ${contactHtml}`;
+  const phone = extractPhone(ride.contact || "");
+  if(phone){
+    joindoneSmsUrl = smsLink(phone.e164, msg);
+
+    // Step 1 只显示电话（没有 Text）
+    $("joindone_step1").innerHTML =
+      `<strong>Reach out to poster</strong><br/>
+       👤 Posted by ${escapeHtml(poster)}<br/>
+       📱 <a href="tel:${phone.e164}">${escapeHtml(phone.display)}</a>`;
+  }else{
+    joindoneSmsUrl = null;
+
+    // 没电话：就展示原 contact 文本
+    $("joindone_step1").innerHTML =
+      `<strong>Reach out to poster</strong><br/>
+       👤 Posted by ${escapeHtml(poster)}<br/>
+       📱 ${escapeHtml(ride.contact || "No contact provided")}`;
+  }
+
+  // 按钮文案：没电话时更合理
+  $("joindone_text_poster").textContent = phone ? "Text Poster" : "Copy Contact";
 }
+
 
   function formatTimeAMPM(hhmm){
     if(!hhmm) return "";
@@ -2317,18 +2341,30 @@ $("joinpreview_confirm").addEventListener("click", async ()=>{
 });
 
 // ===== Join Done modal actions =====
+// ===== Join Done modal actions (new) =====
 $("joindone_close").addEventListener("click", closeJoinDoneModal);
-$("joindone_got_it").addEventListener("click", closeJoinDoneModal);
 
 $("joindone_overlay").addEventListener("click", (e)=>{
   if(e.target === $("joindone_overlay")) closeJoinDoneModal();
 });
 
-$("joindone_view_my").addEventListener("click", async ()=>{
-  closeJoinDoneModal();
-  activateTab("my");
-  await loadMyRides();
+// underlined close text
+$("joindone_close_text").addEventListener("click", closeJoinDoneModal);
+
+// main CTA: Text Poster (or Copy Contact fallback)
+$("joindone_text_poster").addEventListener("click", async ()=>{
+  if(joindoneSmsUrl){
+    window.location.href = joindoneSmsUrl;
+    return;
+  }
+
+  // fallback: copy contact text
+  const raw = (String($("joindone_step1").textContent || "")).trim();
+  await copyText(raw);
+  $("joindone_text_poster").textContent = "Copied!";
+  setTimeout(()=> $("joindone_text_poster").textContent = "Copy Contact", 900);
 });
+
 
 
     // Sign-in modal actions
