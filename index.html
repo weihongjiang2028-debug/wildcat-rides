@@ -845,7 +845,6 @@ input[type="date"]{
     <select id="find_time"></select>
 
     <button id="find_btn" class="secondary">Search</button>
-
     <div id="find_msg" class="muted"></div>
     <div id="find_err" class="error"></div>
 
@@ -1757,58 +1756,6 @@ async function maybeResumePendingAction(){
   }
 
   // ====== FIND ======
- // ====== TODAY FEED (show all rides today on landing) ======
-async function loadTodayRides(){
-  setText("find_err","");
-  setText("find_msg","Loading today’s rides...");
-  $("find_btn").disabled = true;
-
-  // use local date to avoid timezone issues
-  const todayIso = isoLocalDate(new Date());
-
-  await refreshUser();
-  const myEmail = normEmail(currentUser?.email || "");
-
-  let q = sb.from("rides")
-    .select("*")
-    .eq("ride_date", todayIso)
-    .in("status", ["open","full"]);
-
-  // signed-in: hide rides I posted myself
-  if(myEmail){
-    q = q.neq("owner_email", myEmail);
-  }
-
-  const { data: rides, error } = await q.order("created_at", { ascending:false });
-
-  if(error){
-    setText("find_msg","");
-    setText("find_err","Load failed:\n" + (error.message || JSON.stringify(error)));
-    $("find_btn").disabled = false;
-    return;
-  }
-
-  const list = rides || [];
-  const rideIds = list.map(r=>r.id);
-  const countsMap = await getSeatsFilledMap(rideIds);
-  const myJoined = myEmail ? await getMyJoinedIds(myEmail) : [];
-
-  const enriched = list.map(r=>{
-    const filled = countsMap[r.id] || 0;
-    const alreadyJoined = myJoined.includes(r.id);
-    const isOwner = myEmail && normEmail(r.owner_email) === myEmail;
-    return { ...r, seats_filled: filled, alreadyJoined, isOwner };
-  });
-
-  // sort by earliest leave window start
-  enriched.sort((a,b)=> timeToMinutes(a.from_time) - timeToMinutes(b.from_time));
-
-  renderResults(enriched);
-
-  setText("find_msg", enriched.length ? `Today: ${enriched.length} ride(s).` : "No rides posted for today yet.");
-  $("find_btn").disabled = false;
-}
-
   async function searchRides(){
     setText("find_err","");
     setText("find_msg","Searching...");
@@ -1825,17 +1772,6 @@ async function loadTodayRides(){
       $("find_btn").disabled = false;
       return;
     }
-
-    async function loadTodayRides(){
-  const todayIso = new Date().toISOString().slice(0,10);
-
-  // 保持 Find 的筛选器一致
-  $("find_date").value = todayIso;
-  $("find_date_display").textContent = isoToMDY(todayIso);
-
-  // 直接复用你现成的 searchRides 逻辑
-  await searchRides();
-}
 
     // Show all rides for day (open + full so user can see, but can only join open if seats available)
    // If signed in, hide rides that I posted myself
@@ -1917,16 +1853,8 @@ function renderResults(rides){
     const routeLine = prettyRoute(r.direction, r.airport);
 
     // 👤 Posted by ...
-const authed = !!(currentUser?.email && isNU(normEmail(currentUser.email)));
-
-let postedByHtml = "";
-if(authed){
-  const poster = riderLabelFromEmail(r.owner_email).replace(/^👤\s*/, "");
-  postedByHtml = `<div class="rideMetaLine">👤 Posted by ${escapeHtml(poster)}</div>`;
-}else{
-  postedByHtml = `<div class="rideMetaLine">👤 Poster unlocked once signed in</div>`;
-}
-
+    const poster = riderLabelFromEmail(r.owner_email).replace(/^👤\s*/, "");
+    const postedByLine = `👤 Posted by ${poster}`;
 
     // Contact locked until joined (no double-escape)
     const contactLine = joined
@@ -1941,7 +1869,7 @@ if(authed){
       <div class="rideDivider"></div>
 
       <div class="rideMetaLine">🧭 ${escapeHtml(routeLine)}</div>
-      ${postedByHtml}
+      <div class="rideMetaLine">${escapeHtml(postedByLine)}</div>
       <div class="rideSubMeta">💺 ${filled} / ${max} seats filled</div>
 
       <div class="rideSubMeta">${escapeHtml(contactLine)}</div>
@@ -2435,8 +2363,6 @@ div.innerHTML = `
     $("find_btn").addEventListener("click", searchRides);
     $("my_refresh_btn").addEventListener("click", loadMyRides);
 
-
-
   // Auth button
 $("auth_btn").addEventListener("click", async ()=>{
   await refreshUser();
@@ -2671,15 +2597,9 @@ sb.auth.onAuthStateChange(async (event, session)=>{
   }
 
   if(event === "SIGNED_IN"){
-  closeSignInModal();
-  await maybeResumePendingAction();
-
-  // ✅ 关键：登录后立刻重刷 Find 页列表，让 poster 立刻显示出来
-  if(!$("view_find").classList.contains("hidden")){
-    await loadTodayRides();  // 或者 await searchRides();
+    closeSignInModal();
+    await maybeResumePendingAction();
   }
-}
-
 
   if(event === "SIGNED_OUT"){
     resetUIAfterSignOut();
@@ -2714,7 +2634,7 @@ window.addEventListener("pageshow", onAppResume); // iOS bfcache 常用
     // If user came back from magic link, resume pending action
     await maybeResumePendingAction();
     activateTab("find");
-    await loadTodayRides();
+
   });
 </script>
 </body>
