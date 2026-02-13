@@ -1427,14 +1427,21 @@ async function getSessionUserFast(){
   }
 }
 
-// iOS 切回前台的 1s 内：给 session 一个“宽限重试”，避免误判登出
+const RESUME_GRACE_MS = 4000; // ✅ 4s grace window (iOS Messages → Safari 常需要更久)
+
 async function getSessionUserWithGrace(){
   let u = await getSessionUserFast();
-  if(!u && (Date.now() - lastResumeAt) < 1500){
-    await sleep(250);
-    u = await getSessionUserFast();
+  if(u) return u;
+
+  // If we just resumed, retry a few times without declaring logout
+  if((Date.now() - lastResumeAt) < RESUME_GRACE_MS){
+    for(const delay of [200, 400, 800, 1200]){
+      await sleep(delay);
+      u = await getSessionUserFast();
+      if(u) return u;
+    }
   }
-  return u;
+  return null;
 }
 
 
@@ -1551,21 +1558,31 @@ let __refreshInFlight = null;
 async function refreshUser({ force=false } = {}){
   if(__refreshInFlight) return __refreshInFlight;
 
+  const prev = currentUser; // ✅ keep a snapshot
+
   __refreshInFlight = (async ()=>{
-    // 1) 先用本地 session 快速恢复（不会卡）
     const su = await getSessionUserWithGrace();
+
     if(su){
       currentUser = { email: su.email, id: su.id };
-      setAuthUI(); // 立刻稳定成“已登录 UI”
+      setAuthUI();
     }else{
-      // session 真没有了，才算登出
+      // ✅ Key fix: if we *had* a user and we just resumed, do NOT clobber to null
+      if(prev?.email && (Date.now() - lastResumeAt) < RESUME_GRACE_MS){
+        currentUser = prev;     // keep showing signed-in
+        setAuthUI();
+        // schedule a quiet retry
+        setTimeout(()=> refreshUser({ force:false }).catch(()=>{}), 500);
+        return currentUser;
+      }
+
+      // truly no session
       currentUser = null;
       setAuthUI();
-      return currentUser;
+      return null;
     }
 
-    // 2) 后台校验（可能会卡/失败，但失败不闪退 UI）
-    //    只在 force 或你想更严谨时做
+    // Optional stricter validation (never clobber on transient failure)
     if(force){
       try{
         const timeout = (ms) => new Promise((_, rej)=>setTimeout(()=>rej(new Error("getUser timeout")), ms));
@@ -1575,7 +1592,6 @@ async function refreshUser({ force=false } = {}){
         }
       }catch(e){
         console.warn("refreshUser getUser failed (ignored):", e);
-        // 不要把 currentUser 清空！否则 iOS resume 会闪 Sign in
       }
       setAuthUI();
     }
@@ -1585,14 +1601,8 @@ async function refreshUser({ force=false } = {}){
 
   return __refreshInFlight;
 }
-async function warmAuth(){
-  try{
-    const { data } = await sb.auth.getSession();
-    const user = data?.session?.user;
-    currentUser = user ? { email: user.email, id: user.id } : null;
-    setAuthUI();
-  }catch(e){}
-}
+
+
 
 
   function savePendingAction(action){
@@ -1610,22 +1620,9 @@ async function warmAuth(){
   }
 
 async function requireAuthOrQueue(action){
-  // ✅ 如果内存里已经有登录态，别卡 UI，直接放行
-  if (currentUser?.email) return true;
-
-  // ✅ 尝试用本地 session 快速恢复（通常比 getUser 快很多）
-  try{
-    const { data } = await sb.auth.getSession();
-    const user = data?.session?.user;
-    currentUser = user ? { email: user.email, id: user.id } : null;
-    setAuthUI();
-  }catch(e){
-    currentUser = null;
-  }
-
+  await refreshUser({ force:false });
   if(currentUser?.email) return true;
 
-  // 仍未登录：再走你原来的队列 + 弹窗逻辑
   savePendingAction(action);
   openSignInModal(action?.emailHint || "");
   return false;
@@ -2385,17 +2382,7 @@ $("auth_btn").addEventListener("click", async ()=>{
     openSignInModal("");
   }
 });
-    // ✅ 这里加：从后台回到前台就预热 session
-document.addEventListener("visibilitychange", ()=>{
-  if(document.visibilityState === "visible") warmAuth();
-});
 
-window.addEventListener("pageshow", (e)=>{
-  if(e.persisted) warmAuth();
-});
-
-// ✅ 页面初次加载也预热一次（可选但推荐）
-await warmAuth();
 // ===== Join Preview modal actions =====
 $("joinpreview_close").addEventListener("click", closeJoinPreviewModal);
 $("joinpreview_cancel").addEventListener("click", closeJoinPreviewModal);
@@ -2609,17 +2596,19 @@ sb.auth.onAuthStateChange(async (event, session)=>{
 
 function onAppResume(){
   lastResumeAt = Date.now();
-
-  // 只用 session 先稳定 UI（不阻塞）
-  getSessionUserFast().then(u=>{
-    if(u){
-      currentUser = { email: u.email, id: u.id };
-    }
-    setAuthUI();
-    // 后台轻量校验（可选）
-    refreshUser({ force:false }).catch(()=>{});
-  });
+  // kick a non-blocking rehydrate
+  refreshUser({ force:false }).catch(()=>{});
 }
+
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible") onAppResume();
+});
+
+window.addEventListener("pageshow", onAppResume);
+
+// ✅ iOS 有时从 Messages 回来 focus 更可靠
+window.addEventListener("focus", onAppResume);
+
 
 document.addEventListener("visibilitychange", ()=>{
   if(document.visibilityState === "visible") onAppResume();
