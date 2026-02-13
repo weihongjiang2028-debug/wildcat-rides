@@ -1092,6 +1092,13 @@ input[type="date"]{
   const normEmail = (e) => (e||"").trim().toLowerCase();
   const isNU = (e) => e.endsWith("@u.northwestern.edu");
 
+function withTimeout(promise, ms, label="timeout"){
+  return Promise.race([
+    promise,
+    new Promise((_, rej)=> setTimeout(()=> rej(new Error(label)), ms))
+  ]);
+}
+
   function escapeHtml(str){
     return String(str ?? "")
       .replaceAll("&", "&amp;")
@@ -1420,12 +1427,50 @@ function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
 async function getSessionUserFast(){
   try{
-    const { data } = await sb.auth.getSession();
+    const { data } = await withTimeout(sb.auth.getSession(), 1200, "getSession timeout");
     return data?.session?.user || null;
   }catch(e){
+    console.warn("getSessionUserFast:", e.message || e);
     return null;
   }
 }
+function withTimeout(promise, ms, label="timeout"){
+  return Promise.race([
+    promise,
+    new Promise((_, rej)=> setTimeout(()=> rej(new Error(label)), ms))
+  ]);
+}
+
+async function safeGetSessionUser(){
+  try{
+    const { data } = await withTimeout(sb.auth.getSession(), 1200, "getSession timeout");
+    return data?.session?.user || null;
+  }catch(e){
+    console.warn("safeGetSessionUser:", e.message || e);
+    return null;
+  }
+}
+
+// ✅ 你原来有 lastResumeAt 就用原来的；没有的话加这一行
+// let lastResumeAt = 0;
+
+async function onAppResume(){
+  lastResumeAt = Date.now();
+
+  // 1) 先尝试把 session 从 storage 里“唤醒”（不管成功与否都不能卡死）
+  await safeGetSessionUser();
+
+  // 2) 可选但很稳：强制 refresh token（有时能救回 iOS 切回来后的“假登出/假空”）
+  try{
+    await withTimeout(sb.auth.refreshSession(), 2000, "refreshSession timeout");
+  }catch(e){
+    console.warn("refreshSession:", e.message || e);
+  }
+
+  // 3) 更新你页面里的 currentUser + chip（不阻塞）
+  refreshUser({ force:false }).catch(()=>{});
+}
+
 
 const RESUME_GRACE_MS = 4000; // ✅ 4s grace window (iOS Messages → Safari 常需要更久)
 
@@ -1560,7 +1605,7 @@ async function refreshUser({ force=false } = {}){
 
   const prev = currentUser; // ✅ keep a snapshot
 
-  __refreshInFlight = (async ()=>{
+ __refreshInFlight = withTimeout((async ()=>{
     const su = await getSessionUserWithGrace();
 
     if(su){
@@ -1597,7 +1642,14 @@ async function refreshUser({ force=false } = {}){
     }
 
     return currentUser;
-  })().finally(()=>{ __refreshInFlight = null; });
+})(), 3000, "refreshUser timeout")
+.finally(()=>{ __refreshInFlight = null; })
+.catch((e)=>{
+  console.warn("refreshUser:", e.message || e);
+  // 超时不要清空 currentUser，保持现状
+  setAuthUI();
+  return currentUser;
+});
 
   return __refreshInFlight;
 }
@@ -1620,7 +1672,12 @@ async function refreshUser({ force=false } = {}){
   }
 
 async function requireAuthOrQueue(action){
-  await refreshUser({ force:false });
+  try{
+    await withTimeout(refreshUser({ force:false }), 2500, "requireAuth timeout");
+  }catch(e){
+    console.warn("requireAuthOrQueue:", e.message || e);
+  }
+
   if(currentUser?.email) return true;
 
   savePendingAction(action);
@@ -2166,20 +2223,30 @@ function closePostDoneModal(){
 
   // ====== MY RIDES ======
 async function loadMyRidesClick(){
-  // ✅ 先立刻切过去，用户不会觉得“点不了”
   activateTab("my");
   setText("my_err","");
   setText("my_msg","Signing you back in…");
 
-  const ok = await requireAuthOrQueue({ type:"LOAD_MY", payload:{} });
+  // 给 rehydrate 一个明确窗口
+  let ok = false;
+  try{
+    ok = await withTimeout(requireAuthOrQueue({ type:"LOAD_MY", payload:{} }), 3000, "loadMy auth wait timeout");
+  }catch(e){
+    console.warn("loadMyRidesClick:", e.message || e);
+    ok = false;
+  }
+
   if(!ok){
-    // 没登录：这里会弹 sign in，你也可以保留提示或清掉
+    // 不要永远显示 signing you back in
+    setText("my_msg","");
+    setText("my_err","Still signing you in — please tap Sign in if prompted.");
     return;
   }
 
-  // 已登录：开始拉数据（如果还需要 1–2 秒，用户也能看到 Loading）
+  setText("my_msg","Loading…");
   await loadMyRides();
 }
+
 
 
   async function loadMyRides(){
