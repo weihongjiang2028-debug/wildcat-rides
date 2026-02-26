@@ -4,19 +4,20 @@
   <meta charset="UTF-8" />
   <title>Northwestern Carpool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Styles -->
+
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Supabase (must load before app.js) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="app.js"></script>
 </head>
 
 <body>
-
-<!-- ===== HEADER ===== -->
 <header>
+  <!-- Top brand block -->
   <div class="brandTop">
-
     <div class="brandTitleRow">
+      <!-- Left white paw -->
       <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
         <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
@@ -27,6 +28,7 @@
 
       <h1 class="brandTitleBig">Northwestern Carpool</h1>
 
+      <!-- Right white paw -->
       <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
         <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
@@ -39,57 +41,23 @@
     <div class="brandSubCenter">
       <span class="taglinePill">Find a ride-mate. Split your airport Uber.</span>
     </div>
-
   </div>
 
   <!-- Tabs -->
   <div class="tabsWrap">
     <div class="tabsAuth">
       <div id="auth_chip" class="chip hidden"></div>
-      <button id="auth_btn" class="authBtn">Sign in</button>
+      <button id="auth_btn" class="authBtn" type="button">Sign in</button>
     </div>
-    <button class="tabBtn active" id="tab_find">Find a Ride</button>
-    <button class="tabBtn" id="tab_post">Post a Ride</button>
-    <button class="tabBtn" id="tab_my">My Rides</button>
-  </div>
 
+    <button class="tabBtn active" id="tab_find" type="button">Find a Ride</button>
+    <button class="tabBtn" id="tab_post" type="button">Post a Ride</button>
+    <button class="tabBtn" id="tab_my" type="button">My Rides</button>
+  </div>
 </header>
 
-
-<!-- ===== MAIN CONTENT ===== -->
 <main>
-
-  <!-- FIND A RIDE -->
-  <section id="view_find" class="card">
-    <div class="card-title">Find a Ride</div>
-
-    <label for="find_direction">Direction</label>
-    <select id="find_direction">
-      <option value="Evanston → Airport" selected>Evanston → Airport</option>
-      <option value="Airport → Evanston">Airport → Evanston</option>
-    </select>
-
-    <label for="find_airport">Airport</label>
-    <select id="find_airport">
-      <option value="ORD" selected>ORD</option>
-      <option value="MDW">MDW</option>
-    </select>
-
-    <label for="find_date">Date</label>
-    <input id="find_date" type="date" />
-    <div class="hint" id="find_date_display"></div>
-
-    <label for="find_time">Leave around</label>
-    <select id="find_time"></select>
-
-    <button id="find_btn" class="secondary">Search</button>
-    <div id="find_msg" class="muted"></div>
-    <div id="find_err" class="error"></div>
-
-    <div id="results"></div>
-  </section>
-
-  <!-- POST A RIDE -->
+  <!-- POST -->
   <section id="view_post" class="card hidden">
     <div class="card-title">Post a Ride</div>
 
@@ -130,33 +98,60 @@
     <label for="post_contact">Contact</label>
     <input id="post_contact" placeholder="Enter your contact info" />
 
-    <button id="post_btn">Submit Ride</button>
+    <button id="post_btn" type="button">Submit Ride</button>
     <div id="post_msg" class="muted"></div>
     <div id="post_err" class="error"></div>
   </section>
 
-  <!-- MY RIDES -->
+  <!-- FIND -->
+  <section id="view_find" class="card">
+    <div class="card-title">Find a Ride</div>
+
+    <label for="find_direction">Direction</label>
+    <select id="find_direction">
+      <option value="Evanston → Airport" selected>Evanston → Airport</option>
+      <option value="Airport → Evanston">Airport → Evanston</option>
+    </select>
+
+    <label for="find_airport">Airport</label>
+    <select id="find_airport">
+      <option value="ORD" selected>ORD</option>
+      <option value="MDW">MDW</option>
+    </select>
+
+    <label for="find_date">Date</label>
+    <input id="find_date" type="date" />
+    <div class="hint" id="find_date_display"></div>
+
+    <label for="find_time">Leave around</label>
+    <select id="find_time"></select>
+
+    <button id="find_btn" class="secondary" type="button">Search</button>
+    <div id="find_msg" class="muted"></div>
+    <div id="find_err" class="error"></div>
+
+    <div id="results"></div>
+  </section>
+
+  <!-- MY -->
   <section id="view_my" class="card hidden">
     <div class="card-title">My Rides</div>
     <div class="muted" style="margin-top:6px;">Sign in to see rides you posted or joined.</div>
 
-    <button id="my_refresh_btn" class="secondary">Refresh</button>
+    <button id="my_refresh_btn" class="secondary" type="button">Refresh</button>
     <div id="my_msg" class="muted"></div>
     <div id="my_err" class="error"></div>
 
     <div class="hr"></div>
     <div id="my_rides"></div>
   </section>
-
 </main>
 
-
-<!-- ===== MODALS ===== -->
-
-<!-- Sign In -->
+<!-- SIGN IN MODAL -->
 <div id="signin_overlay" class="overlay">
   <div class="modal">
-    <button class="modalClose" id="signin_close">✕</button>
+    <button class="modalClose" id="signin_close" type="button">✕</button>
+
     <div class="modalTitle" id="signin_title">Sign in</div>
 
     <div id="signin_view">
@@ -195,10 +190,11 @@
   </div>
 </div>
 
-<!-- Sign Up -->
+<!-- SIGN UP MODAL -->
 <div id="signup_overlay" class="overlay">
   <div class="modal">
-    <button class="modalClose" id="signup_close">✕</button>
+    <button class="modalClose" id="signup_close" type="button">✕</button>
+
     <div class="modalTitle">Create account</div>
 
     <label for="signup_email" style="margin-top:8px;">NU Email</label>
@@ -220,10 +216,11 @@
   </div>
 </div>
 
-<!-- Ride Posted Success -->
+<!-- POST SUCCESS MODAL -->
 <div id="postdone_overlay" class="overlay">
   <div class="modal">
-    <button class="modalClose" id="postdone_close">✕</button>
+    <button class="modalClose" id="postdone_close" type="button">✕</button>
+
     <div class="modalTitle">🎉 Ride posted!🎉</div>
     <div class="postNextSub">What happens next?</div>
 
@@ -232,17 +229,21 @@
         <div class="stepNum">1</div>
         <div class="stepText"><strong>Wait for a message</strong><br/>Other NU students who have joined will text you.</div>
       </div>
+
       <div class="stepItem">
         <div class="stepNum">2</div>
         <div class="stepText"><strong>Coordinate details</strong><br/>Confirm pickup time, location, and luggage.</div>
       </div>
+
       <div class="stepItem">
         <div class="stepNum">3</div>
         <div class="stepText"><strong>Book &amp; split</strong><br/>Book Uber/Lyft together and split the cost (Venmo, Zelle, or cash).</div>
       </div>
     </div>
 
-    <div class="postDisclaimer">NUCarpool helps you connect — it doesn't book rides or handle payments.</div>
+    <div class="postDisclaimer">
+      NUCarpool helps you connect — it doesn’t book rides or handle payments.
+    </div>
 
     <div class="modalActions">
       <button id="postdone_view_my" class="secondary" type="button">View My Rides</button>
@@ -251,12 +252,12 @@
   </div>
 </div>
 
-<!-- Join Preview / Confirm -->
+<!-- JOIN PREVIEW / CONFIRM MODAL -->
 <div id="joinpreview_overlay" class="overlay">
   <div class="modal joinPreviewModal">
-    <button class="modalClose" id="joinpreview_close">✕</button>
-    <div class="joinPreviewTitle">You are joining:</div>
+    <button class="modalClose" id="joinpreview_close" type="button">✕</button>
 
+    <div class="joinPreviewTitle">You are joining:</div>
     <div class="joinPreviewLines" id="joinpreview_body"></div>
 
     <div class="modalActions joinpreviewActions">
@@ -269,10 +270,11 @@
   </div>
 </div>
 
-<!-- Ride Joined Success -->
+<!-- JOIN SUCCESS MODAL -->
 <div id="joindone_overlay" class="overlay">
   <div class="modal">
-    <button class="modalClose" id="joindone_close">✕</button>
+    <button class="modalClose" id="joindone_close" type="button">✕</button>
+
     <div class="modalTitle">🎉 Ride joined 🎉</div>
     <div class="postNextSub">What happens next?</div>
 
@@ -281,37 +283,43 @@
         <div class="stepNum">1</div>
         <div class="stepText" id="joindone_step1"></div>
       </div>
+
       <div class="stepItem">
         <div class="stepNum">2</div>
-        <div class="stepText"><strong>Coordinate the plan</strong><br/>Communicate time + specific location.</div>
+        <div class="stepText">
+          <strong>Coordinate the plan</strong><br/>
+          Communicate time + specific location.
+        </div>
       </div>
+
       <div class="stepItem">
         <div class="stepNum">3</div>
-        <div class="stepText"><strong>Save money together</strong><br/>Book 1 Uber/Lyft, split with Venmo/Zelle/Cash.</div>
+        <div class="stepText">
+          <strong>Save money together</strong><br/>
+          Book 1 Uber/Lyft, split with Venmo/Zelle/Cash.
+        </div>
       </div>
     </div>
 
     <div class="postDisclaimer" style="margin-top:10px;">
-      <div style="font-weight:950; color:#111; margin-bottom:6px;">💸 You'll save about $25 by sharing</div>
+      <div style="font-weight:950; color:#111; margin-bottom:6px;">💸 You’ll save about $25 by sharing</div>
       <div style="font-weight:950; color:#111;">💡 Tip: Add a pickup stop if you live far apart</div>
     </div>
 
     <div class="postDisclaimer" style="margin-top:10px;">
-      NUCarpool helps you connect — it doesn't book rides or handle payments.
+      NUCarpool helps you connect — it doesn’t book rides or handle payments.
     </div>
 
     <div class="modalActions" style="flex-direction:column; gap:10px;">
       <button id="joindone_text_poster" type="button" style="width:100%;">Text Poster</button>
-      <div id="joindone_close_text" style="text-align:center; font-size:13px; font-weight:900; color:#4e2a84; text-decoration:underline; cursor:pointer;">
+
+      <div id="joindone_close_text"
+           style="text-align:center; font-size:13px; font-weight:900; color:#4e2a84; text-decoration:underline; cursor:pointer;">
         Close
       </div>
     </div>
   </div>
 </div>
-
-
-<!-- ===== SCRIPTS ===== -->
-<script src="app.js"></script>
 
 </body>
 </html>
