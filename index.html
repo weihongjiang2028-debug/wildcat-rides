@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Northwestern Carpool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="brandTop">
+    <div class="brandTitleRow">
+      <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+        <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+        <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+        <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+        <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
+      </svg>
+      <h1 class="brandTitleBig">Northwestern Carpool</h1>
+      <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+        <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+        <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+        <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+        <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
+      </svg>
+    </div>
+    <div class="brandSubCenter">
+      <span class="taglinePill">Find a ride-mate. Split your airport Uber.</span>
+    </div>
+  </div>
+
+  <div class="tabsWrap">
+    <div class="tabsAuth">
+      <div id="auth_chip" class="chip hidden"></div>
+      <button id="auth_btn" class="authBtn">Sign in</button>
+    </div>
+    <button class="tabBtn active" id="tab_find">Find a Ride</button>
+    <button class="tabBtn" id="tab_post">Post a Ride</button>
+    <button class="tabBtn" id="tab_my">My Rides</button>
+  </div>
+</header>
+
+
+<!-- ===== MAIN ===== -->
+<main>
+
+  <!-- FIND -->
+  <section id="view_find" class="card">
+    <div class="card-title">Find a Ride</div>
+
+    <label for="find_direction">Direction</label>
+    <select id="find_direction">
+      <option value="Evanston → Airport" selected>Evanston → Airport</option>
+      <option value="Airport → Evanston">Airport → Evanston</option>
+    </select>
+
+    <label for="find_airport">Airport</label>
+    <select id="find_airport">
+      <option value="ORD" selected>ORD</option>
+      <option value="MDW">MDW</option>
+    </select>
+
+    <label for="find_date">Date</label>
+    <input id="find_date" type="date" />
+    <div class="hint" id="find_date_display"></div>
+
+    <label for="find_time">Leave around</label>
+    <select id="find_time"></select>
+
+    <button id="find_btn" class="secondary">Search</button>
+    <div id="find_msg" class="muted"></div>
+    <div id="find_err" class="error"></div>
+
+    <div id="results"></div>
+  </section>
+
+  <!-- POST -->
+  <section id="view_post" class="card hidden">
+    <div class="card-title">Post a Ride</div>
+
+    <label for="post_direction">Direction</label>
+    <select id="post_direction">
+      <option value="Evanston → Airport" selected>Evanston → Airport</option>
+      <option value="Airport → Evanston">Airport → Evanston</option>
+    </select>
+
+    <label for="post_airport">Airport</label>
+    <select id="post_airport">
+      <option value="ORD" selected>ORD</option>
+      <option value="MDW">MDW</option>
+    </select>
+
+    <label for="post_date">Date</label>
+    <input id="post_date" type="date" />
+    <div class="hint" id="post_date_display"></div>
+
+    <label>Leave window</label>
+    <div class="split">
+      <div>
+        <label for="post_from" style="margin-top:0;">From (earliest)</label>
+        <select id="post_from"></select>
+      </div>
+      <div>
+        <label for="post_to" style="margin-top:0;">To (latest)</label>
+        <select id="post_to"></select>
+      </div>
+    </div>
+
+    <label for="post_max_seats">Max seats (including you)</label>
+    <select id="post_max_seats">
+      <option value="2">2</option>
+      <option value="3" selected>3</option>
+    </select>
+
+    <label for="post_contact">Contact</label>
+    <input id="post_contact" placeholder="Enter your contact info" />
+
+    <button id="post_btn">Submit Ride</button>
+    <div id="post_msg" class="muted"></div>
+    <div id="post_err" class="error"></div>
+  </section>
+
+  <!-- MY RIDES -->
+  <section id="view_my" class="card hidden">
+    <div class="card-title">My Rides</div>
+    <div class="muted" style="margin-top:6px;">Sign in to see rides you posted or joined.</div>
+
+    <button id="my_refresh_btn" class="secondary">Refresh</button>
+    <div id="my_msg" class="muted"></div>
+    <div id="my_err" class="error"></div>
+
+    <div class="hr"></div>
+    <div id="my_rides"></div>
+  </section>
+
+</main>
+
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="footer-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
+    </svg>
+    <span class="footer-brand-name">NUCarpool</span>
+  </div>
+  <div class="footer-tagline">For Northwestern students only</div>
+  <div class="footer-links">
+    <a class="footer-link" href="privacy.html">Privacy Policy</a>
+    <a class="footer-link" href="contact.html">Contact</a>
+  </div>
+  <div class="footer-copy">© 2025 NUCarpool · Not affiliated with Northwestern University</div>
+</footer>
+
+
+<!-- ===== MODALS ===== -->
+
+<!-- Sign In -->
+<div id="signin_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="signin_close">✕</button>
+    <div class="modalTitle" id="signin_title">Sign in</div>
+
+    <div id="signin_view">
+      <label for="signin_email" style="margin-top:8px;">NU Email</label>
+      <input id="signin_email" placeholder="name@u.northwestern.edu" />
+
+      <label for="signin_password" style="margin-top:10px;">Password</label>
+      <input id="signin_password" type="password" placeholder="At least 8 characters" />
+
+      <button id="signin_pw_btn" type="button">Sign in</button>
+
+      <div class="modalActions" style="margin-top:10px;">
+        <button id="forgot_pw_btn" class="secondary" type="button">Forgot password</button>
+        <button id="signup_pw_btn" class="secondary" type="button">Sign up</button>
+      </div>
+
+      <div id="signin_msg" class="muted"></div>
+      <div id="signin_err" class="error"></div>
+    </div>
+
+    <div id="reset_view" class="hidden">
+      <div class="hint" style="margin-top:6px;">Set a new password for your account.</div>
+
+      <label for="reset_pw1" style="margin-top:10px;">New password</label>
+      <input id="reset_pw1" type="password" placeholder="At least 8 characters" />
+
+      <label for="reset_pw2" style="margin-top:10px;">Confirm new password</label>
+      <input id="reset_pw2" type="password" placeholder="Type it again" />
+
+      <button id="reset_save_btn" type="button">Update password</button>
+      <button id="reset_back_btn" class="secondary" type="button">Back to sign in</button>
+
+      <div id="reset_msg" class="muted"></div>
+      <div id="reset_err" class="error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sign Up -->
+<div id="signup_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="signup_close">✕</button>
+    <div class="modalTitle">Create account</div>
+
+    <label for="signup_email" style="margin-top:8px;">NU Email</label>
+    <input id="signup_email" placeholder="name@u.northwestern.edu" />
+
+    <label for="signup_password" style="margin-top:10px;">Password</label>
+    <input id="signup_password" type="password" placeholder="At least 8 characters" />
+
+    <label for="signup_password2" style="margin-top:10px;">Confirm password</label>
+    <input id="signup_password2" type="password" placeholder="Type it again" />
+
+    <div class="modalActions">
+      <button id="signup_create_btn" type="button">Create account</button>
+      <button id="signup_back_btn" class="secondary" type="button">Back</button>
+    </div>
+
+    <div id="signup_msg" class="muted"></div>
+    <div id="signup_err" class="error"></div>
+  </div>
+</div>
+
+<!-- Post Success -->
+<div id="postdone_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="postdone_close">✕</button>
+    <div class="modalTitle">🎉 Ride posted!🎉</div>
+    <div class="postNextSub">What happens next?</div>
+
+    <div class="stepList">
+      <div class="stepItem">
+        <div class="stepNum">1</div>
+        <div class="stepText"><strong>Wait for a message</strong><br/>Other NU students who have joined will text you.</div>
+      </div>
+      <div class="stepItem">
+        <div class="stepNum">2</div>
+        <div class="stepText"><strong>Coordinate details</strong><br/>Confirm pickup time, location, and luggage.</div>
+      </div>
+      <div class="stepItem">
+        <div class="stepNum">3</div>
+        <div class="stepText"><strong>Book &amp; split</strong><br/>Book Uber/Lyft together and split the cost (Venmo, Zelle, or cash).</div>
+      </div>
+    </div>
+
+    <div class="postDisclaimer">NUCarpool helps you connect — it doesn't book rides or handle payments.</div>
+
+    <div class="modalActions">
+      <button id="postdone_view_my" class="secondary" type="button">View My Rides</button>
+      <button id="postdone_got_it" type="button">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Join Preview -->
+<div id="joinpreview_overlay" class="overlay">
+  <div class="modal joinPreviewModal">
+    <button class="modalClose" id="joinpreview_close">✕</button>
+    <div class="joinPreviewTitle">You are joining:</div>
+
+    <div class="joinPreviewLines" id="joinpreview_body"></div>
+
+    <div class="modalActions joinpreviewActions">
+      <button id="joinpreview_cancel" class="secondary" type="button">Not now</button>
+      <button id="joinpreview_confirm" type="button">Confirm Join</button>
+    </div>
+
+    <div id="joinpreview_msg" class="muted"></div>
+    <div id="joinpreview_err" class="error"></div>
+  </div>
+</div>
+
+<!-- Join Success -->
+<div id="joindone_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="joindone_close">✕</button>
+    <div class="modalTitle">🎉 Ride joined 🎉</div>
+    <div class="postNextSub">What happens next?</div>
+
+    <div class="stepList">
+      <div class="stepItem">
+        <div class="stepNum">1</div>
+        <div class="stepText" id="joindone_step1"></div>
+      </div>
+      <div class="stepItem">
+        <div class="stepNum">2</div>
+        <div class="stepText"><strong>Coordinate the plan</strong><br/>Communicate time + specific location.</div>
+      </div>
+      <div class="stepItem">
+        <div class="stepNum">3</div>
+        <div class="stepText"><strong>Save money together</strong><br/>Book 1 Uber/Lyft, split with Venmo/Zelle/Cash.</div>
+      </div>
+    </div>
+
+    <div class="postDisclaimer" style="margin-top:10px;">
+      <div style="font-weight:950; color:#111; margin-bottom:6px;">💸 You'll save about $25 by sharing</div>
+      <div style="font-weight:950; color:#111;">💡 Tip: Add a pickup stop if you live far apart</div>
+    </div>
+
+    <div class="postDisclaimer" style="margin-top:10px;">
+      NUCarpool helps you connect — it doesn't book rides or handle payments.
+    </div>
+
+    <div class="modalActions" style="flex-direction:column; gap:10px;">
+      <button id="joindone_text_poster" type="button" style="width:100%;">Text Poster</button>
+      <div id="joindone_close_text" style="text-align:center; font-size:13px; font-weight:900; color:#4e2a84; text-decoration:underline; cursor:pointer;">
+        Close
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="app.js"></script>
+</body>
+</html>
