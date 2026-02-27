@@ -5,83 +5,777 @@
   <title>Northwestern Carpool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      background:#f6f7fb;
+      margin:0;
+    }
+
+    header{
+      background:#4e2a84;
+      color:#fff;
+      padding:14px 14px 12px;
+      position:sticky;
+      top:0;
+      z-index:50;
+      box-shadow:0 2px 10px rgba(0,0,0,.10);
+    }
+
+ 
+    /* New header layout */
+/* ===== Header (Plan A) ===== */
+.brandTop{
+  max-width:980px;
+  margin:0 auto;
+  padding:10px 0 8px;
+  position:relative; /* for right-top auth */
+}
+
+/* Title centered */
+.brandTitleRow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.brandTitleBig{
+  margin:0;
+  font-size:26px;          /* bigger */
+  font-weight:950;
+  letter-spacing:.2px;
+  text-align:center;
+  line-height:1.1;
+  white-space:nowrap;
+}
+
+/* White paw svg */
+.paw{
+  width:18px;
+  height:18px;
+  flex:0 0 auto;
+}
+
+/* Tagline: single line, white bg, black text */
+.brandSubCenter{
+  text-align:center;
+  margin-top:10px;
+}
+
+.taglinePill{
+  display:inline-block;
+  background:#fff;
+  color:#111;
+  padding:7px 12px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:12.5px;
+  line-height:1;
+  box-shadow:0 2px 8px rgba(0,0,0,.10);
+}
+
+/* Right-top auth: small + clean */
+.authRow{
+  position:absolute;
+  top:8px;
+  right:0;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.chip{
+  max-width:160px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.25);
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.authBtn{
+  border:none;
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+/* Mobile tweaks */
+@media (max-width:520px){
+  header{ padding:12px 12px 10px; }
+  .brandTop{ padding:10px 0 10px; }
+
+  .brandTitleBig{ font-size:22px; }
+
+  /* chip hides on tiny screens to prevent overlap */
+  .chip{ display:none; }
+
+  .authRow{ top:6px; right:0; }
+  .authBtn{ padding:6px 9px; font-size:12px; }
+
+  .taglinePill{
+    font-size:12px;
+    padding:7px 10px;
+    max-width:92%;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
+
+/* Make chip + auth button look clean on mobile */
+@media (max-width:520px){
+  .brandTitleBig{ font-size:20px; }
+  .tabsWrap{ gap:6px; }
+  .tabBtn{ font-size:13px; padding:10px 8px; }
+  .chip{ max-width:220px; }
+}
+
+/* Auth placed near My Rides (above tabs) */
+.tabsAuth{
+  position:absolute;
+  right:0;
+  top:-38px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  z-index:60;
+}
+
+/* Make sure auth button is not full width */
+.authBtn{
+  width:auto;
+  margin-top:0;
+}
+.chip{
+  width:auto;
+}
+
+/* Mobile: hide chip, keep small button */
+@media (max-width:520px){
+  .tabsAuth{ top:-19.5px; }
+  .chip{ display:none; }
+}
+
+    /* Tabs */
+    .tabsWrap{
+      max-width:980px;
+      margin:10px auto 0;
+      display:flex;
+      gap:8px;
+      position:relative;
+    }
+    .tabBtn{
+      flex:1;
+      border:none;
+      border-radius:12px;
+      padding:10px 10px;
+      font-weight:900;
+      font-size:14px;
+      cursor:pointer;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+    }
+    .tabBtn.active{
+      background:#fff;
+      color:#4e2a84;
+      border-color:#fff;
+    }
+
+    main{
+      max-width:980px;
+      margin:16px auto 28px;
+      padding:0 14px;
+    }
+
+    .card{
+      background:#fff;
+      border-radius:14px;
+      padding:16px 14px 14px;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+    }
+
+    .card-title{
+      text-align:center;
+      font-weight:950;
+      font-size:26px;
+      margin:6px 0 14px;
+      color:#111;
+    }
+
+    label{
+      display:block;
+      font-size:14px;
+      font-weight:850;
+      color:#222;
+      margin-top:14px;
+      text-align:left;
+    }
+
+    input, select, textarea, button{
+      width:100%;
+      padding:12px;
+      margin-top:7px;
+      border-radius:12px;
+      border:1px solid #ddd;
+      box-sizing:border-box;
+      font-size:16px;
+      background:#fff;
+    }
+input[type="date"]{
+  max-width:100%;
+  height:48px;
+  line-height:24px;
+  padding:12px;
+}
+
+@supports (-webkit-touch-callout: none){
+  input[type="date"]{
+    -webkit-appearance:none;
+    appearance:none;
+  }
+}
+    button{
+      background:#4e2a84;
+      color:#fff;
+      border:none;
+      cursor:pointer;
+      font-weight:900;
+      margin-top:16px;
+      padding:12px;
+      border-radius:12px;
+    }
+    button.secondary{
+      background:#ece7f6;
+      color:#4e2a84;
+      border:1px solid #d9ccef;
+    }
+    button.danger{
+      background:#b91c1c;
+    }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .muted{ color:#666; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+    .error{ color:#b91c1c; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+
+    .split{ display:flex; gap:12px; }
+    .split > *{ flex:1; }
+
+    .hr{ height:1px; background:#eee; margin:16px 0; }
+
+    .ride{
+      border:1px solid #eee;
+      border-radius:14px;
+      padding:12px;
+      margin-top:12px;
+      background:#fff;
+    }
+    /* Version G ride card */
+.rideTime{
+  font-size:18px;
+  font-weight:950;
+  color:#111;
+  margin-top:8px;
+  letter-spacing:.1px;
+}
+.rideMeta{
+  font-size:13px;
+  font-weight:800;
+  color:#555;
+  margin-top:6px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.rideStatus{
+  margin-left:auto;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#f2effa;
+  color:#4e2a84;
+  font-size:12px;
+  font-weight:900;
+}
+.kv{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.kvRow{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+.kvLabel{
+  font-size:13px;
+  color:#555;
+  font-weight:800;
+}
+.kvValue{
+  font-size:14px;
+  color:#111;
+  font-weight:950;
+  text-align:right;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  max-width:65%;
+}
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#f2effa;
+      color:#4e2a84;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .leave-big{
+      font-size:17px;
+      font-weight:900;
+      margin-top:10px;
+      color:#111;
+    }
+    .leave-big span{ font-weight:950; }
+
+    .big-row{
+      font-size:16px;
+      font-weight:900;
+      color:#111;
+      margin-top:10px;
+    }
+    .big-row strong{ font-weight:950; }
+
+    .hint{
+      color:#666;
+      font-size:12px;
+      margin-top:6px;
+    }
+
+    .hidden{ display:none !important; }
+
+    /* Modal */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.45);
+      display:none;
+      z-index:100;
+      padding:18px;
+    }
+    .overlay.show{ display:flex; align-items:center; justify-content:center; }
+    .modal{
+      width:min(520px, 100%);
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+      padding:14px;
+    }
+    .modalTitle{
+      font-size:18px;
+      font-weight:950;
+      margin:4px 0 10px;
+      color:#111;
+      text-align:center;
+    }
+    .modalActions{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+    .modalActions button{ margin-top:0; }
+    .modalClose{
+      border:none;
+      background:transparent;
+      font-size:18px;
+      cursor:pointer;
+      float:right;
+      line-height:1;
+      padding:6px 8px;
+    }
+    .textareaBox{
+      width:100%;
+      min-height:96px;
+      resize:vertical;
+    }
+    /* ===== Post-success modal (Ride posted) ===== */
+.postNextSub{
+  text-align:center;
+  font-weight:900;
+  color:#333;
+  margin:0 0 10px;
+  font-size:14px;
+}
+
+.stepList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+}
+
+.stepItem{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  background:#f6f7fb;
+  border:1px solid #eee;
+  border-radius:12px;
+  padding:10px;
+}
+
+.stepNum{
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  background:#4e2a84;
+  color:#fff;
+  font-weight:950;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  margin-top:1px;
+}
+
+.stepText{
+  font-size:13px;
+  color:#222;
+  line-height:1.35;
+  font-weight:750;
+}
+
+.stepText strong{
+  font-weight:950;
+}
+
+.postDisclaimer{
+  margin-top:12px;
+  font-size:12.5px;
+  color:#666;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:12px;
+  padding:10px;
+}
+
+
+    /* Slightly tighter on very small screens */
+    @media (max-width:420px){
+      .brandTitle{ font-size:18px; }
+      .tabBtn{ font-size:13px; padding:9px 8px; }
+      .card-title{ font-size:24px; }
+      input,select,textarea,button{ font-size:15px; }
+      .big-row{ font-size:15px; }
+    }
+    @media (max-width:520px){
+  .brandTitleBig{ font-size: clamp(22px, 6.2vw, 30px); }
+  .paw{ width: clamp(18px, 5vw, 28px); height: clamp(18px, 5vw, 28px); }
+}
+
+    /* Hide the X close on Ride Posted modal */
+#postdone_overlay .modalClose{
+  display:none !important;
+}
+#postdone_overlay .modalTitle{
+  font-size:32px;   /* ← 从 30 改成 34 */
+  font-weight:950;
+  margin:10px 0 0px;
+}
+    #postdone_overlay .stepText strong{
+  font-size:18px;   
+  font-weight:950;
+  margin-bottom:0px;
+}
+    /* ===== Search result card (new layout) ===== */
+.rideNewTop{
+  font-weight:900;
+  color:#111;
+  margin-bottom:10px;
+}
+
+.rideBlockPill{
+  display:inline-block;
+  font-size:12px;
+  font-weight:950;
+  color:#4e2a84;
+  background:#f2effa;
+  padding:4px 10px;
+  border-radius:999px;
+  margin-bottom:10px;
+}
+
+.rideNewTime{
+  font-size:18px;
+  font-weight:950;
+  margin:6px 0 8px;
+  color:#111;
+}
+
+.rideNewMeta{
+  font-size:14px;
+  font-weight:900;
+  color:#111;
+  margin:4px 0;
+}
+
+.rideNewHint{
+  font-size:13px;
+  color:#555;
+  font-weight:800;
+  margin:6px 0 10px;
+}
+
+.rideDivider{
+  height:1px;
+  background:#eee;
+  margin:12px 0;
+}
+
+.ridePersonLine{
+  font-size:14px;
+  font-weight:900;
+  color:#111;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:6px 0;
+}
+
+.rideSeatsLine{
+  font-size:13px;
+  font-weight:800;
+  color:#555;
+  margin:6px 0 12px;
+}
+
+.rideContactLocked{
+  font-size:13px;
+  font-weight:800;
+  color:#666;
+  margin:8px 0 12px;
+}
+.ridePostedBy{
+  font-size:14px;
+  font-weight:900;
+  color:#111;
+  margin:6px 0 6px;
+}
+/* ===== Search card: Leaving window block ===== */
+.leaveWindowLabel{
+  font-size:12px;
+  font-weight:900;
+  color:#666;
+  letter-spacing:.2px;
+  margin-bottom:4px;
+}
+
+.leaveWindowTime{
+  font-size:22px;
+  font-weight:950;
+  color:#111;
+  margin:2px 0 2px;
+}
+
+.leaveWindowDate{
+  font-size:14px;
+  font-weight:800;
+  color:#555;
+  margin-bottom:8px;
+}
+
+.rideDivider{
+  height:1px;
+  background:#eee;
+  margin:10px 0;
+}
+
+.rideMetaLine{
+  font-size:14px;
+  font-weight:900;
+  color:#111;
+  margin:6px 0;
+}
+
+.rideSubMeta{
+  font-size:13px;
+  font-weight:800;
+  color:#555;
+  margin:6px 0;
+}
+/* ===== Join modals: match Ride Posted styling ===== */
+#joindone_overlay .modalClose{ display:none !important; } /* 如果你也不想要叉 */
+#joinpreview_overlay .modalTitle{ font-size:18px; font-weight:950; text-align:center; }
+
+#joindone_overlay .modalTitle{
+  font-size:32px;
+  font-weight:950;
+  margin:10px 0 0px;
+}
+
+/* Link style inside modal steps (phone/sms) */
+#joindone_overlay a{
+  color:#4e2a84;
+  text-decoration:none;
+  font-weight:950;
+}
+#joindone_overlay a:active{ opacity:.85; }
+/* Make Confirm Join modal match Ride Posted / Ride Joined spacing */
+#joinpreview_overlay .modalTitle{
+  font-size:32px;
+  font-weight:950;
+  margin:10px 0 0px;
+}
+
+#joinpreview_overlay .postNextSub{
+  margin:2px 0 10px;
+}
+
+#joinpreview_overlay .joinpreviewActions{
+  margin-top:10px;          /* 往上提 */
+}
+
+#joinpreview_overlay #joinpreview_msg,
+#joinpreview_overlay #joinpreview_err{
+  margin-top:8px;           /* 更紧凑 */
+}
+/* ===== Join Preview (clean list style) ===== */
+.joinPreviewModal{
+  padding:16px 14px 14px;
+}
+
+.joinPreviewTitle{
+  text-align:center;
+  font-size:26px;
+  font-weight:950;
+  color:#111;
+  margin:6px 0 12px;
+  letter-spacing:.1px;
+}
+
+.joinPreviewLines{
+  background:#f6f7fb;
+  border:1px solid #eee;
+  border-radius:12px;
+  padding:12px;
+}
+
+.joinPreviewLine{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  font-size:14px;
+  font-weight:850;
+  color:#111;
+  line-height:1.35;
+  padding:8px 0;
+}
+
+.joinPreviewLine + .joinPreviewLine{
+  border-top:1px solid #eaeaea;
+}
+
+.joinPreviewKey{
+  flex:0 0 auto;
+  min-width:92px;
+  color:#555;
+  font-weight:900;
+}
+
+.joinPreviewVal{
+  flex:1 1 auto;
+  font-weight:950;
+  color:#111;
+  word-break:break-word;
+}
+
+#joinpreview_overlay .joinpreviewActions{
+  margin-top:12px;
+}
+
+  </style>
 </head>
 
 <body>
-
-<!-- ===== HEADER ===== -->
 <header>
-  <div class="brandTop">
-    <div class="brandTitleRow">
-      <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-        <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-        <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-        <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-        <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
-      </svg>
-      <h1 class="brandTitleBig">Northwestern Carpool</h1>
-      <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-        <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-        <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-        <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-        <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
-      </svg>
-    </div>
-    <div class="brandSubCenter">
-      <span class="taglinePill">Find a ride-mate. Split your airport Uber.</span>
-    </div>
+  <!-- Top brand block -->
+<div class="brandTop">
+
+  <!-- Center title -->
+  <div class="brandTitleRow">
+    <!-- Left white paw -->
+    <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
+    </svg>
+
+    <h1 class="brandTitleBig">Northwestern Carpool</h1>
+
+    <!-- Right white paw -->
+    <svg class="paw" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
+      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
+      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
+    </svg>
   </div>
 
-  <div class="tabsWrap">
-    <div class="tabsAuth">
-      <div id="auth_chip" class="chip hidden"></div>
-      <button id="auth_btn" class="authBtn">Sign in</button>
-    </div>
-    <button class="tabBtn active" id="tab_find">Find a Ride</button>
-    <button class="tabBtn" id="tab_post">Post a Ride</button>
-    <button class="tabBtn" id="tab_my">My Rides</button>
+  <!-- Single-line tagline pill -->
+  <div class="brandSubCenter">
+    <span class="taglinePill">Find a ride-mate. Split your airport Uber.</span>
   </div>
+</div>
+
+
+  <!-- Tabs: Find, Post, My -->
+  <div class="tabsWrap">
+  <div class="tabsAuth">
+    <div id="auth_chip" class="chip hidden"></div>
+    <button id="auth_btn" class="authBtn">Sign in</button>
+  </div>
+
+  <button class="tabBtn active" id="tab_find">Find a Ride</button>
+  <button class="tabBtn" id="tab_post">Post a Ride</button>
+  <button class="tabBtn" id="tab_my">My Rides</button>
+</div>
+
+
 </header>
 
 
-<!-- ===== MAIN ===== -->
 <main>
-
-  <!-- FIND -->
-  <section id="view_find" class="card">
-    <div class="card-title">Find a Ride</div>
-
-    <label for="find_direction">Direction</label>
-    <select id="find_direction">
-      <option value="Evanston → Airport" selected>Evanston → Airport</option>
-      <option value="Airport → Evanston">Airport → Evanston</option>
-    </select>
-
-    <label for="find_airport">Airport</label>
-    <select id="find_airport">
-      <option value="ORD" selected>ORD</option>
-      <option value="MDW">MDW</option>
-    </select>
-
-    <label for="find_date">Date</label>
-    <input id="find_date" type="date" />
-    <div class="hint" id="find_date_display"></div>
-
-    <label for="find_time">Leave around</label>
-    <select id="find_time"></select>
-
-    <button id="find_btn" class="secondary">Search</button>
-    <div id="find_msg" class="muted"></div>
-    <div id="find_err" class="error"></div>
-
-    <div id="results"></div>
-  </section>
-
   <!-- POST -->
   <section id="view_post" class="card hidden">
+
     <div class="card-title">Post a Ride</div>
 
     <label for="post_direction">Direction</label>
@@ -126,7 +820,38 @@
     <div id="post_err" class="error"></div>
   </section>
 
-  <!-- MY RIDES -->
+  <!-- FIND -->
+ <section id="view_find" class="card">
+
+    <div class="card-title">Find a Ride</div>
+
+    <label for="find_direction">Direction</label>
+    <select id="find_direction">
+      <option value="Evanston → Airport" selected>Evanston → Airport</option>
+      <option value="Airport → Evanston">Airport → Evanston</option>
+    </select>
+
+    <label for="find_airport">Airport</label>
+    <select id="find_airport">
+      <option value="ORD" selected>ORD</option>
+      <option value="MDW">MDW</option>
+    </select>
+
+    <label for="find_date">Date</label>
+    <input id="find_date" type="date" />
+    <div class="hint" id="find_date_display"></div>
+
+    <label for="find_time">Leave around</label>
+    <select id="find_time"></select>
+
+    <button id="find_btn" class="secondary">Search</button>
+    <div id="find_msg" class="muted"></div>
+    <div id="find_err" class="error"></div>
+
+    <div id="results"></div>
+  </section>
+
+  <!-- MY -->
   <section id="view_my" class="card hidden">
     <div class="card-title">My Rides</div>
     <div class="muted" style="margin-top:6px;">Sign in to see rides you posted or joined.</div>
@@ -136,41 +861,19 @@
     <div id="my_err" class="error"></div>
 
     <div class="hr"></div>
+
     <div id="my_rides"></div>
   </section>
-
 </main>
 
-
-<!-- ===== FOOTER ===== -->
-<footer class="site-footer">
-  <div class="footer-brand">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#fff"/>
-      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#fff"/>
-      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#fff"/>
-    </svg>
-    <span class="footer-brand-name">NUCarpool</span>
-  </div>
-  <div class="footer-tagline">For Northwestern students only</div>
-  <div class="footer-links">
-    <a class="footer-link" href="privacy.html">Privacy Policy</a>
-    <a class="footer-link" href="contact.html">Contact</a>
-  </div>
-  <div class="footer-copy">© 2025 NUCarpool · Not affiliated with Northwestern University</div>
-</footer>
-
-
-<!-- ===== MODALS ===== -->
-
-<!-- Sign In -->
+<!-- SIGN IN MODAL -->
 <div id="signin_overlay" class="overlay">
   <div class="modal">
     <button class="modalClose" id="signin_close">✕</button>
+
     <div class="modalTitle" id="signin_title">Sign in</div>
 
+    <!-- SIGN IN VIEW -->
     <div id="signin_view">
       <label for="signin_email" style="margin-top:8px;">NU Email</label>
       <input id="signin_email" placeholder="name@u.northwestern.edu" />
@@ -178,8 +881,10 @@
       <label for="signin_password" style="margin-top:10px;">Password</label>
       <input id="signin_password" type="password" placeholder="At least 8 characters" />
 
+      <!-- Big primary sign in button -->
       <button id="signin_pw_btn" type="button">Sign in</button>
 
+      <!-- bottom row: forgot left, signup right -->
       <div class="modalActions" style="margin-top:10px;">
         <button id="forgot_pw_btn" class="secondary" type="button">Forgot password</button>
         <button id="signup_pw_btn" class="secondary" type="button">Sign up</button>
@@ -189,8 +894,11 @@
       <div id="signin_err" class="error"></div>
     </div>
 
+    <!-- RESET PASSWORD VIEW (hidden by default) -->
     <div id="reset_view" class="hidden">
-      <div class="hint" style="margin-top:6px;">Set a new password for your account.</div>
+      <div class="hint" style="margin-top:6px;">
+        Set a new password for your account.
+      </div>
 
       <label for="reset_pw1" style="margin-top:10px;">New password</label>
       <input id="reset_pw1" type="password" placeholder="At least 8 characters" />
@@ -207,10 +915,11 @@
   </div>
 </div>
 
-<!-- Sign Up -->
+<!-- SIGN UP MODAL -->
 <div id="signup_overlay" class="overlay">
   <div class="modal">
     <button class="modalClose" id="signup_close">✕</button>
+
     <div class="modalTitle">Create account</div>
 
     <label for="signup_email" style="margin-top:8px;">NU Email</label>
@@ -232,10 +941,37 @@
   </div>
 </div>
 
-<!-- Post Success -->
+  
+<!-- JOIN CONFIRMATION MODAL -->
+<div id="join_overlay" class="overlay">
+  <div class="modal">
+    <button class="modalClose" id="join_close">✕</button>
+    <div class="modalTitle" id="join_title">You’ve joined!</div>
+
+    <div id="join_summary" class="muted"></div>
+
+    <label style="margin-top:10px;">Contact</label>
+    <input id="join_contact" readonly />
+
+    <div class="modalActions">
+      <button id="copy_contact_btn" class="secondary">Copy contact</button>
+      <button id="go_my_btn">Go to My Rides</button>
+    </div>
+
+    <label style="margin-top:14px;">Message template</label>
+    <textarea id="join_message" class="textareaBox"></textarea>
+
+    <div class="modalActions">
+      <button id="copy_message_btn" class="secondary">Copy message</button>
+      <button id="close_join_btn">Done</button>
+    </div>
+  </div>
+</div>
+<!-- POST SUCCESS MODAL -->
 <div id="postdone_overlay" class="overlay">
   <div class="modal">
     <button class="modalClose" id="postdone_close">✕</button>
+
     <div class="modalTitle">🎉 Ride posted!🎉</div>
     <div class="postNextSub">What happens next?</div>
 
@@ -244,17 +980,21 @@
         <div class="stepNum">1</div>
         <div class="stepText"><strong>Wait for a message</strong><br/>Other NU students who have joined will text you.</div>
       </div>
+
       <div class="stepItem">
         <div class="stepNum">2</div>
         <div class="stepText"><strong>Coordinate details</strong><br/>Confirm pickup time, location, and luggage.</div>
       </div>
+
       <div class="stepItem">
         <div class="stepNum">3</div>
         <div class="stepText"><strong>Book &amp; split</strong><br/>Book Uber/Lyft together and split the cost (Venmo, Zelle, or cash).</div>
       </div>
     </div>
 
-    <div class="postDisclaimer">NUCarpool helps you connect — it doesn't book rides or handle payments.</div>
+    <div class="postDisclaimer">
+      NUCarpool helps you connect — it doesn’t book rides or handle payments.
+    </div>
 
     <div class="modalActions">
       <button id="postdone_view_my" class="secondary" type="button">View My Rides</button>
@@ -262,11 +1002,13 @@
     </div>
   </div>
 </div>
-
-<!-- Join Preview -->
+<!-- JOIN PREVIEW / CONFIRM MODAL -->
+<!-- JOIN PREVIEW / CONFIRM MODAL (match Ride Posted / Ride Joined style) -->
+<!-- JOIN PREVIEW / CONFIRM MODAL (clean, no step number) -->
 <div id="joinpreview_overlay" class="overlay">
   <div class="modal joinPreviewModal">
     <button class="modalClose" id="joinpreview_close">✕</button>
+
     <div class="joinPreviewTitle">You are joining:</div>
 
     <div class="joinPreviewLines" id="joinpreview_body"></div>
@@ -281,10 +1023,16 @@
   </div>
 </div>
 
-<!-- Join Success -->
+
+   
+
+
+
+<!-- JOIN SUCCESS MODAL (same style as Ride Posted) -->
 <div id="joindone_overlay" class="overlay">
   <div class="modal">
     <button class="modalClose" id="joindone_close">✕</button>
+
     <div class="modalTitle">🎉 Ride joined 🎉</div>
     <div class="postNextSub">What happens next?</div>
 
@@ -293,35 +1041,1657 @@
         <div class="stepNum">1</div>
         <div class="stepText" id="joindone_step1"></div>
       </div>
+
       <div class="stepItem">
         <div class="stepNum">2</div>
-        <div class="stepText"><strong>Coordinate the plan</strong><br/>Communicate time + specific location.</div>
+        <div class="stepText">
+          <strong>Coordinate the plan</strong><br/>
+          Communicate time + specific location.
+        </div>
       </div>
+
       <div class="stepItem">
         <div class="stepNum">3</div>
-        <div class="stepText"><strong>Save money together</strong><br/>Book 1 Uber/Lyft, split with Venmo/Zelle/Cash.</div>
+        <div class="stepText">
+          <strong>Save money together</strong><br/>
+          Book 1 Uber/Lyft, split with Venmo/Zelle/Cash.
+        </div>
       </div>
     </div>
 
     <div class="postDisclaimer" style="margin-top:10px;">
-      <div style="font-weight:950; color:#111; margin-bottom:6px;">💸 You'll save about $25 by sharing</div>
+      <div style="font-weight:950; color:#111; margin-bottom:6px;">💸 You’ll save about $25 by sharing</div>
       <div style="font-weight:950; color:#111;">💡 Tip: Add a pickup stop if you live far apart</div>
     </div>
 
     <div class="postDisclaimer" style="margin-top:10px;">
-      NUCarpool helps you connect — it doesn't book rides or handle payments.
+      NUCarpool helps you connect — it doesn’t book rides or handle payments.
     </div>
 
-    <div class="modalActions" style="flex-direction:column; gap:10px;">
-      <button id="joindone_text_poster" type="button" style="width:100%;">Text Poster</button>
-      <div id="joindone_close_text" style="text-align:center; font-size:13px; font-weight:900; color:#4e2a84; text-decoration:underline; cursor:pointer;">
-        Close
-      </div>
-    </div>
+<div class="modalActions" style="flex-direction:column; gap:10px;">
+  <button id="joindone_text_poster" type="button" style="width:100%;">Text Poster</button>
+
+  <div id="joindone_close_text"
+       style="text-align:center; font-size:13px; font-weight:900; color:#4e2a84; text-decoration:underline; cursor:pointer;">
+    Close
   </div>
 </div>
 
+  </div>
+</div>
 
-<script src="app.js"></script>
+<script>
+  // ====== CONFIG ======
+  const SUPABASE_URL = "https://ylpgfkmjqzuwmqqhubyq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGdma21qcXp1d21xcWh1YnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxNjAwMzUsImV4cCI6MjA4NTczNjAzNX0.QuUF6VQdiFf4idaKsV_wCihaOX3QSeT_U1DZ-w1SgkA";
+  const sb = window.__nu_carpool_sb || (window.__nu_carpool_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
+
+  // ====== HELPERS ======
+  const $ = (id) => document.getElementById(id);
+  const setText = (id, t) => { const el=$(id); if(el) el.textContent = t||""; };
+  const normEmail = (e) => (e||"").trim().toLowerCase();
+  const isNU = (e) => e.endsWith("@u.northwestern.edu");
+
+function withTimeout(promise, ms, label="timeout"){
+  return Promise.race([
+    promise,
+    new Promise((_, rej)=> setTimeout(()=> rej(new Error(label)), ms))
+  ]);
+}
+
+  function escapeHtml(str){
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function timeToMinutes(t){ const [h,m] = t.split(":").map(Number); return h*60 + m; }
+  function windowMidMinutes(from_t, to_t){ return Math.round((timeToMinutes(from_t) + timeToMinutes(to_t))/2); }
+
+  function isoToMDY(iso){
+    if(!iso) return "";
+    const [y,m,d] = iso.split("-");
+    return `${m}/${d}/${y}`;
+  }
+// ===== Join two-step state =====
+let pendingJoinRideId = null;
+
+// phone + sms clickable helpers
+function extractPhone(contact){
+  const raw = String(contact || "").trim();
+  if(!raw) return null;
+
+  let cleaned = raw.replace(/[^\d+]/g, "");
+  const digits = cleaned.replace(/[^\d]/g, "");
+  if(digits.length < 10) return null;
+
+  if(digits.length === 10 && !cleaned.startsWith("+")) cleaned = "+1" + digits;
+  if(!cleaned.startsWith("+")) cleaned = "+" + digits;
+
+  return { display: raw, e164: cleaned };
+}
+
+function smsLink(numberE164, body){
+  const msg = encodeURIComponent(body || "");
+  const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return isiOS ? `sms:${numberE164}&body=${msg}` : `sms:${numberE164}?body=${msg}`;
+}
+
+function renderContactSmart(contact, prefillMsg){
+  const phone = extractPhone(contact);
+  if(!phone){
+    return `📱 ${escapeHtml(contact || "")}`;
+  }
+  return `📱 <a href="tel:${phone.e164}">${escapeHtml(phone.display)}</a>
+          &nbsp;·&nbsp;💬 <a href="${smsLink(phone.e164, prefillMsg)}">Text</a>`;
+}
+
+// Preview modal open/close
+function openJoinPreviewModal(){ $("joinpreview_overlay").classList.add("show"); }
+function closeJoinPreviewModal(){ $("joinpreview_overlay").classList.remove("show"); }
+
+// JoinDone modal open/close
+function openJoinDoneModal(){ $("joindone_overlay").classList.add("show"); }
+function closeJoinDoneModal(){ $("joindone_overlay").classList.remove("show"); }
+
+async function buildJoinPreviewById(rideId){
+  setText("joinpreview_err","");
+  setText("joinpreview_msg","Loading...");
+  $("joinpreview_confirm").disabled = true;
+
+  // load ride
+  const { data: ride, error: e0 } = await sb.from("rides").select("*").eq("id", rideId).single();
+  if(e0 || !ride){
+    setText("joinpreview_msg","");
+    setText("joinpreview_err", e0?.message || "Failed to load ride.");
+    $("joinpreview_confirm").disabled = false;
+    return null;
+  }
+
+  // seats remaining
+  const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
+  const filled = (parts||[]).length;
+  const remaining = Math.max(ride.max_seats - filled, 0);
+
+  const poster = riderLabelFromEmail(ride.owner_email).replace("👤 ","");
+  const dateLine = isoToMDY(ride.ride_date);
+  const routeLine = prettyRoute(ride.direction, ride.airport);
+  const timeLine = `${formatTimeAMPM(ride.from_time)}–${formatTimeAMPM(ride.to_time)}`;
+
+  // Render preview text
+$("joinpreview_body").innerHTML =
+  `<strong>${escapeHtml(poster)}’s ride</strong><br/>
+   ${escapeHtml(dateLine)} · ${escapeHtml(routeLine)}<br/>
+   • ${escapeHtml(timeLine)}<br/>
+   • ${remaining} seat remaining`;
+
+
+  setText("joinpreview_msg","");
+  $("joinpreview_confirm").disabled = false;
+  return { ride, filled, remaining };
+}
+
+let joindoneSmsUrl = null; // 全局：存短信跳转链接
+
+function fillJoinDoneStep1(ride, myEmail){
+  const poster = riderLabelFromEmail(ride.owner_email).replace("👤 ","");
+  const msg = makeMessageTemplate(ride, myEmail);
+
+  const phone = extractPhone(ride.contact || "");
+  if(phone){
+    joindoneSmsUrl = smsLink(phone.e164, msg);
+
+    // Step 1 只显示电话（没有 Text）
+    $("joindone_step1").innerHTML =
+      `<strong>Reach out to poster</strong><br/>
+       👤 Posted by ${escapeHtml(poster)}<br/>
+       📱 <a href="tel:${phone.e164}">${escapeHtml(phone.display)}</a>`;
+  }else{
+    joindoneSmsUrl = null;
+
+    // 没电话：就展示原 contact 文本
+    $("joindone_step1").innerHTML =
+      `<strong>Reach out to poster</strong><br/>
+       👤 Posted by ${escapeHtml(poster)}<br/>
+       📱 ${escapeHtml(ride.contact || "No contact provided")}`;
+  }
+
+  // 按钮文案：没电话时更合理
+  $("joindone_text_poster").textContent = phone ? "Text Poster" : "Copy Contact";
+}
+
+
+  function formatTimeAMPM(hhmm){
+    if(!hhmm) return "";
+    const [hStr, mStr] = hhmm.split(":");
+    let h = parseInt(hStr,10);
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12; if(h === 0) h = 12;
+    return `${h}:${mStr} ${ampm}`;
+  }
+  function riderLabelFromEmail(email){
+  const e = normEmail(email || "");
+  const local = e.split("@")[0] || "";
+  // match trailing 4 digits as grad year: lukexiang2028 -> name=lukexiang, yy=28
+  const m = local.match(/^(.*?)(\d{4})$/);
+  if(!m) return `👤 ${local}`;
+  const namePart = m[1] || local;
+  const yy = (m[2] || "").slice(2); // 2028 -> 28
+  return `👤 ${namePart} ${yy}'`;
+}
+
+function prettyRoute(direction, airport){
+  if((direction || "").includes("Evanston")) return `Evanston → ${airport}`;
+  return `${airport} → Evanston`;
+}
+
+// ====== DATE FILTER (hide old rides, keep 1-day buffer) ======
+const RIDE_BUFFER_DAYS = 1; // keep yesterday + today, hide earlier
+
+function isoLocalDate(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+function cutoffRideDateIso(){
+  const d = new Date();
+  d.setDate(d.getDate() - RIDE_BUFFER_DAYS);
+  return isoLocalDate(d); // local-safe YYYY-MM-DD
+}
+
+  function buildTimeOptions(selectEl, defaultHHMM, includeAny=false){
+    selectEl.innerHTML = "";
+    if(includeAny){
+      const anyOpt = document.createElement("option");
+      anyOpt.value = "";
+      anyOpt.textContent = "Anytime";
+      selectEl.appendChild(anyOpt);
+    }
+    for(let mins = 0; mins < 24*60; mins += 15){
+      const hh = String(Math.floor(mins/60)).padStart(2,"0");
+      const mm = String(mins%60).padStart(2,"0");
+      const hhmm = `${hh}:${mm}`;
+      const opt = document.createElement("option");
+      opt.value = hhmm;
+      opt.textContent = formatTimeAMPM(hhmm);
+      selectEl.appendChild(opt);
+    }
+    if(defaultHHMM !== undefined && defaultHHMM !== null) selectEl.value = defaultHHMM;
+  }
+
+  async function copyText(txt){
+    try{
+      await navigator.clipboard.writeText(txt);
+      return true;
+    }catch(e){
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      return true;
+    }
+  }
+
+  function show(el){ el.classList.remove("hidden"); }
+  function hide(el){ el.classList.add("hidden"); }
+
+  // ====== TABS ======
+  function activateTab(which){
+    const tabs = { post: $("tab_post"), find: $("tab_find"), my: $("tab_my") };
+    const views = { post: $("view_post"), find: $("view_find"), my: $("view_my") };
+
+    for(const k of Object.keys(tabs)){
+      tabs[k].classList.toggle("active", k===which);
+      views[k].classList.toggle("hidden", k!==which);
+    }
+  }
+
+  // ====== AUTH ======
+
+  function showResetView(){
+  hide($("signin_view"));
+  show($("reset_view"));
+  setText("reset_msg","");
+  setText("reset_err","");
+  $("reset_pw1").value = "";
+  $("reset_pw2").value = "";
+}
+
+function showSignInView(){
+  show($("signin_view"));
+  hide($("reset_view"));
+  setText("signin_msg","");
+  setText("signin_err","");
+}
+async function sendPasswordRecovery(email){
+  setText("signin_err","");
+  setText("signin_msg","Sending recovery email...");
+  $("forgot_pw_btn").disabled = true;
+  $("signin_pw_btn").disabled = true;
+  $("signup_pw_btn").disabled = true;
+
+  try{
+    if(!email || !isNU(email)){
+      throw new Error("Please enter a Northwestern email (@u.northwestern.edu).");
+    }
+
+const redirectTo = window.location.origin + "/";
+
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    if(error) throw error;
+
+    setText("signin_msg","Recovery email sent. Check your inbox, then come back here.");
+    return true;
+  }catch(err){
+    setText("signin_msg","");
+    setText("signin_err", err.message || "Failed to send recovery email.");
+    return false;
+  }finally{
+    $("forgot_pw_btn").disabled = false;
+    $("signin_pw_btn").disabled = false;
+    $("signup_pw_btn").disabled = false;
+  }
+}
+async function updatePasswordFromRecovery(){
+  setText("reset_err","");
+  setText("reset_msg","Updating password...");
+  $("reset_save_btn").disabled = true;
+  $("reset_back_btn").disabled = true;
+
+  try{
+    const p1 = $("reset_pw1").value || "";
+    const p2 = $("reset_pw2").value || "";
+
+    if(p1.length < 8) throw new Error("Password must be at least 8 characters.");
+    if(p1 !== p2) throw new Error("Passwords do not match.");
+
+    const { error } = await sb.auth.updateUser({ password: p1 });
+    if(error) throw error;
+
+    setText("reset_msg","Password updated. Please sign in again.");
+setText("signin_msg","Password updated. Please sign in.");
+showSignInView();
+
+    return true;
+  }catch(err){
+    setText("reset_msg","");
+    setText("reset_err", err.message || "Failed to update password.");
+    return false;
+  }finally{
+    $("reset_save_btn").disabled = false;
+    $("reset_back_btn").disabled = false;
+  }
+}
+
+function resetUIAfterSignOut(){
+  // Close any modals
+  closeSignInModal();
+  closeJoinModal();
+
+  // Clear pending actions
+  clearPendingAction();
+
+  // Clear messages and lists
+  setText("post_msg","");
+  setText("post_err","");
+  setText("find_msg","");
+  setText("find_err","");
+  setText("my_msg","");
+  setText("my_err","Signed out.");
+  $("my_rides").innerHTML = "";
+
+  // Re-enable buttons
+  $("post_btn").disabled = false;
+  $("find_btn").disabled = false;
+  $("my_refresh_btn").disabled = false;
+
+  // Go back to a safe tab
+  activateTab("find");
+}
+
+  
+  let currentUser = null; // { email, id }
+  const PENDING_KEY = "nu_carpool_pending_action";
+  // ===== iOS Safari resume anti-flicker =====
+let lastResumeAt = 0;
+
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+async function getSessionUserFast(){
+  try{
+    const { data } = await withTimeout(sb.auth.getSession(), 1200, "getSession timeout");
+    return data?.session?.user || null;
+  }catch(e){
+    console.warn("getSessionUserFast:", e.message || e);
+    return null;
+  }
+}
+function withTimeout(promise, ms, label="timeout"){
+  return Promise.race([
+    promise,
+    new Promise((_, rej)=> setTimeout(()=> rej(new Error(label)), ms))
+  ]);
+}
+
+async function safeGetSessionUser(){
+  try{
+    const { data } = await withTimeout(sb.auth.getSession(), 1200, "getSession timeout");
+    return data?.session?.user || null;
+  }catch(e){
+    console.warn("safeGetSessionUser:", e.message || e);
+    return null;
+  }
+}
+
+// ✅ 你原来有 lastResumeAt 就用原来的；没有的话加这一行
+// let lastResumeAt = 0;
+
+async function onAppResume(){
+  lastResumeAt = Date.now();
+
+  // 1) 先尝试把 session 从 storage 里“唤醒”（不管成功与否都不能卡死）
+  await safeGetSessionUser();
+
+  // 2) 可选但很稳：强制 refresh token（有时能救回 iOS 切回来后的“假登出/假空”）
+  try{
+    await withTimeout(sb.auth.refreshSession(), 2000, "refreshSession timeout");
+  }catch(e){
+    console.warn("refreshSession:", e.message || e);
+  }
+
+  // 3) 更新你页面里的 currentUser + chip（不阻塞）
+  refreshUser({ force:false }).catch(()=>{});
+}
+
+
+const RESUME_GRACE_MS = 4000; // ✅ 4s grace window (iOS Messages → Safari 常需要更久)
+
+async function getSessionUserWithGrace(){
+  let u = await getSessionUserFast();
+  if(u) return u;
+
+  // If we just resumed, retry a few times without declaring logout
+  if((Date.now() - lastResumeAt) < RESUME_GRACE_MS){
+    for(const delay of [200, 400, 800, 1200]){
+      await sleep(delay);
+      u = await getSessionUserFast();
+      if(u) return u;
+    }
+  }
+  return null;
+}
+
+
+  function setAuthUI(){
+    const chip = $("auth_chip");
+    const btn = $("auth_btn");
+
+    if(currentUser?.email){
+      chip.textContent = currentUser.email;
+      chip.classList.remove("hidden");
+      btn.textContent = "Sign out";
+    }else{
+      chip.classList.add("hidden");
+      btn.textContent = "Sign in";
+    }
+  }
+
+function openSignInModal(prefillEmail=""){
+  showSignInView(); // ✅ always start from sign-in view
+  setText("signin_msg","");
+  setText("signin_err","");
+  if(prefillEmail) $("signin_email").value = prefillEmail;
+  $("signin_overlay").classList.add("show");
+}
+
+
+  function closeSignInModal(){
+    $("signin_overlay").classList.remove("show");
+  }
+  
+function openSignUpModal(prefillEmail=""){
+  setText("signup_msg","");
+  setText("signup_err","");
+  if(prefillEmail) $("signup_email").value = prefillEmail;
+  $("signup_password").value = "";
+  $("signup_password2").value = "";
+  $("signup_overlay").classList.add("show");
+}
+
+function closeSignUpModal(){
+  $("signup_overlay").classList.remove("show");
+}
+
+async function signUpWithPassword(email, password){
+  setText("signin_err","");
+  setText("signin_msg","Creating account...");
+  $("signup_pw_btn").disabled = true;
+  $("signin_pw_btn").disabled = true;
+
+  try{
+    if(!email || !isNU(email)){
+      throw new Error("Please use your Northwestern email (@u.northwestern.edu).");
+    }
+    if(!password || password.length < 8){
+      throw new Error("Password must be at least 8 characters.");
+    }
+
+    const redirectTo = window.location.origin;
+
+    const { error } = await sb.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: redirectTo }
+    });
+
+    if(error) throw error;
+
+    setText("signin_msg","Account created. Now sign in with your password.");
+    return true;
+  }catch(err){
+    setText("signin_msg","");
+    setText("signin_err", err.message || "Sign up failed.");
+    return false;
+  }finally{
+    $("signup_pw_btn").disabled = false;
+    $("signin_pw_btn").disabled = false;
+  }
+}
+async function signInWithPassword(email, password){
+  setText("signin_err","");
+  setText("signin_msg","Signing in...");
+  $("signin_pw_btn").disabled = true;
+  $("forgot_pw_btn").disabled = true;
+  $("signup_pw_btn").disabled = true;
+
+  try{
+    if(!email || !isNU(email)){
+      throw new Error("Please use your Northwestern email (@u.northwestern.edu).");
+    }
+    if(!password){
+      throw new Error("Please enter your password.");
+    }
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if(error) throw error;
+
+    setText("signin_msg","Signed in.");
+    return true;
+  }catch(err){
+    setText("signin_msg","");
+    setText("signin_err", err.message || "Sign in failed.");
+    return false;
+  }finally{
+    $("signin_pw_btn").disabled = false;
+    $("forgot_pw_btn").disabled = false;
+    $("signup_pw_btn").disabled = false;
+  }
+}
+
+
+
+let __refreshInFlight = null;
+
+async function refreshUser({ force=false } = {}){
+  if(__refreshInFlight) return __refreshInFlight;
+
+  const prev = currentUser; // ✅ keep a snapshot
+
+ __refreshInFlight = withTimeout((async ()=>{
+    const su = await getSessionUserWithGrace();
+
+    if(su){
+      currentUser = { email: su.email, id: su.id };
+      setAuthUI();
+    }else{
+      // ✅ Key fix: if we *had* a user and we just resumed, do NOT clobber to null
+      if(prev?.email && (Date.now() - lastResumeAt) < RESUME_GRACE_MS){
+        currentUser = prev;     // keep showing signed-in
+        setAuthUI();
+        // schedule a quiet retry
+        setTimeout(()=> refreshUser({ force:false }).catch(()=>{}), 500);
+        return currentUser;
+      }
+
+      // truly no session
+      currentUser = null;
+      setAuthUI();
+      return null;
+    }
+
+    // Optional stricter validation (never clobber on transient failure)
+    if(force){
+      try{
+        const timeout = (ms) => new Promise((_, rej)=>setTimeout(()=>rej(new Error("getUser timeout")), ms));
+        const { data } = await Promise.race([ sb.auth.getUser(), timeout(4000) ]);
+        if(data?.user){
+          currentUser = { email: data.user.email, id: data.user.id };
+        }
+      }catch(e){
+        console.warn("refreshUser getUser failed (ignored):", e);
+      }
+      setAuthUI();
+    }
+
+    return currentUser;
+})(), 3000, "refreshUser timeout")
+.finally(()=>{ __refreshInFlight = null; })
+.catch((e)=>{
+  console.warn("refreshUser:", e.message || e);
+  // 超时不要清空 currentUser，保持现状
+  setAuthUI();
+  return currentUser;
+});
+
+  return __refreshInFlight;
+}
+
+
+
+
+  function savePendingAction(action){
+    localStorage.setItem(PENDING_KEY, JSON.stringify({ ...action, ts: Date.now() }));
+  }
+  function loadPendingAction(){
+    try{
+      const raw = localStorage.getItem(PENDING_KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  }
+  function clearPendingAction(){
+    localStorage.removeItem(PENDING_KEY);
+  }
+
+async function requireAuthOrQueue(action){
+  try{
+    await withTimeout(refreshUser({ force:false }), 2500, "requireAuth timeout");
+  }catch(e){
+    console.warn("requireAuthOrQueue:", e.message || e);
+  }
+
+  if(currentUser?.email) return true;
+
+  savePendingAction(action);
+  openSignInModal(action?.emailHint || "");
+  return false;
+}
+
+
+
+async function maybeResumePendingAction(){
+  await refreshUser();
+  if(!currentUser?.email) return;
+
+  const pending = loadPendingAction();
+  if(!pending) return;
+
+  // avoid super old actions
+  if(pending.ts && (Date.now() - pending.ts) > 15 * 60 * 1000){
+    clearPendingAction();
+    return;
+  }
+
+  clearPendingAction();
+
+  // resume
+  if(pending.type === "POST"){
+    await doPostRide(pending.payload);
+  }else if(pending.type === "JOIN_PREVIEW"){
+    pendingJoinRideId = pending.payload.rideId;
+    await buildJoinPreviewById(pending.payload.rideId);
+    openJoinPreviewModal();
+  }else if(pending.type === "CANCEL"){
+    await doCancelJoin(pending.payload.rideId, null, true);
+  }else if(pending.type === "LOAD_MY"){
+    activateTab("my");
+    await loadMyRides();
+  }else if(pending.type === "CANCEL_RIDE"){
+    await doCancelRideAsHost(pending.payload.rideId, null, true);
+  }
+}
+
+
+  // ====== DATA OPS ======
+  async function getSeatsFilledMap(rideIds){
+    let countsMap = {};
+    if(!rideIds.length) return countsMap;
+    const { data: parts, error } = await sb.from("ride_participants").select("ride_id").in("ride_id", rideIds);
+    if(error) return countsMap;
+    for(const p of (parts||[])) countsMap[p.ride_id] = (countsMap[p.ride_id]||0) + 1;
+    return countsMap;
+  }
+
+  async function getMyJoinedIds(email){
+    const { data: joins, error } = await sb.from("ride_participants").select("ride_id").eq("user_email", email);
+    if(error) return [];
+    return [...new Set((joins||[]).map(j=>j.ride_id))];
+  }
+
+  // ====== POST ======
+  async function postRideClick(){
+    setText("post_err","");
+    setText("post_msg","");
+
+    const payload = collectPostPayload();
+    if(!payload) return;
+
+    const ok = await requireAuthOrQueue({ type:"POST", payload, emailHint: payload.owner_email });
+    if(!ok) return;
+
+    await doPostRide(payload);
+  }
+
+  function collectPostPayload(){
+    const direction = $("post_direction").value;
+    const airport = $("post_airport").value;
+    const ride_date_iso = $("post_date").value;
+    const from_time = $("post_from").value;
+    const to_time = $("post_to").value;
+    const max_seats = parseInt($("post_max_seats").value,10);
+    const contact = $("post_contact").value.trim();
+
+    const owner_email = normEmail(currentUser?.email || ""); // once signed in
+    if(!ride_date_iso){ setText("post_err","Please select a date."); return null; }
+    if(!from_time || !to_time){ setText("post_err","Please fill both From and To times."); return null; }
+    if(timeToMinutes(from_time) > timeToMinutes(to_time)){ setText("post_err","From time must be earlier than To time."); return null; }
+    if(!contact){ setText("post_err","Please provide contact info."); return null; }
+
+    return {
+      owner_email, direction, airport,
+      ride_date: ride_date_iso,
+      from_time, to_time,
+      max_seats,
+      status: "open",
+      note: null,
+      contact
+    };
+  }
+
+  async function doPostRide(payload){
+    setText("post_err","");
+    setText("post_msg","Posting...");
+    $("post_btn").disabled = true;
+
+    // Ensure email now that we're signed in
+    await refreshUser();
+    payload.owner_email = normEmail(currentUser?.email || "");
+    if(!payload.owner_email || !isNU(payload.owner_email)){
+      setText("post_msg","");
+      setText("post_err","Please sign in with your Northwestern email.");
+      $("post_btn").disabled = false;
+      return;
+    }
+
+    const { data, error } = await sb.from("rides").insert([payload]).select().single();
+    if(error){
+      setText("post_msg","");
+      setText("post_err","Submit failed:\n" + (error.message || JSON.stringify(error)));
+      $("post_btn").disabled = false;
+      return;
+    }
+
+    // owner takes first seat
+    await sb.from("ride_participants").insert([{ ride_id: data.id, user_email: payload.owner_email }]);
+
+    setText("post_msg","Posted! Your ride is now open.");openPostDoneModal();
+
+    $("post_btn").disabled = false;
+
+    // Optionally refresh find results if user is on find tab
+  }
+
+  // ====== FIND ======
+  async function searchRides(){
+    setText("find_err","");
+    setText("find_msg","Searching...");
+    $("find_btn").disabled = true;
+
+    const direction = $("find_direction").value;
+    const airport = $("find_airport").value;
+    const ride_date_iso = $("find_date").value;
+    const t = $("find_time").value; // optional, may be ""
+
+    if(!ride_date_iso){
+      setText("find_msg","");
+      setText("find_err","Please select a date.");
+      $("find_btn").disabled = false;
+      return;
+    }
+
+    // Show all rides for day (open + full so user can see, but can only join open if seats available)
+   // If signed in, hide rides that I posted myself
+await refreshUser();
+const myEmail = normEmail(currentUser?.email || "");
+
+let q = sb.from("rides")
+  .select("*")
+  .eq("ride_date", ride_date_iso)
+  .eq("direction", direction)
+  .eq("airport", airport)
+  .in("status", ["open","full"]);
+
+if(myEmail){
+  q = q.neq("owner_email", myEmail);
+}
+
+
+    const { data: rides, error } = await q.order("created_at", { ascending:false });
+    if(error){
+      setText("find_msg","");
+      setText("find_err","Search failed:\n" + (error.message || JSON.stringify(error)));
+      $("find_btn").disabled = false;
+      return;
+    }
+
+    const list = rides || [];
+    const rideIds = list.map(r=>r.id);
+    const countsMap = await getSeatsFilledMap(rideIds);
+
+const myJoined = myEmail ? await getMyJoinedIds(myEmail) : [];
+
+
+    const tMin = t ? timeToMinutes(t) : null;
+
+    const enriched = list.map(r=>{
+      const filled = countsMap[r.id] || 0;
+      const mid = windowMidMinutes(r.from_time, r.to_time);
+      const dist = (tMin===null) ? null : Math.abs(mid - tMin);
+      const alreadyJoined = myJoined.includes(r.id);
+      const isOwner = myEmail && normEmail(r.owner_email) === myEmail;
+      return { ...r, seats_filled: filled, dist, alreadyJoined, isOwner };
+    });
+
+    // Sorting: if time chosen, sort by distance, else sort by earliest from_time
+    enriched.sort((a,b)=>{
+      if(tMin!==null){
+        return (a.dist ?? 0) - (b.dist ?? 0);
+      }
+      // default: earliest start
+      return timeToMinutes(a.from_time) - timeToMinutes(b.from_time);
+    });
+
+    renderResults(enriched);
+    setText("find_msg", enriched.length ? `Found ${enriched.length} ride(s).` : "No rides for this day.");
+    $("find_btn").disabled = false;
+  }
+
+function renderResults(rides){
+  const container = $("results");
+  container.innerHTML = "";
+
+  for(const r of rides){
+    const filled = r.seats_filled || 0;
+    const max = r.max_seats;
+    const isFull = filled >= max;
+    const joined = !!r.alreadyJoined;
+
+    const div = document.createElement("div");
+    div.className = "ride";
+
+    const joinBtnHtml = joined
+      ? `<button data-cancel="${r.id}" class="danger">Cancel Join</button>`
+      : `<button data-join="${r.id}" ${isFull ? "disabled" : ""}>Join Ride</button>`;
+
+    // Leaving window block
+    const timeLine = `${formatTimeAMPM(r.from_time)} – ${formatTimeAMPM(r.to_time)}`;
+    const dateLine = isoToMDY(r.ride_date);
+    const routeLine = prettyRoute(r.direction, r.airport);
+
+    // 👤 Posted by ...
+    const poster = riderLabelFromEmail(r.owner_email).replace(/^👤\s*/, "");
+    const postedByLine = `👤 Posted by ${poster}`;
+
+    // Contact locked until joined (no double-escape)
+    const contactLine = joined
+      ? `📱 ${r.contact || ""}`
+      : `📱 Contact unlocked once joined`;
+
+    div.innerHTML = `
+      <div class="leaveWindowLabel">Leaving window</div>
+      <div class="leaveWindowTime">${escapeHtml(timeLine)}</div>
+      <div class="leaveWindowDate">${escapeHtml(dateLine)}</div>
+
+      <div class="rideDivider"></div>
+
+      <div class="rideMetaLine">🧭 ${escapeHtml(routeLine)}</div>
+      <div class="rideMetaLine">${escapeHtml(postedByLine)}</div>
+      <div class="rideSubMeta">💺 ${filled} / ${max} seats filled</div>
+
+      <div class="rideSubMeta">${escapeHtml(contactLine)}</div>
+
+      <div class="row" style="margin-top:10px;">
+        ${joinBtnHtml}
+      </div>
+    `;
+
+    container.appendChild(div);
+  }
+
+  // bind buttons
+  container.querySelectorAll("button[data-join]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const rideId = btn.getAttribute("data-join");
+      await joinRideClick(rideId, btn);
+    });
+  });
+
+  container.querySelectorAll("button[data-cancel]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const rideId = btn.getAttribute("data-cancel");
+      await cancelJoinClick(rideId, btn);
+    });
+  });
+}
+
+
+  // ====== JOIN / CANCEL ======
+
+    async function cancelRideAsHostClick(rideId, btn){
+    const ok = await requireAuthOrQueue({ type:"CANCEL_RIDE", payload:{ rideId } });
+    if(!ok) return;
+
+    await doCancelRideAsHost(rideId, btn, false);
+  }
+
+  async function doCancelRideAsHost(rideId, btn, fromResume){
+    await refreshUser();
+    const email = normEmail(currentUser?.email || "");
+    if(!email || !isNU(email)){
+      alert("Please sign in with your Northwestern email.");
+      return;
+    }
+
+    if(!confirm("Cancel (delete) this ride for everyone? This cannot be undone.")) return;
+
+    if(btn){
+      btn.disabled = true;
+      btn.textContent = "Cancelling...";
+    }
+
+    // 1) Make sure this user is the owner
+    const { data: ride, error: e0 } = await sb
+      .from("rides")
+      .select("id, owner_email, max_seats, status")
+      .eq("id", rideId)
+      .single();
+
+    if(e0 || !ride){
+      alert(e0?.message || "Failed to load ride.");
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = "Cancel Ride";
+      }
+      return;
+    }
+
+    if(normEmail(ride.owner_email) !== email){
+      alert("You can only cancel rides you posted.");
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = "Cancel Ride";
+      }
+      return;
+    }
+
+  // 2) Delete participants first (so FK constraints won't block the ride delete)
+  const { error: pErr } = await sb
+    .from("ride_participants")
+    .delete()
+    .eq("ride_id", rideId);
+
+  if(pErr){
+    alert(pErr.message || "Cancel failed (participants).");
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = "Cancel Ride";
+    }
+    return;
+  }
+
+  // 3) Delete the ride itself (this hides it from everyone)
+  const { error: rErr } = await sb
+    .from("rides")
+    .delete()
+    .eq("id", rideId);
+
+  if(rErr){
+    alert(rErr.message || "Cancel failed (ride).");
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = "Cancel Ride";
+    }
+    return;
+  }
+
+
+    // 4) Refresh UI
+    if(!$("view_my").classList.contains("hidden")){
+      await loadMyRides();
+    }
+    if(!$("view_find").classList.contains("hidden")){
+      await searchRides().catch(()=>{});
+    }
+  }
+
+async function joinRideClick(rideId, btn){
+  // Step 0: require auth first
+  const ok = await requireAuthOrQueue({ type:"JOIN_PREVIEW", payload:{ rideId } });
+  if(!ok) return;
+
+  pendingJoinRideId = rideId;
+  await buildJoinPreviewById(rideId);
+  openJoinPreviewModal();
+}
+
+
+  async function doJoinRide(rideId, btn, fromResume){
+    await refreshUser();
+    const email = normEmail(currentUser?.email || "");
+    if(!email || !isNU(email)){
+      alert("Please sign in with your Northwestern email.");
+      return;
+    }
+
+    if(btn){
+      btn.disabled = true;
+      btn.textContent = "Joining...";
+    }
+
+   
+    // Prevent duplicate join (client-side quick check)
+    const { data: existing } = await sb
+      .from("ride_participants")
+      .select("id")
+      .eq("ride_id", rideId)
+      .eq("user_email", email)
+      .maybeSingle();
+
+  if(existing){
+  if(btn){
+    btn.disabled = false;
+    btn.textContent = "Cancel Join";
+  }
+  await searchRides();
+
+  // load ride + show joindone
+  const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
+  if(ride){
+    fillJoinDoneStep1(ride, email);
+    openJoinDoneModal();
+  }
+  return;
+}
+
+
+    const { error: e1 } = await sb.from("ride_participants").insert([{ ride_id: rideId, user_email: email }]);
+    if(e1){
+      alert(e1.message || "Join failed.");
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = "Join Ride";
+      }
+      return;
+    }
+
+    // Update ride status if full
+    const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
+    const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
+    const filled = (parts||[]).length;
+
+    if(ride && filled >= ride.max_seats){
+      await sb.from("rides").update({ status: "full" }).eq("id", rideId);
+    }else{
+      // ensure open
+      await sb.from("rides").update({ status: "open" }).eq("id", rideId);
+    }
+
+// refresh UI + modal
+await searchRides();
+
+// Step 2 modal: Ride joined (same style as Ride posted)
+fillJoinDoneStep1(ride, email);
+openJoinDoneModal();
+
+
+    // auto switch to My Rides? (You asked for Go to My Rides button; we’ll keep user in Find unless they tap.)
+    // If you want auto-switch, tell me and I’ll change it.
+  }
+
+  async function cancelJoinClick(rideId, btn){
+    const ok = await requireAuthOrQueue({ type:"CANCEL", payload:{ rideId } });
+    if(!ok) return;
+
+    await doCancelJoin(rideId, btn, false);
+  }
+
+  async function doCancelJoin(rideId, btn, fromResume){
+    await refreshUser();
+    const email = normEmail(currentUser?.email || "");
+    if(!email || !isNU(email)){
+      alert("Please sign in with your Northwestern email.");
+      return;
+    }
+
+    if(!confirm("Cancel your join for this ride?")) return;
+
+    if(btn){
+      btn.disabled = true;
+      btn.textContent = "Cancelling...";
+    }
+
+    const { error } = await sb
+      .from("ride_participants")
+      .delete()
+      .eq("ride_id", rideId)
+      .eq("user_email", email);
+
+    if(error){
+      alert(error.message || "Cancel failed.");
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = "Cancel Join";
+      }
+      return;
+    }
+
+    // If ride was full, may become open again
+    const { data: ride } = await sb.from("rides").select("max_seats,status").eq("id", rideId).single();
+    const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
+    const filled = (parts||[]).length;
+
+    if(ride && filled < ride.max_seats){
+      await sb.from("rides").update({ status: "open" }).eq("id", rideId);
+    }
+
+    // Refresh current views
+    // If on Find tab and there are results, refresh search
+    await searchRides().catch(()=>{});
+    // If on My tab, refresh too
+    if(!$("view_my").classList.contains("hidden")){
+      await loadMyRides();
+    }
+  }
+
+  // ====== JOIN MODAL ======
+  function openJoinModal(){
+    $("join_overlay").classList.add("show");
+  }
+  function closeJoinModal(){
+    $("join_overlay").classList.remove("show");
+  }
+// ====== POST SUCCESS MODAL ======
+function openPostDoneModal(){
+  $("postdone_overlay").classList.add("show");
+}
+function closePostDoneModal(){
+  $("postdone_overlay").classList.remove("show");
+}
+
+  function makeMessageTemplate(ride, myEmail){
+    const dateStr = isoToMDY(ride.ride_date);
+    const windowStr = `${formatTimeAMPM(ride.from_time)}–${formatTimeAMPM(ride.to_time)}`;
+    const dir = ride.direction;
+    const airport = ride.airport;
+
+    return `Hi! I just joined your carpool on ${dateStr} (${dir}, ${airport}). My leave window is ${windowStr}. Where should we meet, and what time should we confirm? Thanks!`;
+  }
+
+  function showJoinModal(ride, filled, myEmail){
+    if(!ride) return;
+    setText("join_title","You’ve joined!");
+    setText("join_summary", `Ride saved to My Rides.\nSeats now: ${filled}/${ride.max_seats}\nDate: ${isoToMDY(ride.ride_date)}\nWindow: ${formatTimeAMPM(ride.from_time)} – ${formatTimeAMPM(ride.to_time)}`);
+    $("join_contact").value = ride.contact || "";
+    $("join_message").value = makeMessageTemplate(ride, myEmail);
+    openJoinModal();
+  }
+
+  async function showJoinModalAfterJoin(rideId, myEmail, already){
+    const { data: ride } = await sb.from("rides").select("*").eq("id", rideId).single();
+    const { data: parts } = await sb.from("ride_participants").select("ride_id").eq("ride_id", rideId);
+    const filled = (parts||[]).length;
+    showJoinModal(ride, filled, myEmail);
+  }
+
+  // ====== MY RIDES ======
+async function loadMyRidesClick(){
+  activateTab("my");
+  setText("my_err","");
+  setText("my_msg","Signing you back in…");
+
+  // 给 rehydrate 一个明确窗口
+  let ok = false;
+  try{
+    ok = await withTimeout(requireAuthOrQueue({ type:"LOAD_MY", payload:{} }), 3000, "loadMy auth wait timeout");
+  }catch(e){
+    console.warn("loadMyRidesClick:", e.message || e);
+    ok = false;
+  }
+
+  if(!ok){
+    // 不要永远显示 signing you back in
+    setText("my_msg","");
+    setText("my_err","Still signing you in — please tap Sign in if prompted.");
+    return;
+  }
+
+  setText("my_msg","Loading…");
+  await loadMyRides();
+}
+
+
+
+  async function loadMyRides(){
+    setText("my_err","");
+    setText("my_msg","Loading...");
+    $("my_refresh_btn").disabled = true;
+
+    await refreshUser();
+    const email = normEmail(currentUser?.email || "");
+    if(!email || !isNU(email)){
+      setText("my_msg","");
+      setText("my_err","Please sign in with your Northwestern email.");
+      $("my_refresh_btn").disabled = false;
+      return;
+    }
+
+const { data: posted, error: e1 } = await sb.from("rides")
+  .select("*")
+  .eq("owner_email", email)
+  .gte("ride_date", cutoffRideDateIso())
+  .order("created_at", { ascending:false });
+
+
+    if(e1){
+      setText("my_msg","");
+      setText("my_err", e1.message || "Failed to load posted rides.");
+      $("my_refresh_btn").disabled = false;
+      return;
+    }
+
+    const joinedIds = await getMyJoinedIds(email);
+    let joined = [];
+    if(joinedIds.length){
+     const { data: jr, error: e2 } = await sb.from("rides")
+  .select("*")
+  .in("id", joinedIds)
+  .gte("ride_date", cutoffRideDateIso())
+  .order("created_at", { ascending:false });
+
+      if(!e2) joined = jr || [];
+    }
+
+    const allIds = [...new Set([...(posted||[]).map(r=>r.id), ...(joined||[]).map(r=>r.id)])];
+    const countsMap = await getSeatsFilledMap(allIds);
+
+    renderMyRides(posted||[], joined||[], countsMap, email);
+    setText("my_msg","Loaded.");
+    $("my_refresh_btn").disabled = false;
+  }
+
+  function renderMyRides(posted, joined, countsMap, myEmail){
+    const container = $("my_rides");
+    container.innerHTML = "";
+
+    const sectionTitle = (txt) => {
+      const d = document.createElement("div");
+      d.className = "muted";
+      d.style.fontWeight = "900";
+      d.style.marginTop = "8px";
+      d.textContent = txt;
+      return d;
+    };
+
+    const makeCard = (r, tag) => {
+      const filled = countsMap[r.id] || 0;
+      const isOwner = normEmail(r.owner_email) === myEmail;
+      const joinedByMe = true; // because in My Rides
+      const canCancel = !isOwner; // don't allow owner to "cancel join" (would remove their own seat)
+      const isFull = filled >= r.max_seats;
+
+      const div = document.createElement("div");
+      div.className = "ride";
+
+const timeLine = `${formatTimeAMPM(r.from_time)}–${formatTimeAMPM(r.to_time)}`;
+const metaLine = `${isoToMDY(r.ride_date)} · ${r.direction} · ${r.airport}`;
+const statusText = isFull ? "FULL" : "OPEN";
+      
+div.innerHTML = `
+  <div class="row" style="justify-content:space-between; gap:10px;">
+    <div class="row" style="gap:8px;">
+      <span class="pill">${escapeHtml(tag)}</span>
+      ${isOwner ? `<span class="pill">HOST</span>` : `<span class="pill">RIDER</span>`}
+    </div>
+    <span class="pill">${statusText}</span>
+  </div>
+
+  <div class="rideTime">${escapeHtml(timeLine)}</div>
+
+  <div class="rideMeta">
+    <span>${escapeHtml(metaLine)}</span>
+  </div>
+
+  <div class="kv">
+    <div class="kvRow">
+      <div class="kvLabel">Seats</div>
+      <div class="kvValue">${filled}/${r.max_seats} filled</div>
+    </div>
+
+    <div class="kvRow">
+      <div class="kvLabel">Contact</div>
+      <div class="kvValue">${escapeHtml(r.contact)}</div>
+    </div>
+  </div>
+
+  ${canCancel ? `
+    <div class="row" style="margin-top:12px;">
+      <button class="danger" data-cancel="${r.id}">Cancel Join</button>
+    </div>
+  ` : `
+    <div class="row" style="margin-top:12px;">
+      <button class="danger" data-cancel-ride="${r.id}">Cancel Ride</button>
+    </div>
+    <div class="hint" style="margin-top:10px;">
+      Cancelling will hide this ride from everyone.
+    </div>
+  `}
+`;
+
+      return div;
+    };
+
+    container.appendChild(sectionTitle("My Posted Rides"));
+    if(!posted.length){
+      const d = document.createElement("div"); d.className="muted"; d.textContent="(none)"; container.appendChild(d);
+    } else {
+      posted.forEach(r=>container.appendChild(makeCard(r,"POSTED")));
+    }
+
+    container.appendChild(document.createElement("div")).className = "hr";
+
+    container.appendChild(sectionTitle("My Joined Rides"));
+    const joinedOnly = joined.filter(r=> !posted.some(p=>p.id===r.id));
+    if(!joinedOnly.length){
+      const d = document.createElement("div"); d.className="muted"; d.textContent="(none)"; container.appendChild(d);
+    } else {
+      joinedOnly.forEach(r=>container.appendChild(makeCard(r,"JOINED")));
+    }
+
+      container.querySelectorAll("button[data-cancel]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const rideId = btn.getAttribute("data-cancel");
+        await cancelJoinClick(rideId, btn);
+      });
+    });
+
+    container.querySelectorAll("button[data-cancel-ride]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const rideId = btn.getAttribute("data-cancel-ride");
+        await cancelRideAsHostClick(rideId, btn);
+      });
+    });
+
+
+  }
+
+  // ====== INIT ======
+  document.addEventListener("DOMContentLoaded", async ()=>{
+      // If user comes back from Supabase recovery email, exchange code for a session
+  try{
+    const url = new URL(window.location.href);
+    if(url.searchParams.get("code")){
+      await sb.auth.exchangeCodeForSession(window.location.href);
+      // Clean URL (optional)
+      url.searchParams.delete("code");
+      window.history.replaceState({}, document.title, url.toString());
+    }
+  }catch(e){
+    console.warn("exchangeCodeForSession failed:", e);
+  }
+
+    // Tabs
+    $("tab_post").addEventListener("click", ()=> activateTab("post"));
+    $("tab_find").addEventListener("click", ()=> activateTab("find"));
+    $("tab_my").addEventListener("click", ()=> loadMyRidesClick());
+
+    // Buttons
+    $("post_btn").addEventListener("click", postRideClick);
+    $("find_btn").addEventListener("click", searchRides);
+    $("my_refresh_btn").addEventListener("click", loadMyRides);
+
+  // Auth button
+$("auth_btn").addEventListener("click", async ()=>{
+  await refreshUser();
+
+  if(currentUser?.email){
+    $("auth_btn").disabled = true;
+
+    try{
+      await sb.auth.signOut();
+    }catch(e){
+      console.warn("signOut failed:", e);
+    }
+
+    currentUser = null;
+    setAuthUI();
+    resetUIAfterSignOut();
+
+    $("auth_btn").disabled = false;
+  }else{
+    openSignInModal("");
+  }
+});
+
+// ===== Join Preview modal actions =====
+$("joinpreview_close").addEventListener("click", closeJoinPreviewModal);
+$("joinpreview_cancel").addEventListener("click", closeJoinPreviewModal);
+
+$("joinpreview_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("joinpreview_overlay")) closeJoinPreviewModal();
+});
+
+$("joinpreview_confirm").addEventListener("click", async ()=>{
+  setText("joinpreview_err","");
+  setText("joinpreview_msg","Joining...");
+  $("joinpreview_confirm").disabled = true;
+  $("joinpreview_cancel").disabled = true;
+
+  try{
+    const rideId = pendingJoinRideId;
+    if(!rideId) throw new Error("Missing ride id.");
+
+    closeJoinPreviewModal();
+    await doJoinRide(rideId, null, false); // doJoinRide will open joindone modal after success
+  }catch(err){
+    setText("joinpreview_msg","");
+    setText("joinpreview_err", err.message || "Join failed.");
+    $("joinpreview_confirm").disabled = false;
+    $("joinpreview_cancel").disabled = false;
+  }finally{
+    $("joinpreview_confirm").disabled = false;
+    $("joinpreview_cancel").disabled = false;
+  }
+});
+
+// ===== Join Done modal actions =====
+// ===== Join Done modal actions (new) =====
+$("joindone_close").addEventListener("click", closeJoinDoneModal);
+
+$("joindone_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("joindone_overlay")) closeJoinDoneModal();
+});
+
+// underlined close text
+$("joindone_close_text").addEventListener("click", closeJoinDoneModal);
+
+// main CTA: Text Poster (or Copy Contact fallback)
+$("joindone_text_poster").addEventListener("click", async ()=>{
+  if(joindoneSmsUrl){
+    window.location.href = joindoneSmsUrl;
+    return;
+  }
+
+  // fallback: copy contact text
+  const raw = (String($("joindone_step1").textContent || "")).trim();
+  await copyText(raw);
+  $("joindone_text_poster").textContent = "Copied!";
+  setTimeout(()=> $("joindone_text_poster").textContent = "Copy Contact", 900);
+});
+
+
+
+    // Sign-in modal actions
+    $("signin_close").addEventListener("click", closeSignInModal);
+    $("signin_overlay").addEventListener("click", (e)=>{
+      if(e.target === $("signin_overlay")) closeSignInModal();
+    });
+
+    $("signup_pw_btn").addEventListener("click", ()=>{
+  const email = normEmail($("signin_email").value);
+  closeSignInModal();
+  openSignUpModal(email);
+});
+
+
+$("signin_pw_btn").addEventListener("click", async ()=>{
+  const email = normEmail($("signin_email").value);
+  const pw = $("signin_password").value || "";
+  const ok = await signInWithPassword(email, pw);
+  if(ok){
+    await refreshUser();
+    if(currentUser?.email) closeSignInModal();
+  }
+});
+
+    // Sign up modal actions
+$("signup_close").addEventListener("click", closeSignUpModal);
+$("signup_back_btn").addEventListener("click", ()=>{
+  closeSignUpModal();
+  openSignInModal($("signup_email").value || "");
+});
+
+$("signup_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("signup_overlay")) closeSignUpModal();
+});
+
+$("signup_create_btn").addEventListener("click", async ()=>{
+  setText("signup_msg","");
+  setText("signup_err","");
+
+  const email = normEmail($("signup_email").value);
+  const p1 = $("signup_password").value || "";
+  const p2 = $("signup_password2").value || "";
+
+  if(!email || !isNU(email)){
+    setText("signup_err","Please use your Northwestern email (@u.northwestern.edu).");
+    return;
+  }
+  if(p1.length < 8){
+    setText("signup_err","Password must be at least 8 characters.");
+    return;
+  }
+  if(p1 !== p2){
+    setText("signup_err","Passwords do not match.");
+    return;
+  }
+
+  // Use your existing signUpWithPassword function
+  const ok = await signUpWithPassword(email, p1);
+  if(ok){
+    setText("signup_msg","Account created. Please check your email if confirmation is required, then sign in.");
+    // Optional: go back to sign in modal
+    closeSignUpModal();
+    openSignInModal(email);
+  }
+});
+
+// Forgot password + reset password actions
+$("forgot_pw_btn").addEventListener("click", async ()=>{
+  const email = normEmail($("signin_email").value);
+  await sendPasswordRecovery(email);
+});
+
+$("reset_save_btn").addEventListener("click", updatePasswordFromRecovery);
+
+$("reset_back_btn").addEventListener("click", ()=>{
+  showSignInView();
+});
+
+    // Join modal actions
+    $("join_close").addEventListener("click", closeJoinModal);
+    $("close_join_btn").addEventListener("click", closeJoinModal);
+    $("join_overlay").addEventListener("click", (e)=>{
+      if(e.target === $("join_overlay")) closeJoinModal();
+    });
+    $("copy_contact_btn").addEventListener("click", async ()=>{
+      const ok = await copyText($("join_contact").value || "");
+      $("copy_contact_btn").textContent = ok ? "Copied!" : "Copy failed";
+      setTimeout(()=> $("copy_contact_btn").textContent = "Copy contact", 900);
+    });
+    $("copy_message_btn").addEventListener("click", async ()=>{
+      const ok = await copyText($("join_message").value || "");
+      $("copy_message_btn").textContent = ok ? "Copied!" : "Copy failed";
+      setTimeout(()=> $("copy_message_btn").textContent = "Copy message", 900);
+    });
+    $("go_my_btn").addEventListener("click", async ()=>{
+      closeJoinModal();
+      activateTab("my");
+      await loadMyRides();
+    });
+// Post-success modal actions
+$("postdone_close").addEventListener("click", closePostDoneModal);
+$("postdone_got_it").addEventListener("click", closePostDoneModal);
+
+$("postdone_overlay").addEventListener("click", (e)=>{
+  if(e.target === $("postdone_overlay")) closePostDoneModal();
+});
+
+$("postdone_view_my").addEventListener("click", async ()=>{
+  closePostDoneModal();
+  activateTab("my");
+  await loadMyRides();
+});
+
+    // Date defaults
+    const todayIso = new Date().toISOString().slice(0,10);
+    $("find_date").value = todayIso;
+    $("post_date").value = todayIso;
+    $("find_date_display").textContent = isoToMDY(todayIso);
+    $("post_date_display").textContent = isoToMDY(todayIso);
+
+    $("find_date").addEventListener("change", ()=> $("find_date_display").textContent = isoToMDY($("find_date").value));
+    $("post_date").addEventListener("change", ()=> $("post_date_display").textContent = isoToMDY($("post_date").value));
+
+    // Time dropdowns
+    buildTimeOptions($("post_from"), "14:00", false);
+    buildTimeOptions($("post_to"), "15:00", false);
+    buildTimeOptions($("find_time"), "", true); // include Anytime
+
+   // Auth state listener
+sb.auth.onAuthStateChange(async (event, session)=>{
+  if(session?.user){
+    currentUser = { email: session.user.email, id: session.user.id };
+  }else{
+    currentUser = null;
+  }
+  setAuthUI();
+
+  if(event === "PASSWORD_RECOVERY"){
+    openSignInModal("");
+    showResetView();
+    return;
+  }
+
+  if(event === "SIGNED_IN"){
+    closeSignInModal();
+    await maybeResumePendingAction();
+  }
+
+  if(event === "SIGNED_OUT"){
+    resetUIAfterSignOut();
+  }
+});
+
+
+function onAppResume(){
+  lastResumeAt = Date.now();
+  // kick a non-blocking rehydrate
+  refreshUser({ force:false }).catch(()=>{});
+}
+
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible") onAppResume();
+});
+
+window.addEventListener("pageshow", onAppResume);
+
+// ✅ iOS 有时从 Messages 回来 focus 更可靠
+window.addEventListener("focus", onAppResume);
+
+
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState === "visible") onAppResume();
+});
+window.addEventListener("pageshow", onAppResume); // iOS bfcache 常用
+
+
+    // Initial auth refresh + resume
+    await refreshUser();
+    setAuthUI();
+
+    // If user came back from magic link, resume pending action
+    await maybeResumePendingAction();
+    activateTab("find");
+
+  });
+</script>
 </body>
 </html>
