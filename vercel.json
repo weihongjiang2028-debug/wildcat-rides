@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/notify?secret=nu-carpool-notify-2025",
+      "schedule": "*/2 * * * *"
+    }
+  ]
+}
