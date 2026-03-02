@@ -73,9 +73,11 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   text-decoration: none;
 }
+
+.nav-brand:hover { opacity: .9; }
 
 .nav-logo {
   width: 40px;

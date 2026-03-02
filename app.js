@@ -269,6 +269,13 @@ function openSignUpModal(email = "") {
 }
 function closeSignUpModal()  { $("signup_overlay").classList.remove("show"); }
 
+function openVerifyModal(email) {
+  $("verify_email_display").textContent = email;
+  setText("verify_msg", "");
+  $("verify_overlay").classList.add("show");
+}
+function closeVerifyModal() { $("verify_overlay").classList.remove("show"); }
+
 function showSignInView() {
   show($("signin_view")); hide($("reset_view"));
   setText("signin_msg",""); setText("signin_err","");
@@ -956,7 +963,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       normEmail($("signup_email").value),
       $("signup_password").value, $("signup_password2").value
     );
-    if (ok) { closeSignUpModal(); openSignInModal($("signup_email").value); }
+    if (ok) {
+      const email = normEmail($("signup_email").value);
+      closeSignUpModal();
+      openVerifyModal(email);
+    }
+  });
+
+  // ── Verify modal ──
+  $("verify_signin_btn")?.addEventListener("click", () => {
+    closeVerifyModal();
+    openSignInModal($("verify_email_display").textContent);
+  });
+  $("verify_resend_btn")?.addEventListener("click", async () => {
+    const email = $("verify_email_display").textContent;
+    setText("verify_msg", "Sending...");
+    const { error } = await sb.auth.resend({ type: "signup", email });
+    if (error) {
+      const isRateLimit = error.message?.toLowerCase().includes("rate") || error.status === 429;
+      setText("verify_msg", isRateLimit
+        ? "Please wait a minute before requesting another email."
+        : "Couldn't resend — please wait a moment and try again.");
+    } else {
+      setText("verify_msg", "Sent! Check your inbox (and spam folder).");
+    }
+  });
+  $("verify_overlay")?.addEventListener("click", e => {
+    if (e.target === $("verify_overlay")) closeVerifyModal();
   });
 
   // ── Post-submit modal ──

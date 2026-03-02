@@ -18,7 +18,10 @@
 ══════════════════════════════════════════ -->
 <nav class="site-nav">
   <div class="nav-inner">
-    <img src="logo_cat.png" class="nav-logo" alt="NUCarpool" />
+    <a class="nav-brand" href="/">
+      <img src="logo_cat.png" class="nav-logo" alt="NUCarpool" />
+      <span class="nav-brand-name">NU Carpool</span>
+    </a>
     <div class="nav-auth">
       <div id="auth_chip" class="nav-chip hidden"></div>
       <button id="auth_btn" class="nav-auth-btn">Sign in</button>
@@ -36,7 +39,7 @@
     <div class="hero-text">
       <div class="hero-tag">Northwestern Students Only</div>
 
-      <h1 class="hero-headline">Split your airport Uber,<br/>keep more in your pocket.</h1>
+      <h1 class="hero-headline">Split your airport Uber,<br/>Keep more in your pocket.</h1>
 
       <p class="hero-sub">
         Flying out? Add your trip and we'll connect you with another Wildcat headed your way.
@@ -317,11 +320,58 @@
       <label class="modal-label" for="signup_password2">Confirm password</label>
       <input id="signup_password2" class="modal-input" type="password" placeholder="Type it again" />
       <div class="modalActions" style="margin-top:16px;">
-        <button id="signup_create_btn" type="button" class="modal-btn-confirm">Create account</button>
         <button id="signup_back_btn" class="modal-btn-secondary" type="button">Back</button>
+        <button id="signup_create_btn" type="button" class="modal-btn-confirm">Create account</button>
       </div>
       <div id="signup_msg" class="status-msg"></div>
       <div id="signup_err" class="status-err"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     EMAIL VERIFICATION MODAL
+══════════════════════════════════════════ -->
+<div id="verify_overlay" class="overlay">
+  <div class="modal">
+    <div class="modalHeader" style="padding: 28px 24px 22px; text-align:center;">
+      <div style="font-size:48px; line-height:1; margin-bottom:12px;">📬</div>
+      <div class="modalHeaderTitle" style="font-size:22px;">Check your inbox</div>
+      <div class="modalHeaderSub" style="margin-top:8px; font-size:13px; opacity:.8; text-transform:none; letter-spacing:0;">
+        We sent a verification link to
+      </div>
+      <div id="verify_email_display" style="margin-top:6px; font-size:14px; font-weight:600; color:#fff; background:rgba(255,255,255,.15); border-radius:8px; padding:6px 14px; display:inline-block;"></div>
+    </div>
+    <div class="modalPlainBody" style="padding: 20px 22px 26px;">
+      <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+        <div style="display:flex; align-items:flex-start; gap:12px;">
+          <div style="font-size:20px; flex:0 0 auto; margin-top:1px;">1️⃣</div>
+          <div>
+            <div style="font-size:14px; font-weight:700; color:var(--text-1); margin-bottom:2px;">Open the email</div>
+            <div style="font-size:13px; color:var(--text-2); line-height:1.5;">Look for an email from Supabase or NUCarpool. Check spam if you don't see it.</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:12px;">
+          <div style="font-size:20px; flex:0 0 auto; margin-top:1px;">2️⃣</div>
+          <div>
+            <div style="font-size:14px; font-weight:700; color:var(--text-1); margin-bottom:2px;">Click "Confirm your email"</div>
+            <div style="font-size:13px; color:var(--text-2); line-height:1.5;">This activates your account. You'll be redirected back to the site.</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:12px;">
+          <div style="font-size:20px; flex:0 0 auto; margin-top:1px;">3️⃣</div>
+          <div>
+            <div style="font-size:14px; font-weight:700; color:var(--text-1); margin-bottom:2px;">Sign in and you're set</div>
+            <div style="font-size:13px; color:var(--text-2); line-height:1.5;">Come back here, sign in with your email and password, and request your first ride.</div>
+          </div>
+        </div>
+      </div>
+      <button id="verify_signin_btn" class="modal-btn-primary" style="margin-top:0;">I verified — Sign in now</button>
+      <div style="text-align:center; margin-top:12px;">
+        <span id="verify_resend_btn" style="font-size:13px; color:var(--purple); font-weight:600; cursor:pointer; text-decoration:underline;">Resend verification email</span>
+      </div>
+      <div id="verify_msg" class="status-msg" style="text-align:center; margin-top:8px;"></div>
     </div>
   </div>
 </div>
