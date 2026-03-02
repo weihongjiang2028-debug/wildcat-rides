@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Terms of Use — NUCarpool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Scoped to this page only ── */
+    .legal-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    .legal-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--purple, #4e2a84);
+      text-decoration: none;
+      margin-bottom: 32px;
+    }
+    .legal-back:hover { text-decoration: underline; }
+
+    .legal-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: var(--text-3, #9ca3af);
+      margin-bottom: 8px;
+    }
+
+    .legal-title {
+      font-size: clamp(26px, 5vw, 36px);
+      font-weight: 700;
+      color: var(--text-1, #111);
+      letter-spacing: -.4px;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    .legal-date {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-3, #9ca3af);
+      margin-bottom: 36px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+
+    .legal-intro {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-2, #374151);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    /* Section number + heading */
+    .legal-section {
+      margin-bottom: 32px;
+    }
+
+    .legal-section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-1, #111);
+      letter-spacing: -.1px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .legal-section-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--purple-pale, #f3f0ff);
+      color: var(--purple, #4e2a84);
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .legal-body {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-2, #374151);
+      line-height: 1.75;
+    }
+
+    .legal-body p { margin-bottom: 10px; }
+    .legal-body p:last-child { margin-bottom: 0; }
+
+    .legal-list {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legal-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-2, #374151);
+      line-height: 1.6;
+    }
+
+    .legal-list li::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--purple, #4e2a84);
+      flex-shrink: 0;
+      margin-top: 8px;
+    }
+
+    /* Sub-lists (nested) */
+    .legal-sub-list {
+      list-style: none;
+      padding: 0;
+      margin: 6px 0 6px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .legal-sub-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-2, #374151);
+      line-height: 1.6;
+    }
+
+    .legal-sub-list li::before {
+      content: '–';
+      color: var(--text-3, #9ca3af);
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+
+    /* Highlighted note boxes */
+    .legal-note {
+      background: var(--purple-pale, #f3f0ff);
+      border-left: 3px solid var(--purple, #4e2a84);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-1, #111);
+      line-height: 1.6;
+      margin: 12px 0;
+    }
+
+    .legal-contact {
+      background: var(--bg, #f8f7fc);
+      border: 1.5px solid var(--border, #e5e7eb);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-top: 8px;
+    }
+
+    .legal-contact-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-1, #111);
+      margin-bottom: 6px;
+    }
+
+    .legal-contact a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--purple, #4e2a84);
+      text-decoration: none;
+    }
+    .legal-contact a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <svg class="nav-logo" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <circle cx="14" cy="14" r="14" fill="rgba(255,255,255,0.15)"/>
+        <path d="M10 11.2c-1-.8-2.5-.6-3.3.5-.9 1.1-.7 2.8.6 3.6 1 .7 2.3.4 3.1-.6.9-1.1.7-2.7-.4-3.5Z" fill="#fff"/>
+        <path d="M18 11c-1-.8-2.5-.6-3.3.5-.9 1.1-.7 2.8.6 3.6 1 .7 2.3.4 3.1-.6.9-1.1.7-2.7-.4-3.5Z" fill="#fff"/>
+        <path d="M7.2 16c-1.2-.6-2.7 0-3.3 1.3-.6 1.5 0 3.3 1.6 3.8 1.2.5 2.6-.1 3.1-1.5.7-1.4.1-3-1.4-3.6Z" fill="#fff"/>
+        <path d="M22 16c-1.2-.6-2.7 0-3.3 1.3-.6 1.5 0 3.3 1.6 3.8 1.2.5 2.6-.1 3.1-1.5.7-1.4.1-3-1.4-3.6Z" fill="#fff"/>
+        <path d="M14 14.5c-3 0-5.3 2-5.3 4.6 0 2.8 2.5 5.1 5.3 5.1s5.3-2.3 5.3-5.1c0-2.6-2.3-4.6-5.3-4.6Z" fill="#fff"/>
+      </svg>
+      <span class="nav-brand-name">NUCarpool</span>
+    </div>
+  </div>
+</nav>
+
+<div class="legal-wrap">
+
+  <a class="legal-back" href="index.html">← Back to NUCarpool</a>
+
+  <div class="legal-eyebrow">Legal</div>
+  <h1 class="legal-title">Terms of Use</h1>
+  <div class="legal-date">Last Updated: March 1, 2026</div>
+
+  <p class="legal-intro">
+    Welcome to NUCarpool. These Terms of Use ("Terms") govern your access to and use of the NUCarpool website and related services (the "Service"). By creating an account, posting a ride, joining a ride, or otherwise using the Service, you agree to these Terms. If you do not agree, do not use the Service.
+  </p>
+
+  <!-- 1 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">1</span>
+      Description of the Service
+    </div>
+    <div class="legal-body">
+      <p>NUCarpool is an online platform that enables Northwestern University students to coordinate shared rides (including Uber or similar services) by posting, discovering, and joining ride opportunities.</p>
+      <p>NUCarpool:</p>
+      <ul class="legal-list">
+        <li>Is a technology platform only</li>
+        <li>Does not provide transportation services</li>
+        <li>Does not operate vehicles</li>
+        <li>Does not employ drivers</li>
+        <li>Does not collect or process ride payments between users</li>
+      </ul>
+      <p>All transportation arrangements and cost-sharing occur directly between users and third-party transportation providers.</p>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">2</span>
+      Eligibility
+    </div>
+    <div class="legal-body">
+      <p>To use the Service, you must:</p>
+      <ul class="legal-list">
+        <li>Be at least 18 years old</li>
+        <li>Have a valid Northwestern University email address</li>
+        <li>Create an account in your own name</li>
+      </ul>
+      <p>The Service is intended exclusively for Northwestern University students. NUCarpool reserves the right to verify eligibility and remove accounts that do not meet these requirements.</p>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">3</span>
+      No Affiliation with Northwestern University
+    </div>
+    <div class="legal-body">
+      <div class="legal-note">NUCarpool is independently operated and is not affiliated with, endorsed by, sponsored by, or officially connected to Northwestern University.</div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">4</span>
+      User Responsibilities
+    </div>
+    <div class="legal-body">
+      <p>You are solely responsible for:</p>
+      <ul class="legal-list">
+        <li>The accuracy of information you post</li>
+        <li>Your conduct during ride coordination and participation</li>
+        <li>Verifying ride details before travel</li>
+        <li>Ensuring safe and lawful behavior</li>
+        <li>Handling cost-sharing and payment arrangements directly with other users</li>
+      </ul>
+      <p>You agree not to:</p>
+      <ul class="legal-list">
+        <li>Post false or misleading information</li>
+        <li>Impersonate another person</li>
+        <li>Use the Service for commercial solicitation</li>
+        <li>Harass, threaten, or abuse other users</li>
+        <li>Use the Service in violation of any law</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">5</span>
+      Ride Coordination and Risk Assumption
+    </div>
+    <div class="legal-body">
+      <p>NUCarpool does not screen users, verify identities beyond email authentication, or conduct background checks. All ride participation is voluntary and at your own risk.</p>
+      <p>You understand and agree that:</p>
+      <ul class="legal-list">
+        <li>NUCarpool does not guarantee the reliability, punctuality, or safety of any user</li>
+        <li>NUCarpool is not responsible for missed rides, no-shows, disputes, or payment disagreements</li>
+        <li>NUCarpool is not responsible for accidents, injuries, damages, theft, misconduct, or losses arising from rides arranged through the Service</li>
+        <li>You assume all risks associated with coordinating or participating in rides</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">6</span>
+      SMS Notifications and Contact Sharing
+    </div>
+    <div class="legal-body">
+      <p>The Service may use automated systems to:</p>
+      <ul class="legal-list">
+        <li>Match riders</li>
+        <li>Share limited contact information between matched participants</li>
+        <li>Send SMS notifications regarding ride coordination</li>
+      </ul>
+      <div class="legal-note">By using the Service and providing your phone number, you consent to receiving service-related SMS notifications. Message and data rates may apply.</div>
+      <p>You are responsible for ensuring that any contact information you share is accurate and that you have authority to provide it.</p>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">7</span>
+      Account Security
+    </div>
+    <div class="legal-body">
+      <p>You are responsible for maintaining the confidentiality of your login credentials and all activity under your account. If you believe your account has been compromised, you must notify us immediately at <a href="mailto:support@nucarpool.com">support@nucarpool.com</a>.</p>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">8</span>
+      Content Ownership and License
+    </div>
+    <div class="legal-body">
+      <p>You retain ownership of content you post (such as ride details). By posting content, you grant NUCarpool a non-exclusive, worldwide, royalty-free license to use, display, and distribute that content solely for operating and improving the Service.</p>
+      <p>You may not copy, reproduce, or distribute any part of the Service without permission.</p>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">9</span>
+      Suspension and Termination
+    </div>
+    <div class="legal-body">
+      <p>NUCarpool reserves the right, at its sole discretion, to remove ride posts, suspend accounts, or terminate access to the Service. This may occur for violations of these Terms, safety concerns, misuse, or any behavior deemed harmful to the platform or its users.</p>
+      <p>We are not obligated to provide advance notice before suspension or termination.</p>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">10</span>
+      Disclaimer of Warranties
+    </div>
+    <div class="legal-body">
+      <p>The Service is provided "as is" and "as available." NUCarpool makes no warranties, express or implied, including but not limited to fitness for a particular purpose, availability or uptime, accuracy of user-posted information, or safety or reliability of ride participants.</p>
+      <div class="legal-note">Use of the Service is at your own risk.</div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">11</span>
+      Limitation of Liability
+    </div>
+    <div class="legal-body">
+      <p>To the maximum extent permitted by law, NUCarpool and its operator shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to:</p>
+      <ul class="legal-list">
+        <li>Personal injury</li>
+        <li>Property damage</li>
+        <li>Loss of profits or data</li>
+        <li>Emotional distress</li>
+        <li>Transportation-related incidents</li>
+      </ul>
+      <div class="legal-note">In no event shall total liability exceed $100 USD.</div>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">12</span>
+      Indemnification
+    </div>
+    <div class="legal-body">
+      <p>You agree to indemnify and hold harmless NUCarpool and its operator from any claims, liabilities, damages, losses, and expenses (including legal fees) arising out of your use of the Service, your violation of these Terms, your interactions with other users, or any ride-related incident.</p>
+    </div>
+  </div>
+
+  <!-- 13 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">13</span>
+      Arbitration Agreement
+    </div>
+    <div class="legal-body">
+      <p>Any dispute arising out of or relating to these Terms or the Service shall be resolved through binding arbitration in the State of Illinois, rather than in court, except that you may bring claims in small claims court if eligible.</p>
+      <div class="legal-note">You waive the right to participate in any class action lawsuit or class-wide arbitration.</div>
+    </div>
+  </div>
+
+  <!-- 14 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">14</span>
+      Governing Law
+    </div>
+    <div class="legal-body">
+      <p>These Terms are governed by the laws of the State of Illinois, without regard to conflict of law principles.</p>
+    </div>
+  </div>
+
+  <!-- 15 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">15</span>
+      Modifications to the Service or Terms
+    </div>
+    <div class="legal-body">
+      <p>NUCarpool may modify or discontinue parts of the Service at any time. We may update these Terms periodically. Continued use of the Service after changes constitutes acceptance of the updated Terms.</p>
+    </div>
+  </div>
+
+  <!-- 16 -->
+  <div class="legal-section">
+    <div class="legal-section-title">
+      <span class="legal-section-num">16</span>
+      Contact Information
+    </div>
+    <div class="legal-body">
+      <p>If you have questions about these Terms, contact:</p>
+      <div class="legal-contact">
+        <div class="legal-contact-name">NUCarpool</div>
+        <a href="mailto:support@nucarpool.com">support@nucarpool.com</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="footer-brand">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#4e2a84"/>
+      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#4e2a84"/>
+      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#4e2a84"/>
+      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#4e2a84"/>
+      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#4e2a84"/>
+    </svg>
+    <span class="footer-brand-name">NUCarpool</span>
+  </div>
+  <div class="footer-tagline">For Northwestern students only · Not affiliated with Northwestern University</div>
+  <div class="footer-links">
+    <a class="footer-link" href="privacy.html">Privacy Policy</a>
+    <a class="footer-link" href="terms.html">Terms of Use</a>
+    <a class="footer-link" href="contact.html">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 NUCarpool</div>
+</footer>
+
+</body>
+</html>
