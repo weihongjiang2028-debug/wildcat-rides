@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = window.__nu_carpool_sb
   || (window.__nu_carpool_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
 
-const MATCH_WINDOW_MINS = 40;
+const MATCH_WINDOW_MINS = 45;
 const VALID_GROUP_SIZES = [2, 3];
 
 
@@ -556,6 +556,11 @@ function collectRequestPayload() {
 }
 
 async function doSubmitRequest(payload) {
+  if (!payload) {
+    // Can happen if form was invalid when user was redirected to sign-in
+    activateTab("request");
+    return;
+  }
   setText("req_err",""); setText("req_msg","Submitting your request...");
   $("req_btn").disabled = true;
 
@@ -708,7 +713,6 @@ function makeRequestCard(r) {
   }
 
   const timeStr = formatTimeAMPM(r.leaving_around);
-  const winStr  = `${formatTimeAMPM(r.window_start)} – ${formatTimeAMPM(r.window_end)}`;
   const dateStr = isoToMDY(r.ride_date);
   const route   = routeLabel(r.direction, r.airport);
   const sizeStr = groupSizeLabel(r.group_size);
@@ -724,8 +728,7 @@ function makeRequestCard(r) {
           const phone = rd.phone_e164
             ? `<span class="req-rider-phone">${escapeHtml(rd.phone_e164)}</span>`
             : `<span class="req-rider-nophone">no phone on file</span>`;
-          const badge = rd.is_me ? `<span class="req-rider-you">you</span>` : "";
-          return `<div class="req-rider-row">${badge}<span class="req-rider-name">👤 ${name}</span>${phone}</div>`;
+          return `<div class="req-rider-row"><span class="req-rider-name">👤 ${name}</span>${phone}</div>`;
         }).join("")}
         <p class="req-riders-hint">Coordinate via text to split your Uber fare. 💸</p>
       </div>`;
@@ -740,14 +743,10 @@ function makeRequestCard(r) {
           const phone = rd.phone_e164
             ? `<span class="req-rider-phone">${escapeHtml(rd.phone_e164)}</span>`
             : `<span class="req-rider-nophone">no phone on file</span>`;
-          const badge = rd.is_me ? `<span class="req-rider-you">you</span>` : "";
-          return `<div class="req-rider-row">${badge}<span class="req-rider-name">👤 ${name}</span>${phone}</div>`;
+          return `<div class="req-rider-row"><span class="req-rider-name">👤 ${name}</span>${phone}</div>`;
         }).join("")}
         <div class="req-forming-note" style="margin-top:10px;margin-bottom:0;">
-          🔍 Still looking for 1 more rider going the same direction.<br/>
-          <span style="font-size:12px;color:var(--text-3);">
-            If a 3rd joins, all 3 riders will get a new text with the full group info.
-          </span>
+          🔍 Still looking for 1 more rider going the same direction.
         </div>
       </div>`;
   }
@@ -766,16 +765,11 @@ function makeRequestCard(r) {
   div.innerHTML = `
     <div class="req-card-header">
       <div class="req-time-block">
-        <div class="req-leaving-label">Leaving around</div>
+        <div class="req-leaving-label">${escapeHtml(dateStr)} · ${escapeHtml(route)}</div>
         <div class="req-time">${escapeHtml(timeStr)}</div>
-        <div class="req-window-hint">Match window: ${escapeHtml(winStr)}</div>
+        <div class="req-window-hint">${escapeHtml(sizeStr)}</div>
       </div>
       <div>${statusBadge}</div>
-    </div>
-    <div class="req-details">
-      <span>📅 ${escapeHtml(dateStr)}</span>
-      <span>🧭 ${escapeHtml(route)}</span>
-      <span>👥 ${escapeHtml(sizeStr)}</span>
     </div>
     ${ridersHtml}
     ${actionsHtml}
