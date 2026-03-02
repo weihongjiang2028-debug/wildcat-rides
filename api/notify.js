@@ -203,9 +203,10 @@ async function processSingleJob(job) {
 export default async function handler(req, res) {
   // Shared-secret auth: set NOTIFY_SECRET in Vercel env vars,
   // then pass it as "Authorization: Bearer <secret>" from your cron caller.
-  const authHeader = req.headers["authorization"] || "";
-  const secret     = process.env.NOTIFY_SECRET;
-  if (secret && authHeader !== `Bearer ${secret}`) {
+  const authHeader  = req.headers["authorization"] || "";
+  const querySecret = (req.query && req.query.secret) ? req.query.secret : "";
+  const secret      = process.env.NOTIFY_SECRET;
+  if (secret && authHeader !== `Bearer ${secret}` && querySecret !== secret) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
