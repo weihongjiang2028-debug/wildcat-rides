@@ -2,17 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Privacy Policy – Northwestern Carpool</title>
+  <title>Privacy Policy – NUCarpool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: #f6f7fb;
+      color: #111;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
+
+    /* ===== Header ===== */
     header {
       background: #4e2a84;
       color: #fff;
@@ -21,7 +25,11 @@
       align-items: center;
       gap: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,.12);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
+
     .header-back {
       background: rgba(255,255,255,.15);
       border: 1px solid rgba(255,255,255,.25);
@@ -30,36 +38,211 @@
       padding: 6px 14px;
       font-size: 13px;
       font-weight: 900;
-      cursor: pointer;
       text-decoration: none;
+      white-space: nowrap;
     }
     .header-back:hover { background: rgba(255,255,255,.25); }
-    .header-title { font-size: 18px; font-weight: 950; margin-left: 4px; }
-    main { max-width: 680px; margin: 40px auto; padding: 0 20px; flex: 1; }
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 32px 28px;
-      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+
+    .header-title { font-size: 18px; font-weight: 950; }
+
+    /* ===== Layout ===== */
+    main {
+      max-width: 720px;
+      margin: 36px auto 60px;
+      padding: 0 20px;
+      flex: 1;
     }
-    .card-icon    { font-size: 40px; margin-bottom: 12px; }
-    .card-title   { font-size: 26px; font-weight: 950; color: #111; margin-bottom: 6px; }
-    .last-updated { font-size: 12px; color: #aaa; font-weight: 800; margin-bottom: 24px; }
-    .hr           { height: 1px; background: #eee; margin: 24px 0; }
-    .placeholder-banner {
+
+    /* ===== Hero ===== */
+    .hero {
+      background: #4e2a84;
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+
+    .hero-icon { font-size: 36px; margin-bottom: 10px; }
+
+    .hero-title {
+      font-size: 28px;
+      font-weight: 950;
+      margin-bottom: 6px;
+      letter-spacing: .1px;
+    }
+
+    .hero-meta {
+      font-size: 13px;
+      color: rgba(255,255,255,.65);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .hero-notice {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: rgba(255,255,255,.85);
+      font-weight: 750;
+      line-height: 1.5;
+    }
+
+    /* ===== TOC ===== */
+    .toc {
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      margin-bottom: 24px;
+    }
+
+    .toc-title {
+      font-size: 11px;
+      font-weight: 950;
+      color: #888;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .toc-list a {
+      display: block;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 850;
+      color: #4e2a84;
+      text-decoration: none;
+    }
+    .toc-list a:hover { background: #f2effa; }
+
+    /* ===== Sections ===== */
+    .section {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px 22px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      margin-bottom: 14px;
+      scroll-margin-top: 80px;
+    }
+
+    .section-num {
+      display: inline-block;
+      background: #4e2a84;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 950;
+      padding: 3px 9px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+      letter-spacing: .3px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 950;
+      color: #111;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .section p {
+      font-size: 14px;
+      color: #444;
+      font-weight: 700;
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .section p:last-child { margin-bottom: 0; }
+
+    /* Sub-sections (A, B, C) */
+    .sub-title {
+      font-size: 13px;
+      font-weight: 950;
+      color: #111;
+      margin: 14px 0 6px;
+    }
+
+    /* Bullet list */
+    .policy-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .policy-list li {
+      font-size: 14px;
+      color: #444;
+      font-weight: 700;
+      line-height: 1.6;
+      padding-left: 18px;
+      position: relative;
+    }
+
+    .policy-list li::before {
+      content: "·";
+      position: absolute;
+      left: 6px;
+      color: #4e2a84;
+      font-weight: 950;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    .policy-list strong {
+      color: #111;
+      font-weight: 950;
+    }
+
+    /* Highlight box */
+    .highlight-box {
       background: #f2effa;
       border: 1px solid #d9ccef;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #4e2a84;
+      line-height: 1.5;
+      margin-top: 10px;
     }
-    .placeholder-banner p { font-size: 14px; color: #4e2a84; font-weight: 850; line-height: 1.5; }
-    .placeholder-banner a { color: #4e2a84; font-weight: 950; }
-    /* When you add real content, use these classes: */
-    .policy-section        { margin-bottom: 28px; }
-    .policy-section h2     { font-size: 16px; font-weight: 950; color: #111; margin-bottom: 10px; }
-    .policy-section p      { font-size: 14px; color: #444; font-weight: 750; line-height: 1.65; }
-    footer { text-align: center; padding: 24px 20px; font-size: 12px; color: #aaa; font-weight: 700; }
+
+    /* Email link */
+    a.email-link {
+      color: #4e2a84;
+      font-weight: 950;
+      text-decoration: none;
+      border-bottom: 2px solid #d9ccef;
+    }
+    a.email-link:hover { border-color: #4e2a84; }
+
+    /* ===== Footer ===== */
+    footer {
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 12px;
+      color: #aaa;
+      font-weight: 700;
+    }
+
+    @media (max-width: 520px) {
+      .hero-title  { font-size: 22px; }
+      .hero        { padding: 20px 16px; }
+      .section     { padding: 18px 16px; }
+      .toc         { padding: 14px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -70,40 +253,185 @@
 </header>
 
 <main>
-  <div class="card">
-    <div class="card-icon">🔒</div>
-    <div class="card-title">Privacy Policy</div>
-    <div class="last-updated">Last updated: —</div>
 
-    <div class="hr"></div>
-
-    <!-- ✏️ Replace this block with your actual privacy policy text when ready -->
-    <div class="placeholder-banner">
-      <p>
-        Privacy policy content coming soon.<br/>
-        Questions? Contact us at
-        <a href="mailto:support@nucarpool.com">support@nucarpool.com</a>
-      </p>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-icon">🔒</div>
+    <div class="hero-title">Privacy Policy</div>
+    <div class="hero-meta">Effective Date: February 26, 2026 · Last Updated: February 26, 2026</div>
+    <div class="hero-notice">
+      <strong>Independence Notice:</strong> NUcarpool is an independent student-built service and is not affiliated with or endorsed by Northwestern University or Uber.
     </div>
-
-    <!--
-      Once you have your privacy policy text, delete the placeholder above
-      and paste your sections here using this format:
-
-      <div class="policy-section">
-        <h2>1. Information We Collect</h2>
-        <p>Your text here...</p>
-      </div>
-
-      <div class="policy-section">
-        <h2>2. How We Use Your Information</h2>
-        <p>Your text here...</p>
-      </div>
-    -->
   </div>
+
+  <!-- Intro -->
+  <div class="section">
+    <p>NUcarpool ("NUcarpool," "we," "us," or "our") provides a website and related services (the "Service") that help students coordinate shared rides — for example, finding Uber ride mates instead of traveling alone.</p>
+    <p>This Privacy Policy explains how we collect, use, disclose, and protect information when you use the Service.</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#s1">1. Information We Collect</a></li>
+      <li><a href="#s2">2. How We Use Your Information</a></li>
+      <li><a href="#s3">3. Ride Post Visibility and Sharing Controls</a></li>
+      <li><a href="#s4">4. How We Share Information</a></li>
+      <li><a href="#s5">5. Data Retention</a></li>
+      <li><a href="#s6">6. Sessions, Cookies, and Local Storage</a></li>
+      <li><a href="#s7">7. Security</a></li>
+      <li><a href="#s8">8. Children's Privacy</a></li>
+      <li><a href="#s9">9. Your Rights and Choices</a></li>
+      <li><a href="#s10">10. Third-Party Links</a></li>
+      <li><a href="#s11">11. Changes to This Privacy Policy</a></li>
+      <li><a href="#s12">12. Contact Us</a></li>
+    </ul>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section" id="s1">
+    <div class="section-num">01</div>
+    <div class="section-title">Information We Collect</div>
+
+    <div class="sub-title">A. Information You Provide</div>
+    <p>When you register, post a ride, join a ride, or contact us, you may provide:</p>
+    <ul class="policy-list">
+      <li><strong>Account information:</strong> email address and authentication details needed to access the Service.</li>
+      <li><strong>Ride information you post:</strong> date/time, direction (e.g., to/from airport), pickup area, destination, seat availability, notes, and any other content you include in a ride post.</li>
+      <li><strong>Ride participation information:</strong> information indicating that you joined a specific ride.</li>
+      <li><strong>Optional contact details for coordination:</strong> phone number or other contact method only if you choose to share it.</li>
+      <li><strong>Support communications:</strong> messages you send us (feedback, bug reports, questions).</li>
+    </ul>
+
+    <div class="sub-title">B. Information Collected Automatically</div>
+    <p>When you use the Service, we may collect basic log and usage information: IP address, device and browser type, pages/actions within the Service, and timestamps. We use this primarily for security, abuse prevention, and troubleshooting.</p>
+
+    <div class="sub-title">C. Information We Do Not Intentionally Collect</div>
+    <div class="highlight-box">We do not intend to collect sensitive personal information (e.g., government ID numbers, precise real-time location, or financial account details). Please do not submit sensitive information through the Service.</div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section" id="s2">
+    <div class="section-num">02</div>
+    <div class="section-title">How We Use Your Information</div>
+    <p>We use information to:</p>
+    <ul class="policy-list">
+      <li>Provide and operate the Service (create accounts, allow users to post and join rides, and display ride availability).</li>
+      <li>Enable ride coordination between users in the same ride.</li>
+      <li>Maintain safety and integrity (prevent spam, abuse, fraud, and unauthorized access).</li>
+      <li>Troubleshoot and improve the Service (fix bugs, improve reliability, and maintain performance).</li>
+      <li>Communicate with you (respond to support requests and send essential service or security notices).</li>
+    </ul>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section" id="s3">
+    <div class="section-num">03</div>
+    <div class="section-title">Ride Post Visibility and Sharing Controls</div>
+    <p>We design the Service so that information is shared in a limited way:</p>
+    <ul class="policy-list">
+      <li>Ride posts are visible to authenticated (logged-in) users so students can find rides.</li>
+      <li>Participant-only information (such as joiner lists and any optional contact details used for coordination) is restricted to users who have joined that ride, where applicable.</li>
+    </ul>
+    <div class="highlight-box">You should avoid posting personal information in ride text fields if you do not want it visible to other logged-in users.</div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section" id="s4">
+    <div class="section-num">04</div>
+    <div class="section-title">How We Share Information</div>
+    <div class="highlight-box" style="margin-bottom:14px;">We do not sell your personal information.</div>
+    <p>We share information only in limited situations:</p>
+
+    <div class="sub-title">A. Service Providers</div>
+    <p>We use third-party infrastructure to operate the Service:</p>
+    <ul class="policy-list">
+      <li>Supabase supports our database and authentication.</li>
+      <li>Our hosting and infrastructure providers process requests and logs needed to deliver the Service reliably.</li>
+    </ul>
+    <p>These providers process information on our behalf to provide the Service.</p>
+
+    <div class="sub-title">B. Legal, Safety, and Security</div>
+    <p>We may disclose information if we believe it is necessary to comply with applicable law or legal process, enforce our terms or investigate potential violations, or protect the rights, safety, and security of users, the public, or the Service.</p>
+
+    <div class="sub-title">C. Business Transfers</div>
+    <p>If NUcarpool is involved in a merger, acquisition, or asset transfer, information may be transferred as part of that transaction.</p>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="section" id="s5">
+    <div class="section-num">05</div>
+    <div class="section-title">Data Retention</div>
+    <p>We retain information only as long as reasonably necessary to provide the Service, maintain security and prevent abuse, comply with legal obligations, and resolve disputes and enforce agreements.</p>
+    <p>Ride posts and participation information may remain available until you delete them (if the Service provides deletion controls) or your account is removed, subject to limited retention for security, legal, or operational purposes.</p>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="section" id="s6">
+    <div class="section-num">06</div>
+    <div class="section-title">Sessions, Cookies, and Local Storage</div>
+    <p>The Service uses session mechanisms to keep you logged in and secure your account. This may involve cookies and/or browser local storage (depending on device and configuration) that store authentication tokens or session identifiers.</p>
+    <p>These technologies are used for essential functionality (authentication, security, and session persistence). If you disable cookies or storage in your browser, parts of the Service such as staying logged in may not work properly.</p>
+    <div class="highlight-box">Analytics: We do not use third-party analytics tracking tools at this time.</div>
+  </div>
+
+  <!-- Section 7 -->
+  <div class="section" id="s7">
+    <div class="section-num">07</div>
+    <div class="section-title">Security</div>
+    <p>We use reasonable administrative, technical, and organizational measures to protect your information, including using established third-party infrastructure for authentication and database security.</p>
+    <div class="highlight-box">No online service can guarantee absolute security. You are responsible for maintaining the confidentiality of your login credentials.</div>
+  </div>
+
+  <!-- Section 8 -->
+  <div class="section" id="s8">
+    <div class="section-num">08</div>
+    <div class="section-title">Children's Privacy</div>
+    <p>The Service is intended for college students and is not directed to children under 13. If we learn we have collected personal information from a child under 13, we will take steps to delete it.</p>
+  </div>
+
+  <!-- Section 9 -->
+  <div class="section" id="s9">
+    <div class="section-num">09</div>
+    <div class="section-title">Your Rights and Choices</div>
+    <p>Depending on your location, you may have rights to request:</p>
+    <ul class="policy-list">
+      <li>Access to personal information we hold about you.</li>
+      <li>Correction of inaccurate information.</li>
+      <li>Deletion of your information.</li>
+    </ul>
+    <p>To make a request, contact us at <a class="email-link" href="mailto:support@nucarpool.com">support@nucarpool.com</a>.</p>
+  </div>
+
+  <!-- Section 10 -->
+  <div class="section" id="s10">
+    <div class="section-num">10</div>
+    <div class="section-title">Third-Party Links</div>
+    <p>The Service may include links to third-party services (for example, Uber). We are not responsible for the privacy practices of third parties, and you should review their policies separately.</p>
+  </div>
+
+  <!-- Section 11 -->
+  <div class="section" id="s11">
+    <div class="section-num">11</div>
+    <div class="section-title">Changes to This Privacy Policy</div>
+    <p>We may update this Privacy Policy from time to time. We will post the updated policy on this page and update the "Last Updated" date. If changes are material, we may provide additional notice within the Service.</p>
+  </div>
+
+  <!-- Section 12 -->
+  <div class="section" id="s12">
+    <div class="section-num">12</div>
+    <div class="section-title">Contact Us</div>
+    <p>If you have questions about this Privacy Policy or want to make a privacy request, contact:</p>
+    <div class="highlight-box">
+      NUcarpool<br/>
+      Email: <a class="email-link" href="mailto:support@nucarpool.com">support@nucarpool.com</a>
+    </div>
+  </div>
+
 </main>
 
-<footer>© 2025 NUCarpool · For Northwestern students</footer>
+<footer>© 2025 NUCarpool · For Northwestern students · Not affiliated with Northwestern University</footer>
 
 </body>
 </html>
