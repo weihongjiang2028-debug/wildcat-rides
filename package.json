@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@supabase/supabase-js": "^2.98.0",
     "twilio": "^5.12.2"
   }
 }
