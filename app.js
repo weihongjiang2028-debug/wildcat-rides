@@ -883,14 +883,19 @@ async function saveProfile() {
 document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Mascots ──
+  // Hero and signup mascot use the SVG cat-car
   const mascots = {
-    mascot_signin: "welcoming",
     mascot_signup: "excited",
     hero_mascot:   "happy",
   };
   for (const [id, mood] of Object.entries(mascots)) {
     const el = $(id);
     if (el) el.innerHTML = catCarSvg(mood);
+  }
+  // Sign-in modal uses the real logo cat
+  const signinMascot = $("mascot_signin");
+  if (signinMascot) {
+    signinMascot.innerHTML = `<img src="logo_cat.png" alt="NUCarpool" style="width:72px;height:72px;border-radius:50%;background:#fff;padding:4px;object-fit:contain;display:block;margin:0 auto;" />`;
   }
 
   // ── Controls ──
