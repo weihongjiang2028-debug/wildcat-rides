@@ -101,63 +101,6 @@ function buildTimeOptions(selectEl, defaultHHMM) {
 }
 
 
-// ════════════════════════════════════════════════════════════
-// CAT-CAR MASCOT
-// ════════════════════════════════════════════════════════════
-function catCarSvg(mood = "happy") {
-  const base = `
-    <rect x="2" y="27" width="116" height="77" rx="23" fill="white"/>
-    <polygon points="17,34 29,8 45,32" fill="white"/>
-    <polygon points="75,32 91,8 103,34" fill="white"/>
-    <rect x="6" y="31" width="108" height="70" rx="19" fill="#5b3a9e"/>
-    <polygon points="21,38 30,13 44,35" fill="#5b3a9e"/>
-    <polygon points="76,35 90,13 99,38" fill="#5b3a9e"/>
-    <polygon points="25,36 33,18 41,34" fill="#8568ca"/>
-    <polygon points="79,34 87,18 95,36" fill="#8568ca"/>
-    <rect x="23" y="33" width="74" height="36" rx="9" fill="#7248b3" opacity="0.65"/>
-    <path d="M31 36 Q60 31 89 36 L87 57 Q60 63 33 57 Z" fill="white" opacity="0.09"/>
-    <rect x="7" y="84" width="20" height="14" rx="7" fill="#3c2170"/>
-    <rect x="93" y="84" width="20" height="14" rx="7" fill="#3c2170"/>
-    <ellipse cx="60" cy="74" rx="3" ry="2.5" fill="#1a0a35"/>
-    <line x1="13" y1="69" x2="36" y2="71" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="13" y1="74" x2="36" y2="74" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="84" y1="71" x2="107" y2="69" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="84" y1="74" x2="107" y2="74" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-  `;
-  const faces = {
-    happy: `
-      <circle cx="41" cy="63" r="9" fill="white"/><circle cx="79" cy="63" r="9" fill="white"/>
-      <circle cx="42" cy="64" r="5.5" fill="#1a0a35"/><circle cx="80" cy="64" r="5.5" fill="#1a0a35"/>
-      <circle cx="44" cy="61" r="2" fill="white"/><circle cx="82" cy="61" r="2" fill="white"/>
-      <path d="M51 79 Q60 86 69 79" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>`,
-    excited: `
-      <circle cx="41" cy="62" r="11" fill="white"/><circle cx="79" cy="62" r="11" fill="white"/>
-      <circle cx="41" cy="63" r="6.5" fill="#1a0a35"/><circle cx="79" cy="63" r="6.5" fill="#1a0a35"/>
-      <circle cx="44" cy="59" r="2.5" fill="white"/><circle cx="82" cy="59" r="2.5" fill="white"/>
-      <ellipse cx="28" cy="72" rx="8" ry="4" fill="#ff8fab" opacity="0.5"/>
-      <ellipse cx="92" cy="72" rx="8" ry="4" fill="#ff8fab" opacity="0.5"/>
-      <path d="M47 78 Q60 91 73 78 Z" fill="white" opacity="0.92"/>
-      <text x="95" y="44" font-size="10" fill="white" opacity="0.85">✦</text>
-      <text x="12" y="43" font-size="8" fill="white" opacity="0.7">✦</text>`,
-    welcoming: `
-      <circle cx="41" cy="62" r="11" fill="white"/><circle cx="79" cy="62" r="11" fill="white"/>
-      <circle cx="41" cy="63" r="6" fill="#1a0a35"/><circle cx="79" cy="63" r="6" fill="#1a0a35"/>
-      <circle cx="44" cy="59" r="2.5" fill="white"/><circle cx="82" cy="59" r="2.5" fill="white"/>
-      <path d="M50 79 Q60 87 70 79" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <line x1="24" y1="49" x2="18" y2="43" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.75"/>
-      <line x1="22" y1="54" x2="14" y2="53" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-      <line x1="96" y1="49" x2="102" y2="43" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.75"/>
-      <line x1="98" y1="54" x2="106" y2="53" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>`,
-    searching: `
-      <circle cx="41" cy="63" r="9" fill="white"/><circle cx="79" cy="63" r="9" fill="white"/>
-      <circle cx="43" cy="62" r="5.5" fill="#1a0a35"/><circle cx="81" cy="62" r="5.5" fill="#1a0a35"/>
-      <circle cx="45" cy="60" r="2" fill="white"/><circle cx="83" cy="60" r="2" fill="white"/>
-      <path d="M53 79 Q60 83 67 79" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <text x="90" y="42" font-size="13" fill="white" opacity="0.9">?</text>`,
-  };
-  return `<svg width="120" height="110" viewBox="0 0 120 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${base}${faces[mood] || faces.happy}</svg>`;
-}
-
 
 // ════════════════════════════════════════════════════════════
 // TAB NAVIGATION
@@ -265,6 +208,8 @@ function openSignUpModal(email = "") {
   setText("signup_msg",""); setText("signup_err","");
   $("signup_email").value    = email;
   $("signup_password").value = ""; $("signup_password2").value = "";
+  const termsCheck = $("signup_terms_check");
+  if (termsCheck) termsCheck.checked = false;
   $("signup_overlay").classList.add("show");
 }
 function closeSignUpModal()  { $("signup_overlay").classList.remove("show"); }
@@ -313,6 +258,7 @@ async function signUpWithPassword(email, p1, p2) {
     if (!isNU(email))    throw new Error("Please use your Northwestern email.");
     if (p1.length < 8)  throw new Error("Password must be at least 8 characters.");
     if (p1 !== p2)      throw new Error("Passwords do not match.");
+    if (!$("signup_terms_check")?.checked) throw new Error("Please agree to the Terms of Use and SMS opt-in to continue.");
     const { error } = await sb.auth.signUp({
       email, password: p1,
       options: { emailRedirectTo: window.location.origin }
@@ -410,7 +356,6 @@ function initAirportPills(rowId, selectId) {
 function openSubmittedModal(state) {
   const overlay = $("submitted_overlay");
   const header  = $("sub_header");
-  const mascot  = $("mascot_submitted");
   const pill    = $("sub_pill");
   const title   = $("sub_title");
   const sub     = $("sub_sub");
@@ -421,7 +366,6 @@ function openSubmittedModal(state) {
   const configs = {
     matched: {
       headerClass: "sub-header--matched",
-      mascotMood:  "excited",
       pill:        "🎉 Group Locked",
       title:       "You're matched!",
       sub:         "Your carpool group is confirmed and on the way.",
@@ -438,7 +382,6 @@ function openSubmittedModal(state) {
     },
     forming: {
       headerClass: "sub-header--forming",
-      mascotMood:  "happy",
       pill:        "📱 Paired Up",
       title:       "You've got a match!",
       sub:         "2 of 3 riders locked in — still searching for one more.",
@@ -455,7 +398,6 @@ function openSubmittedModal(state) {
     },
     waiting: {
       headerClass: "sub-header--waiting",
-      mascotMood:  "searching",
       pill:        "🔍 Searching",
       title:       "Request submitted!",
       sub:         "We're scanning for Wildcats going your way.",
@@ -476,9 +418,6 @@ function openSubmittedModal(state) {
 
   // Apply header colour class
   header.className = `sub-header ${cfg.headerClass}`;
-
-  // Mascot
-  mascot.innerHTML = catCarSvg(cfg.mascotMood);
 
   // Text content
   pill.textContent  = cfg.pill;
@@ -881,22 +820,6 @@ async function saveProfile() {
 // ════════════════════════════════════════════════════════════
 
 document.addEventListener("DOMContentLoaded", async () => {
-
-  // ── Mascots ──
-  // Hero and signup mascot use the SVG cat-car
-  const mascots = {
-    mascot_signup: "excited",
-    hero_mascot:   "happy",
-  };
-  for (const [id, mood] of Object.entries(mascots)) {
-    const el = $(id);
-    if (el) el.innerHTML = catCarSvg(mood);
-  }
-  // Sign-in modal uses the real logo cat
-  const signinMascot = $("mascot_signin");
-  if (signinMascot) {
-    signinMascot.innerHTML = `<img src="logo_cat.png" alt="NUCarpool" style="width:72px;height:72px;border-radius:50%;background:#fff;padding:4px;object-fit:contain;display:block;margin:0 auto;" />`;
-  }
 
   // ── Controls ──
   initDirPicker("req_dir_toggle",  "req_direction");

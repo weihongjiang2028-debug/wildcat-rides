@@ -7,20 +7,16 @@
   <meta name="description" content="Find a Northwestern student going your way. Auto-matched carpool system." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     NAV
-══════════════════════════════════════════ -->
 <nav class="site-nav">
   <div class="nav-inner">
     <a class="nav-brand" href="/">
-      <img src="logo_cat.png" class="nav-logo" alt="NUCarpool" />
-      <span class="nav-brand-name">NU Carpool</span>
+      <span class="nav-brand-name"><span class="nav-brand-nu">NU</span>Carpool</span>
     </a>
     <div class="nav-auth">
       <div id="auth_chip" class="nav-chip hidden"></div>
@@ -30,21 +26,12 @@
 </nav>
 
 
-<!-- ══════════════════════════════════════════
-     HERO
-══════════════════════════════════════════ -->
 <section class="hero-section" id="hero_section">
   <div class="hero-inner">
-
     <div class="hero-text">
       <div class="hero-tag">Northwestern Students Only</div>
-
-      <h1 class="hero-headline">Split your airport Uber,<br/>keep more in your pocket.</h1>
-
-      <p class="hero-sub">
-        Flying out? Add your trip and we'll connect you with another Wildcat headed your way.
-      </p>
-
+      <h1 class="hero-headline">Split Your Airport Uber<br/>Keep More in Your Pocket</h1>
+      <p class="hero-sub">Flying out? Add your trip and we'll connect you with another Wildcat headed your way.</p>
       <div class="hero-stats">
         <div class="hero-stat">
           <span class="hero-stat-num">$30+</span>
@@ -62,16 +49,40 @@
         </div>
       </div>
     </div>
-
-    <div class="hero-mascot" id="hero_mascot"></div>
-
+    <div class="hero-deco" aria-hidden="true">
+      <div class="hero-deco-card">
+        <div class="hero-deco-top">
+          <span class="hero-deco-brand">NUCarpool</span>
+          <span class="hero-deco-badge">✓ Matched</span>
+        </div>
+        <div class="hero-deco-route">
+          <div class="hero-deco-endpoint">
+            <div class="hero-deco-code">EVN</div>
+            <div class="hero-deco-city-name">Evanston</div>
+          </div>
+          <div class="hero-deco-flight">
+            <span class="hero-deco-plane-icon">✈</span>
+            <div class="hero-deco-flight-line"></div>
+          </div>
+          <div class="hero-deco-endpoint hero-deco-endpoint--right">
+            <div class="hero-deco-code">ORD</div>
+            <div class="hero-deco-city-name">O'Hare</div>
+          </div>
+        </div>
+        <div class="hero-deco-divider"></div>
+        <div class="hero-deco-bottom">
+          <div class="hero-deco-avatars">
+            <div class="hero-deco-avatar">A</div>
+            <div class="hero-deco-avatar hero-deco-avatar--b">T</div>
+          </div>
+          <div class="hero-deco-savings">~$17 each</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     TAB BAR
-══════════════════════════════════════════ -->
 <div class="tab-bar">
   <div class="tab-bar-inner">
     <button class="tab-item active" id="tab_request">
@@ -87,12 +98,9 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════
-     MAIN
-══════════════════════════════════════════ -->
 <main class="app-main">
 
-  <!-- ── REQUEST A RIDE ── -->
+  <!-- REQUEST A RIDE -->
   <section id="view_request">
 
     <div class="how-strip" style="margin-bottom:22px;">
@@ -117,7 +125,6 @@
       <div class="form-card-title">Request a Ride</div>
       <div class="form-card-sub">Submit once — we'll match you automatically.</div>
 
-      <!-- Direction picker — card style -->
       <div class="field-solo" style="margin-bottom:4px;">
         <label class="field-label">Direction</label>
         <div class="dir-picker" id="req_dir_toggle">
@@ -136,7 +143,6 @@
         <option value="from_airport">Airport to Evanston</option>
       </select>
 
-      <!-- Airport pills -->
       <div class="field-solo" style="margin-bottom:4px;">
         <label class="field-label">Airport</label>
         <div class="airport-row" id="req_airport_row">
@@ -155,7 +161,6 @@
         <option value="MDW">MDW</option>
       </select>
 
-      <!-- Date + Time -->
       <div class="field-row">
         <div class="field-group">
           <label class="field-label" for="req_date">Date</label>
@@ -165,11 +170,10 @@
         <div class="field-group">
           <label class="field-label" for="req_time">Leaving Around</label>
           <select id="req_time" class="form-select"></select>
-          <div class="field-hint">We'll match you within ±45 min · All times CST</div>
+          <div class="field-hint">We'll match you within ±40 min · All times CST</div>
         </div>
       </div>
 
-      <!-- Group size: no hint text -->
       <div class="field-solo">
         <label class="field-label">Max Group Size</label>
         <div class="seg-toggle" id="req_size_toggle" style="margin-bottom:0;">
@@ -182,15 +186,13 @@
         </select>
       </div>
 
-      <!-- Phone number — per request -->
       <div class="field-solo">
         <label class="field-label" for="req_phone">Your Phone Number</label>
         <input id="req_phone" class="form-input" placeholder="(312) 555-0100" type="tel" maxlength="20" />
-        <div class="field-hint consent-hint">By clicking "Find My Match," you agree to receive recurring SMS from NU Carpool about your ride.</div>
+        <div class="field-hint consent-hint">By submitting, you consent to receive SMS from NUCarpool about your ride. Msg &amp; data rates may apply. Reply STOP to opt out. See our <a href="terms.html" class="consent-link">Terms</a> &amp; <a href="privacy.html" class="consent-link">Privacy Policy</a>.</div>
       </div>
 
       <button id="req_btn" class="search-btn" style="margin-top:16px;">Find My Match →</button>
-
       <div id="req_msg" class="status-msg"></div>
       <div id="req_err" class="status-err"></div>
     </div>
@@ -198,7 +200,7 @@
   </section>
 
 
-  <!-- ── MY REQUESTS ── -->
+  <!-- MY REQUESTS -->
   <section id="view_my" class="hidden">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
       <div class="section-page-title">My Requests</div>
@@ -210,25 +212,20 @@
   </section>
 
 
-  <!-- ── ACCOUNT ── -->
+  <!-- ACCOUNT -->
   <section id="view_account" class="hidden">
     <div class="form-card">
       <div class="form-card-title">Account</div>
-      <div class="form-card-sub">
-        Your first name is shown to your carpool group so they know who to text.
-      </div>
-
+      <div class="form-card-sub">Your first name is shown to your carpool group so they know who to text.</div>
       <div class="field-solo">
         <label class="field-label">NU Email</label>
         <div id="acct_email" class="acct-email-display">—</div>
       </div>
-
       <div class="field-solo">
         <label class="field-label" for="acct_first_name">First Name</label>
         <input id="acct_first_name" class="form-input" placeholder="e.g. Alex" maxlength="40" />
         <div class="field-hint">Shown to your carpool group when you're matched.</div>
       </div>
-
       <button id="acct_save_btn" class="search-btn" style="margin-top:8px;">Save</button>
       <div id="acct_msg" class="status-msg"></div>
       <div id="acct_err" class="status-err"></div>
@@ -238,18 +235,9 @@
 </main>
 
 
-<!-- ══════════════════════════════════════════
-     FOOTER
-══════════════════════════════════════════ -->
 <footer class="site-footer">
   <div class="footer-brand">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M8.7 9.4c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#4e2a84"/>
-      <path d="M15.7 9.2c-.9-.7-2.2-.5-2.9.4-.8 1-.6 2.5.5 3.2.9.6 2.1.4 2.8-.5.8-1 .6-2.4-.4-3.1Z" fill="#4e2a84"/>
-      <path d="M6.2 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#4e2a84"/>
-      <path d="M19.4 13.9c-1.1-.5-2.4 0-2.9 1.1-.6 1.3 0 2.9 1.4 3.4 1.1.4 2.3-.1 2.8-1.3.6-1.3.1-2.7-1.3-3.2Z" fill="#4e2a84"/>
-      <path d="M12 12.7c-2.6 0-4.7 1.8-4.7 4.1 0 2.5 2.2 4.5 4.7 4.5s4.7-2 4.7-4.5c0-2.3-2.1-4.1-4.7-4.1Z" fill="#4e2a84"/>
-    </svg>
+    <div class="footer-brand-mark">NU</div>
     <span class="footer-brand-name">NUCarpool</span>
   </div>
   <div class="footer-tagline">For Northwestern students only · Not affiliated with Northwestern University</div>
@@ -262,17 +250,15 @@
 </footer>
 
 
-<!-- ══════════════════════════════════════════
-     MODALS
-══════════════════════════════════════════ -->
+<!-- MODALS -->
 
 <!-- Sign In -->
 <div id="signin_overlay" class="overlay">
   <div class="modal">
-    <button class="modalClose" id="signin_close">✕</button>
+    <button class="modalClose" id="signin_close" aria-label="Close">✕</button>
     <div id="signin_view">
       <div class="modalHeader" style="padding-bottom:14px;">
-        <div id="mascot_signin" class="mascotSlot"></div>
+        <div class="modal-brand-mark">NU</div>
         <div class="modalHeaderTitle">Welcome back!</div>
         <div class="modalHeaderSub">NU students only · @u.northwestern.edu</div>
       </div>
@@ -309,17 +295,27 @@
 <!-- Sign Up -->
 <div id="signup_overlay" class="overlay">
   <div class="modal">
-    <button class="modalClose" id="signup_close">✕</button>
-    <div id="mascot_signup" class="mascotSlot" style="background:linear-gradient(135deg,#4e2a84 0%,#6b3fad 100%);padding:20px 0 14px;"></div>
-    <div class="modalPlainBody">
-      <div class="modalTitle">Join NUCarpool</div>
+    <button class="modalClose" id="signup_close" aria-label="Close">✕</button>
+    <div class="modalHeader" style="padding-bottom:18px;">
+      <div class="modal-brand-mark">NU</div>
+      <div class="modalHeaderTitle">Join NUCarpool</div>
+      <div class="modalHeaderSub">NU students only · @u.northwestern.edu</div>
+    </div>
+    <div class="modalPlainBody" style="padding-top:18px;">
+      <div style="display:none;" class="modalTitle">Join NUCarpool</div>
       <label class="modal-label" for="signup_email">NU Email</label>
       <input id="signup_email" class="modal-input" placeholder="name@u.northwestern.edu" type="email" />
       <label class="modal-label" for="signup_password">Password</label>
       <input id="signup_password" class="modal-input" type="password" placeholder="At least 8 characters" />
       <label class="modal-label" for="signup_password2">Confirm password</label>
       <input id="signup_password2" class="modal-input" type="password" placeholder="Type it again" />
-      <div class="modalActions" style="margin-top:16px;">
+      <div class="consent-check-wrap">
+        <label class="consent-check-label">
+          <input type="checkbox" id="signup_terms_check" class="consent-check-input" />
+          <span class="consent-check-text">I agree to the <a href="terms.html" target="_blank" class="consent-link">Terms of Use</a> and <a href="privacy.html" target="_blank" class="consent-link">Privacy Policy</a>, and I opt in to receive SMS from NUCarpool about my ride. Msg &amp; data rates may apply. Reply STOP to opt out.</span>
+        </label>
+      </div>
+      <div class="modalActions" style="margin-top:12px;">
         <button id="signup_back_btn" class="modal-btn-secondary" type="button">Back</button>
         <button id="signup_create_btn" type="button" class="modal-btn-confirm">Create account</button>
       </div>
@@ -329,18 +325,13 @@
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     EMAIL VERIFICATION MODAL
-══════════════════════════════════════════ -->
+<!-- Email Verification -->
 <div id="verify_overlay" class="overlay">
   <div class="modal">
     <div class="modalHeader" style="padding: 28px 24px 22px; text-align:center;">
       <div style="font-size:48px; line-height:1; margin-bottom:12px;">📬</div>
       <div class="modalHeaderTitle" style="font-size:22px;">Check your inbox</div>
-      <div class="modalHeaderSub" style="margin-top:8px; font-size:13px; opacity:.8; text-transform:none; letter-spacing:0;">
-        We sent a verification link to
-      </div>
+      <div class="modalHeaderSub" style="margin-top:8px; font-size:13px; opacity:.8; text-transform:none; letter-spacing:0;">We sent a verification link to</div>
       <div id="verify_email_display" style="margin-top:6px; font-size:14px; font-weight:600; color:#fff; background:rgba(255,255,255,.15); border-radius:8px; padding:6px 14px; display:inline-block;"></div>
     </div>
     <div class="modalPlainBody" style="padding: 20px 22px 26px;">
@@ -376,36 +367,22 @@
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     POST-SUBMIT MODAL
-     One modal, three states set by JS:
-       "matched"  — full group locked, texts sent
-       "forming"  — 3+3 pair found, still looking for 3rd
-       "waiting"  — no match yet, request is live
-══════════════════════════════════════════ -->
+<!-- Post-Submit Modal -->
 <div id="submitted_overlay" class="overlay sub-overlay">
   <div class="sub-modal" id="submitted_modal">
-    <button class="sub-close" id="submitted_close">✕</button>
-
-    <!-- Coloured header: mascot + status -->
+    <button class="sub-close" id="submitted_close" aria-label="Close">✕</button>
     <div class="sub-header" id="sub_header">
-      <div class="sub-mascot" id="mascot_submitted"></div>
       <div class="sub-pill"  id="sub_pill"></div>
       <div class="sub-title" id="sub_title"></div>
       <div class="sub-sub"   id="sub_sub"></div>
     </div>
-
-    <!-- Steps list -->
     <div class="sub-body">
       <div class="sub-steps" id="sub_steps"></div>
       <div class="sub-disclaimer" id="sub_disclaimer"></div>
       <button id="sub_cta" class="sub-cta" type="button"></button>
     </div>
-
   </div>
 </div>
-
 
 <script src="app.js"></script>
 </body>
