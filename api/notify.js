@@ -31,6 +31,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import twilio from "twilio";
 
 // ── Supabase admin client (service role — NEVER expose on the client side) ──
 const supabase = createClient(
@@ -38,12 +39,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-
- import twilio from "twilio";
- const twilioClient = twilio(
-   process.env.TWILIO_ACCOUNT_SID,
-   process.env.TWILIO_AUTH_TOKEN
- );
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
 const MAX_JOBS_PER_RUN = 50;
 
