@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = window.__nu_carpool_sb
   || (window.__nu_carpool_sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY));
 
-const MATCH_WINDOW_MINS = 45;
+const MATCH_WINDOW_MINS = 15;
 const VALID_GROUP_SIZES = [2, 3];
 
 
